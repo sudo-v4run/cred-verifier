@@ -1,0 +1,26 @@
+{
+  "canisters": {
+    "credential_backend": {
+      "main": "src/credential_backend/main.mo",
+      "type": "motoko"
+    },
+    "credential_frontend": {
+      "dependencies": [
+        "credential_backend"
+      ],
+      "source": [
+        "src/credential_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "credential_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
