@@ -1,7 +1,7 @@
 {
   "canisters": {
     "credential_backend": {
-      "main": "src/credential_backend/main.mo",
+      "main": "src/backend/main.mo",
       "type": "motoko"
     },
     "credential_frontend": {
@@ -9,10 +9,10 @@
         "credential_backend"
       ],
       "source": [
-        "src/credential_frontend/dist"
+        "src/frontend/dist"
       ],
       "type": "assets",
-      "workspace": "credential_frontend"
+      "workspace": "src/frontend"
     }
   },
   "defaults": {

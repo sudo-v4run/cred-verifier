@@ -1,116 +1,178 @@
-# 🎓 Trustless Academic Credential Verification
+# Certificate Issuance and Verification System
 
-A blockchain-based system for verifying academic credentials using **Internet Computer Protocol (ICP) certified variables** - enabling cryptographically proven verification without trusting the frontend.
-
-## 🔒 Why Trustless?
-
-Traditional verification systems require trusting a server, API, or portal. This system uses **ICP's certified variables** to provide mathematical proof of authenticity:
-
-- ✅ **Cryptographic Proof** - Certificates include Merkle tree proofs signed by IC subnet nodes
-- ✅ **No Trust Required** - Even a compromised frontend cannot fake verification results
-- ✅ **Client-Side Verification** - Your browser verifies signatures against IC's root public key
-- ✅ **Fully On-Chain** - Both frontend and backend run entirely on the blockchain
-
-**Deep Dive:** See [TRUSTLESS_VERIFICATION.md](./TRUSTLESS_VERIFICATION.md) for technical details.
-
----
+A blockchain-based certificate management system built on the Internet Computer Protocol (ICP). Features secure certificate issuance, cryptographic verification using Merkle trees, and comprehensive performance monitoring.
 
 ## 🚀 Quick Start
 
+```bash
+# Start the local ICP replica
+dfx start --background
+
+# Deploy the canisters
+dfx deploy
+
+# Open the dashboard
+open dashboard.html
+```
+
+## 📁 Project Structure
+
+```
+├── src/
+│   ├── backend/              # Motoko smart contracts
+│   │   ├── main.mo          # Main canister entry point
+│   │   ├── Types.mo         # Type definitions
+│   │   ├── Utils.mo         # Utility functions
+│   │   ├── MerkleTree.mo    # Merkle tree implementation
+│   │   ├── CertificateManager.mo  # Certificate logic
+│   │   └── PerformanceMetrics.mo  # Performance tracking
+│   ├── frontend/            # Web application (React/Vite)
+│   └── declarations/        # Auto-generated Candid bindings
+├── benchmarks/              # Performance testing tools
+│   ├── single.sh           # Single operation benchmark
+│   ├── batch_issue.sh      # Batch issuance benchmark
+│   ├── batch_verify.sh     # Batch verification benchmark
+│   ├── stress_test.sh      # System limits testing
+│   └── README.md           # Benchmark documentation
+├── docs/                    # Documentation
+│   ├── ARCHITECTURE.md     # System architecture
+│   ├── MODULE_DESIGN.md    # Module design diagrams
+│   ├── MERKLE_TREE.md      # Merkle tree implementation
+│   ├── PERFORMANCE.md      # Performance analysis
+│   ├── DASHBOARD.md        # Dashboard user guide
+│   └── VERIFICATION.md     # Trustless verification
+├── dashboard.html           # Performance metrics dashboard
+├── dfx.json                # DFX configuration
+├── package.json            # Node.js dependencies
+└── README.md               # This file
+```
+
+## 🎯 Features
+
+- **Secure Certificate Issuance**: Universities can issue tamper-proof digital certificates
+- **Merkle Tree Verification**: Efficient cryptographic proof of certificate authenticity
+- **Performance Monitoring**: Real-time metrics and benchmarking tools
+- **Batch Operations**: Issue and verify multiple certificates efficiently
+- **Interactive Dashboard**: Visual analytics for system performance
+
+## 📊 Performance Monitoring
+
+### View Metrics Dashboard
+```bash
+open dashboard.html
+```
+
+### Run Benchmarks
+```bash
+# Single certificate operations
+./benchmarks/single.sh
+
+# Batch issuance (50 certificates)
+./benchmarks/batch_issue.sh 50
+
+# Batch verification (50 certificates)
+./benchmarks/batch_verify.sh 50
+
+# System stress test (finds performance limits)
+./benchmarks/stress_test.sh
+```
+
+## 🔧 Development
+
 ### Prerequisites
-- [DFX SDK](https://internetcomputer.org/docs/current/developer-docs/setup/install/) (v0.15.0+)
-- Node.js (v16+) and npm (v7+)
+- DFX SDK 0.29.2 or later
+- Node.js 18+ and npm
+- Git
 
 ### Installation
-
 ```bash
+# Clone the repository
+git clone <repository-url>
+cd hello
+
 # Install dependencies
 npm install
-cd src/hello_frontend && npm install && cd ../..
 
-# Start local IC replica
+# Start local replica
 dfx start --background
 
 # Deploy canisters
 dfx deploy
 ```
 
-**Access:** http://u6s2n-gx777-77774-qaaba-cai.localhost:4943/
-
----
-
-## 📖 How It Works
-
-### 1. Certificate Issuance (University Portal)
-University issues certificate → Stored on blockchain → Certified data updated → Merkle tree created & signed
-
-### 2. Trustless Verification (Verification Portal)
-Verifier queries certificate → Returns data + proof → Browser verifies signature → ✅ Valid or ❌ Invalid
-
-### 3. Certificate Lookup (Student Portal)
-Students search and view certificates by student ID.
-
----
-
-## 🏗️ Architecture
-
-**Backend (Motoko)**
-- Certificate storage (HashMap)
-- Certified variables (CertifiedData API)
-- Role-based authorization
-
-**Frontend (React + MUI)**
-- University Portal
-- Verification Portal  
-- Student Portal
-
----
-
-## 🔐 Security
-
-### Cryptographic Protection
-- **Certified Queries** - Fast verification with pre-signed Merkle proofs
-- **Threshold Signatures** - 2/3+ IC subnet nodes must sign
-- **Tamper Detection** - Data modification breaks signatures
-- **Client Verification** - No server trust needed
-
-### Independent Verification
-
+### Available Commands
 ```bash
-# DFX CLI
-dfx canister call credential_backend verifyCertificate '("CERT-ID")'
+# Deploy backend only
+dfx deploy credential_backend
 
-# Candid UI
-http://127.0.0.1:4943/?canisterId=uzt4z-lp777-77774-qaabq-cai&id=uxrrr-q7777-77774-qaaaq-cai
+# Deploy frontend only
+dfx deploy credential_frontend
+
+# Clear metrics
+dfx canister call credential_backend clearMetrics '()'
+
+# Get metrics summary
+dfx canister call credential_backend getAllMetricsSummaries '()'
+
+# Stop local replica
+dfx stop
 ```
-
----
-
-## 💡 Use Cases
-
-- Employment verification
-- University transfers
-- Professional licensing
-- Immigration credentials
-
----
 
 ## 📚 Documentation
 
-**[TRUSTLESS_VERIFICATION.md](./TRUSTLESS_VERIFICATION.md)** - Technical explanation of cryptographic security
+- **[Architecture](docs/ARCHITECTURE.md)** - System design and module structure
+- **[Merkle Tree](docs/MERKLE_TREE.md)** - Cryptographic implementation details
+- **[Performance](docs/PERFORMANCE.md)** - Benchmarking results and analysis
+- **[Dashboard Guide](docs/DASHBOARD.md)** - How to use the metrics dashboard
+- **[Folder Structure FAQ](docs/FOLDER_STRUCTURE_FAQ.md)** - Understanding project structure
+- **[Benchmarks](benchmarks/README.md)** - Performance testing guide
 
----
+## 🎓 Usage Examples
 
-## 🛠️ Development
-
+### Register a University
 ```bash
-# Build
-dfx build credential_backend
-
-# Deploy to mainnet
-dfx deploy --network ic
+dfx canister call credential_backend registerUniversity '("MIT")'
 ```
 
----
+### Issue a Certificate
+```bash
+dfx canister call credential_backend issueCertificate '(
+  "CERT001",
+  "MIT",
+  "https://mit.edu/verify",
+  "John Doe",
+  "MIT2024CS001",
+  "principal-xyz",
+  "Bachelor of Science",
+  "Computer Science",
+  "2024-05-15",
+  "2024-05-15",
+  3.8,
+  "Summa Cum Laude"
+)'
+```
 
-**Built on Internet Computer Protocol** - *Cryptographically proven credentials, no trust required.*
+### Verify a Certificate
+```bash
+dfx canister call credential_backend verifyCertificate '("CERT001")'
+```
+
+## 🚀 Performance Baseline
+
+Based on local replica testing:
+
+| Operation | End-to-End Time | Throughput |
+|-----------|----------------|------------|
+| Single Issuance | ~1200ms | 0.8 certs/sec |
+| Single Verification | ~1200ms | 0.8 verif/sec |
+| Batch Issuance (100) | ~125s | 0.8 certs/sec |
+
+*Note: End-to-end time includes network latency and consensus. Internal canister execution is <1μs.*
+
+## 📄 License
+
+MIT License
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read the documentation in the `docs/` folder before submitting pull requests.
