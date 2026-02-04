@@ -8,6 +8,9 @@ UNIVERSITY=${2:-"Benchmark University"}
 TIMESTAMP=$(date +%s)
 OUTPUT_FILE="benchmark_issue_${CERT_COUNT}_${TIMESTAMP}.json"
 
+# Note: This script generates timestamped files for batch testing
+# Main benchmark files are: benchmark_single.json and benchmark_concurrency.json
+
 echo "================================================"
 echo "  BATCH CERTIFICATE ISSUANCE BENCHMARK"
 echo "================================================"

@@ -8,8 +8,9 @@ A blockchain-based certificate management system built on the Internet Computer 
 # Start the local ICP replica
 dfx start --background
 
-# Deploy the canisters
-dfx deploy
+# Deploy the canisters (use npm run deploy to avoid dfx color bug on WSL)
+npm run deploy
+# Or: TERM=xterm-256color dfx deploy
 
 # Open the dashboard
 open dashboard.html

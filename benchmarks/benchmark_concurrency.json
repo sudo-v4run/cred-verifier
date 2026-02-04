@@ -1,0 +1,16 @@
+{
+  "test_type": "system_limits",
+  "date": "2026-02-04T20:29:30+00:00",
+  "batch_sizes": [1 10 50 100 500 1000],
+  "issuance_results": [
+    {
+      "batch_size": 1,
+      "concurrency": 1,
+      "parallel": true,
+      "total_time_ms": 2082,
+      "total_time_s": 2.082,
+      "avg_time_ms": 2082.000,
+      "throughput": .480,
+      "successful": 1,
+      "failed": 0
+    }

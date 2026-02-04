@@ -4,7 +4,10 @@
 # Tests individual certificate issuance and verification
 
 TIMESTAMP=$(date +%s)
-OUTPUT_FILE="benchmark_single_${TIMESTAMP}.json"
+OUTPUT_FILE="benchmark_single.json"
+
+# Remove old single benchmark files (keep only the latest)
+rm -f benchmark_single_*.json 2>/dev/null
 
 echo "================================================"
 echo "  SINGLE CERTIFICATE BENCHMARK"

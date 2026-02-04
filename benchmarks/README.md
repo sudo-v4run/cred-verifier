@@ -18,7 +18,7 @@ Tests individual certificate issuance and verification.
 - Single certificate verification time (end-to-end + canister internal)
 - Success/failure rates
 
-**Output:** `benchmark_single_<timestamp>.json`
+**Output:** `benchmark_single.json` (overwrites previous results)
 
 ---
 
@@ -42,7 +42,7 @@ Issues N certificates in sequence and measures performance.
 - Success/failure breakdown
 - Canister internal metrics
 
-**Output:** `benchmark_issue_<N>_<timestamp>.json`
+**Output:** `benchmark_issue_<N>_<timestamp>.json` (timestamped for batch testing)
 
 ---
 
@@ -65,30 +65,51 @@ Verifies N certificates in sequence and measures performance.
 - Success/failure breakdown
 - Canister internal metrics
 
-**Output:** `benchmark_verify_<N>_<timestamp>.json`
+**Output:** `benchmark_verify_<N>_<timestamp>.json` (timestamped for batch testing)
 
 ---
 
-### 4. System Limits Testing (`test_limits.sh`)
+### 4. System Limits Testing (`stress_test.sh`)
 Tests increasing batch sizes to find performance degradation points.
+**Uses PARALLEL execution to simulate concurrent users and test scalability.**
 
 **Usage:**
 ```bash
-./test_limits.sh
+# Default: up to 50 concurrent requests
+./stress_test.sh
+
+# Custom concurrency levels:
+CONCURRENCY=10 ./stress_test.sh     # Light load: 10 concurrent requests
+CONCURRENCY=100 ./stress_test.sh    # Medium load: 100 concurrent requests
+CONCURRENCY=200 ./stress_test.sh    # Heavy load: 200 concurrent requests
+CONCURRENCY=500 ./stress_test.sh    # Extreme load: 500 concurrent requests
+
+# Export for multiple runs:
+export CONCURRENCY=100
+./stress_test.sh                    # Uses CONCURRENCY=100
+./stress_test.sh                    # Still uses CONCURRENCY=100
 ```
 
 **Tests batch sizes:** 1, 5, 10, 20, 50, 100, 200, 500, 1000
 
+**Features:**
+- **Parallel execution**: Simulates real-world concurrent user load
+- **Configurable concurrency**: Control how many requests run simultaneously
+- **Scalability testing**: Tests how system handles concurrent operations
+
 **Measures:**
-- Performance at each batch size
+- Performance at each batch size under concurrent load
 - Average time per operation
 - Throughput at each scale
 - Identifies slowdown points (>2x degradation)
 - Maximum supported batch size
+- Success/failure rates under concurrent load
 
-**Output:** `benchmark_limits_<timestamp>.json`
+**Output:** `benchmark_concurrency.json` (overwrites previous results)
 
-**Visualizes:** Performance degradation graph showing when system slows significantly
+**Visualizes:** Performance degradation graph showing when system slows significantly under concurrent load
+
+**Note:** This benchmark issues certificates in parallel (not sequentially) to better simulate real-world scenarios where multiple users request certificates simultaneously. This tests the system's ability to handle concurrent operations and identify scalability bottlenecks.
 
 ---
 
@@ -108,8 +129,14 @@ All benchmark results are automatically saved as JSON files and can be visualize
 
 ### End-to-End Time
 - Includes network latency + ICP consensus + canister execution
-- Typical range: 1000-1500ms per operation
+- Typical range: 1000-1500ms per operation (sequential)
 - **What it measures:** Real user experience
+
+### Parallel Execution Time
+- Wall-clock time for concurrent operations
+- With parallel execution, total time is much less than sequential
+- Example: 100 certificates in parallel might take ~5-10s instead of ~125s
+- **What it measures:** System scalability under concurrent load
 
 ### Canister Internal Time
 - Pure computation time inside the canister
@@ -118,13 +145,14 @@ All benchmark results are automatically saved as JSON files and can be visualize
 
 ### Throughput
 - Operations per second
-- Typical range: 0.7-0.9 ops/sec
+- Sequential: Typical range: 0.7-0.9 ops/sec
+- Parallel: Can be much higher (depends on concurrency level)
 - **What it measures:** System capacity
 
 ### Success Rate
 - Percentage of successful operations
 - Target: >95%
-- **What it measures:** System reliability
+- **What it measures:** System reliability under load
 
 ---
 
@@ -161,23 +189,33 @@ All benchmark results are automatically saved as JSON files and can be visualize
 # Compare throughput in dashboard
 ```
 
-### Example 4: Stress Testing
+### Example 4: Stress Testing (Concurrent Load)
 ```bash
 # Clear metrics
 dfx canister call credential_backend clearMetrics '()'
 
-# Run large batch
-./issue_batch.sh 500
+# Run stress test with parallel execution (simulates concurrent users)
+./stress_test.sh
 
-# Check if system handles load
-./verify_batch.sh 500
+# Or with custom concurrency level
+CONCURRENCY=100 ./stress_test.sh
 
-# Analyze results
+# This tests: 1, 5, 10, 20, 50, 100, 200, 500, 1000 certificates
+# Each batch is issued in PARALLEL to simulate concurrent users
+# Analyze results to see how system scales under concurrent load
 ```
 
 ---
 
 ## 📁 Output File Format
+
+**Main Benchmark Files (Fixed Names):**
+- `benchmark_single.json` - Single certificate test results (overwrites on each run)
+- `benchmark_concurrency.json` - Concurrency/stress test results (overwrites on each run)
+
+**Helper Batch Files (Timestamped):**
+- `benchmark_issue_<N>_<timestamp>.json` - Individual batch issuance tests
+- `benchmark_verify_<N>_<timestamp>.json` - Individual batch verification tests
 
 All benchmarks generate JSON files with this structure:
 
@@ -321,8 +359,9 @@ After running benchmarks, the dashboard displays:
 # Batch verification (N certificates)
 ./verify_batch.sh 50
 
-# System limits (finds breaking point)
-./test_limits.sh
+# System limits (finds breaking point with parallel execution)
+./stress_test.sh
+# Or with custom concurrency: CONCURRENCY=100 ./stress_test.sh
 
 # View results
 open ../metrics_dashboard.html

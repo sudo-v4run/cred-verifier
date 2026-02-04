@@ -8,6 +8,9 @@ PREFIX=${2:-"BENCH_ISSUE"}
 TIMESTAMP=$(date +%s)
 OUTPUT_FILE="benchmark_verify_${VERIFY_COUNT}_${TIMESTAMP}.json"
 
+# Note: This script generates timestamped files for batch testing
+# Main benchmark files are: benchmark_single.json and benchmark_concurrency.json
+
 echo "================================================"
 echo "  BATCH CERTIFICATE VERIFICATION BENCHMARK"
 echo "================================================"
