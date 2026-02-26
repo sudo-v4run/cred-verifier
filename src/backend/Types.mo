@@ -51,7 +51,9 @@ module {
   // Merkle tree node structure
   public type MerkleNode = {
     hash: Text;
-    left: ?Text;  // Hash of left child
-    right: ?Text; // Hash of right child
+    left: ?Text;    // Hash of left child (null for leaf nodes)
+    right: ?Text;   // Hash of right child (null for leaf nodes)
+    parent: ?Text;  // Hash of parent node (null for root)
+    sibling: ?Text; // Hash of sibling used in proof path (null for root or unpaired odd node)
   };
 };

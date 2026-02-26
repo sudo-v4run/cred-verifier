@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { credential_backend } from 'declarations/credential_backend';
 import {
   Box,
@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import SchoolIcon from '@mui/icons-material/School';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import LogoutIcon from '@mui/icons-material/Logout';
 import SendIcon from '@mui/icons-material/Send';
 
 function UniversityPortal() {
@@ -39,6 +40,26 @@ function UniversityPortal() {
     honors: ''
   });
 
+  // Hydrate registration state from localStorage so universities don't need
+  // to re-register on every tab change or page refresh in the same browser.
+  useEffect(() => {
+    try {
+      const storedRegistered = window.localStorage.getItem('cv_university_isRegistered');
+      const storedName = window.localStorage.getItem('cv_university_name');
+
+      if (storedRegistered === 'true' && storedName) {
+        setIsRegistered(true);
+        setUniversityName(storedName);
+        setCertificateForm(prev => ({
+          ...prev,
+          universityName: storedName,
+        }));
+      }
+    } catch {
+      // If localStorage is unavailable (e.g., privacy mode), fail silently.
+    }
+  }, []);
+
   const handleRegister = async () => {
     if (!universityName.trim()) {
       setMessage({ type: 'error', text: 'Please enter university name' });
@@ -53,12 +74,50 @@ function UniversityPortal() {
       if (result) {
         setIsRegistered(true);
         setMessage({ type: 'success', text: `Successfully registered as ${universityName}` });
+
+        // Persist registration locally so the UI remembers it across tab
+        // switches and reloads. The backend already persists registration
+        // by principal; this is purely a UX optimization.
+        try {
+          window.localStorage.setItem('cv_university_isRegistered', 'true');
+          window.localStorage.setItem('cv_university_name', universityName);
+        } catch {
+          // Ignore storage errors; UX fallback is just to re-register.
+        }
+
+        // Pre-fill the form with the registered university name.
+        setCertificateForm(prev => ({
+          ...prev,
+          universityName,
+        }));
       }
     } catch (error) {
       setMessage({ type: 'error', text: error.message });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogoutUniversity = () => {
+    // Clear local registration state so a new institution can be registered.
+    setIsRegistered(false);
+    setUniversityName('');
+    setCertificateForm(prev => ({
+      ...prev,
+      universityName: '',
+    }));
+
+    try {
+      window.localStorage.removeItem('cv_university_isRegistered');
+      window.localStorage.removeItem('cv_university_name');
+    } catch {
+      // Ignore storage errors.
+    }
+
+    setMessage({
+      type: 'info',
+      text: 'You have been logged out. Register a new institution to continue issuing certificates.',
+    });
   };
 
   const handleInputChange = (e) => {
@@ -134,7 +193,9 @@ function UniversityPortal() {
 
       {!isRegistered ? (
         <Paper sx={{ p: 4, borderRadius: 2 }} elevation={1}>
-          <Typography variant="h6" gutterBottom fontWeight="600">Register Institution</Typography>
+          <Typography variant="h6" gutterBottom fontWeight="600">
+            Register Institution
+          </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Register your institution to start issuing certificates
           </Typography>
@@ -147,8 +208,8 @@ function UniversityPortal() {
               variant="outlined"
               disabled={loading}
             />
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               onClick={handleRegister}
               disabled={loading}
               sx={{ minWidth: 140, px: 3 }}
@@ -159,7 +220,42 @@ function UniversityPortal() {
         </Paper>
       ) : (
         <Paper sx={{ p: 4, borderRadius: 2 }} elevation={1}>
-          <Typography variant="h6" gutterBottom fontWeight="600">Certificate Information</Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 2,
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <SchoolIcon color="primary" />
+              <Box>
+                <Typography variant="h6" gutterBottom fontWeight="600" sx={{ mb: 0 }}>
+                  Certificate Information
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Logged in as{' '}
+                  <Typography component="span" fontWeight={600}>
+                    {universityName || certificateForm.universityName || 'Registered Institution'}
+                  </Typography>
+                </Typography>
+              </Box>
+            </Box>
+            <Tooltip title="Log out and register a different institution">
+              <Button
+                variant="text"
+                color="error"
+                size="small"
+                onClick={handleLogoutUniversity}
+                startIcon={<LogoutIcon fontSize="small" />}
+                sx={{ fontWeight: 600 }}
+              >
+                Logout
+              </Button>
+            </Tooltip>
+          </Box>
+
           <Divider sx={{ mb: 4 }} />
           
           <Box component="form" onSubmit={handleIssueCertificate}>

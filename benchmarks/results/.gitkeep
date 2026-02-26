@@ -1,0 +1,7 @@
+# Benchmark results are saved here as JSON.
+# Each run appends a new timestamped file per suite:
+#   scalability_<timestamp>.json
+#   concurrency_<timestamp>.json
+#   finality_<timestamp>.json
+#
+# The Python visualiser reads the most-recent file for each suite.

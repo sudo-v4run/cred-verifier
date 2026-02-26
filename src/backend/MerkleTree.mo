@@ -12,167 +12,140 @@ module {
   public type Certificate = Types.Certificate;
   public type MerkleNode = Types.MerkleNode;
 
-  // Build Merkle tree from certificate hashes
+  // Build Merkle tree from certificate hashes.
+  // Populates merkleNodes with parent + sibling links so that getMerkleProof
+  // can walk the pre-built tree upward in O(log n) without any re-computation.
+  // The caller is expected to pass a freshly-created (empty) merkleNodes map
+  // so there is no need to clear it here.
   public func buildMerkleTree(
     certificates: HashMap.HashMap<Text, Certificate>,
     merkleNodes: HashMap.HashMap<Text, MerkleNode>
   ) : Text {
-    // Clear existing nodes
-    for ((key, _) in merkleNodes.entries()) {
-      merkleNodes.delete(key);
-    };
-    
-    // Get all certificate hashes as leaf nodes
-    let certHashes = Buffer.Buffer<Text>(0);
-    for ((id, cert) in certificates.entries()) {
-      certHashes.add(cert.certificate_hash);
-    };
-    
-    // If no certificates, return empty hash
-    if (certHashes.size() == 0) {
-      return Utils.bytesToHex(Array.freeze(Array.init<Nat8>(32, 0)));
-    };
-    
-    // If only one certificate, return its hash
-    if (certHashes.size() == 1) {
-      return certHashes.get(0);
-    };
-    
-    // Build tree bottom-up
-    var currentLevel = Buffer.Buffer<Text>(0);
-    for (hash in certHashes.vals()) {
-      currentLevel.add(hash);
-      // Store leaf nodes
-      merkleNodes.put(hash, {
-        hash = hash;
-        left = null;
-        right = null;
+    // Collect leaf hashes and seed the tree with leaf nodes
+    let leaves = Buffer.Buffer<Text>(certificates.size());
+    for ((_, cert) in certificates.entries()) {
+      let h = cert.certificate_hash;
+      leaves.add(h);
+      merkleNodes.put(h, {
+        hash    = h;
+        left    = null;
+        right   = null;
+        parent  = null;
+        sibling = null;
       });
     };
-    
-    // Build intermediate levels
+
+    let leafCount = leaves.size();
+
+    if (leafCount == 0) {
+      return Utils.bytesToHex(Array.freeze(Array.init<Nat8>(32, 0)));
+    };
+
+    if (leafCount == 1) {
+      return leaves.get(0);
+    };
+
+    // Bottom-up build: currentLevel holds the hashes at the current depth.
+    // For each pair (left, right) we:
+    //   1. compute the parent hash,
+    //   2. back-patch parent + sibling onto the two children already stored,
+    //   3. store the new parent node (its own parent/sibling will be set when
+    //      it is processed in the next iteration).
+    var currentLevel : [Text] = Buffer.toArray(leaves);
+
     while (currentLevel.size() > 1) {
       let nextLevel = Buffer.Buffer<Text>(0);
       var i = 0;
-      
+
       while (i < currentLevel.size()) {
         if (i + 1 < currentLevel.size()) {
-          // Pair exists
-          let leftHash = currentLevel.get(i);
-          let rightHash = currentLevel.get(i + 1);
+          let leftHash  = currentLevel[i];
+          let rightHash = currentLevel[i + 1];
           let parentHash = Utils.combineHashes(leftHash, rightHash);
-          
-          // Store parent node
+
+          // Back-patch the left child
+          switch (merkleNodes.get(leftHash)) {
+            case (?n) {
+              merkleNodes.put(leftHash, { n with parent = ?parentHash; sibling = ?rightHash });
+            };
+            case null {};
+          };
+
+          // Back-patch the right child
+          switch (merkleNodes.get(rightHash)) {
+            case (?n) {
+              merkleNodes.put(rightHash, { n with parent = ?parentHash; sibling = ?leftHash });
+            };
+            case null {};
+          };
+
+          // Store the parent (parent/sibling filled in during the next level)
           merkleNodes.put(parentHash, {
-            hash = parentHash;
-            left = ?leftHash;
-            right = ?rightHash;
+            hash    = parentHash;
+            left    = ?leftHash;
+            right   = ?rightHash;
+            parent  = null;
+            sibling = null;
           });
-          
+
           nextLevel.add(parentHash);
           i += 2;
         } else {
-          // Odd node out, promote to next level
-          let singleHash = currentLevel.get(i);
-          nextLevel.add(singleHash);
+          // Odd node: promoted unchanged; its parent will be set next level.
+          nextLevel.add(currentLevel[i]);
           i += 1;
         };
       };
-      
-      currentLevel := nextLevel;
+
+      currentLevel := Buffer.toArray(nextLevel);
     };
-    
+
     // Return root hash
-    currentLevel.get(0);
+    currentLevel[0];
   };
 
-  // Get Merkle proof for a specific certificate hash
+  // Return the Merkle proof (list of sibling hashes from leaf to root) for
+  // the given leaf hash. Requires that buildMerkleTree has already been called
+  // with the same merkleNodes map.
+  //
+  // Complexity: O(log n) — walks upward via stored parent links.
   public func getMerkleProof(
     targetHash: Text,
-    certificates: HashMap.HashMap<Text, Certificate>
+    merkleNodes: HashMap.HashMap<Text, MerkleNode>
   ) : [Text] {
-    let proof = Buffer.Buffer<Text>(0);
-    
-    // Build current level with all certificate hashes
-    let certHashes = Buffer.Buffer<Text>(0);
-    for ((id, cert) in certificates.entries()) {
-      certHashes.add(cert.certificate_hash);
-    };
-    
-    if (certHashes.size() <= 1) {
-      return [];
-    };
-    
-    var currentLevel = Buffer.Buffer<Text>(0);
-    for (hash in certHashes.vals()) {
-      currentLevel.add(hash);
-    };
-    
-    var targetIndex : ?Nat = null;
-    
-    // Find target in current level
-    var idx = 0;
-    for (hash in currentLevel.vals()) {
-      if (hash == targetHash) {
-        targetIndex := ?idx;
-      };
-      idx += 1;
-    };
-    
-    // If target not found, return empty proof
-    switch (targetIndex) {
-      case null { return []; };
-      case (?index) {
-        var currentIndex = index;
-        
-        // Build proof by traversing up the tree
-        while (currentLevel.size() > 1) {
-          let nextLevel = Buffer.Buffer<Text>(0);
-          var i = 0;
-          
-          while (i < currentLevel.size()) {
-            if (i + 1 < currentLevel.size()) {
-              let leftHash = currentLevel.get(i);
-              let rightHash = currentLevel.get(i + 1);
-              let parentHash = Utils.combineHashes(leftHash, rightHash);
-              
-              // If current index is in this pair, add sibling to proof
-              if (i == currentIndex) {
-                proof.add(rightHash);
-                currentIndex := nextLevel.size();
-              } else if (i + 1 == currentIndex) {
-                proof.add(leftHash);
-                currentIndex := nextLevel.size();
-              };
-              
-              nextLevel.add(parentHash);
-              i += 2;
-            } else {
-              // Odd node out
-              if (i == currentIndex) {
-                currentIndex := nextLevel.size();
-              };
-              nextLevel.add(currentLevel.get(i));
-              i += 1;
-            };
+    let proof = Buffer.Buffer<Text>(16);
+    var current = targetHash;
+    var running = true;
+
+    while (running) {
+      switch (merkleNodes.get(current)) {
+        case null { running := false };
+        case (?node) {
+          // Collect sibling (absent for root or an unpaired odd node)
+          switch (node.sibling) {
+            case (?s) { proof.add(s) };
+            case null {};
           };
-          
-          currentLevel := nextLevel;
+          // Climb to parent; stop at root (parent == null)
+          switch (node.parent) {
+            case null    { running := false };
+            case (?p)    { current := p };
+          };
         };
       };
     };
-    
+
     Buffer.toArray(proof);
   };
 
-  // Verify Merkle proof for a given hash
+  // Verify a Merkle proof: recompute the root from the leaf and confirm it
+  // matches the stored root.
   public func verifyProof(leafHash: Text, proof: [Text], merkleRoot: Text) : Bool {
     var currentHash = leafHash;
-    
     for (siblingHash in proof.vals()) {
       currentHash := Utils.combineHashes(currentHash, siblingHash);
     };
-    
     currentHash == merkleRoot;
   };
 };
+

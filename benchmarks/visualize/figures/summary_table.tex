@@ -1,0 +1,27 @@
+\begin{table}[ht]
+\centering
+\caption{ICP Credential Verification System --- Key Performance Metrics}
+\label{tab:perf}
+\begin{tabular}{lrrl}
+\hline
+\textbf{Metric} & \textbf{Value} & \textbf{Unit} & \textbf{Source} \\
+\hline
+\multicolumn{4}{l}{\textit{ICP --- directly measured on mainnet}} \\
+\hline
+Update call latency (p50) & 2052 & ms & Measured \\
+Update call latency (p95) & 2270 & ms & Measured \\
+Update call latency (p99) & 2319 & ms & Measured \\
+Query call latency (p50) & 800 & ms & Measured \\
+Query call latency (p95) & 800 & ms & Measured \\
+Query vs Update speedup (p50) & 3 & $\\times$ & Derived \\
+Peak issuance throughput & 19.76 & ops/sec & Measured \\
+\hline
+\multicolumn{4}{l}{\textit{Reference values --- published specifications, not measured here}} \\
+\hline
+Ethereum checkpoint finality\textsuperscript{1} & 768,000 & ms & ethereum.org \\
+Bitcoin 6-conf.\ finality\textsuperscript{2} & 60 & min & bitcoin.org \\
+\hline
+\multicolumn{4}{p{12cm}}{\textsuperscript{1} 2 Casper FFG epochs $\times$ 32 slots $\times$ 12\,s/slot = 768\,s. Source: \url{https://ethereum.org/en/developers/docs/consensus-mechanisms/pos}} \\
+\multicolumn{4}{p{12cm}}{\textsuperscript{2} 6 confirmations $\times$ $\approx$10\,min/block. Source: \url{https://bitcoin.org/en/faq}} \\
+\end{tabular}
+\end{table}

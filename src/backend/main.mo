@@ -83,7 +83,8 @@ persistent actor class AcademicCredentialSystem() {
   
   // Update certified data with Merkle root
   private func updateCertifiedData() {
-    // Build Merkle tree and get root
+    // Discard the old tree and start fresh — avoids an O(n) delete loop.
+    merkleNodes := HashMap.HashMap<Text, MerkleNode>(certificates.size() * 2 + 1, Text.equal, Text.hash);
     let root = MerkleTree.buildMerkleTree(certificates, merkleNodes);
     merkleRoot := root;
     
@@ -248,7 +249,8 @@ persistent actor class AcademicCredentialSystem() {
         };
       };
       case (?cert) {
-        let proof = MerkleTree.getMerkleProof(cert.certificate_hash, certificates);
+        // O(log n): walks the pre-built tree upward via parent links
+        let proof = MerkleTree.getMerkleProof(cert.certificate_hash, merkleNodes);
         CertManager.verifyCertificate(cert, proof, merkleRoot);
       };
     };
@@ -274,7 +276,8 @@ persistent actor class AcademicCredentialSystem() {
       };
       case (?cert) {
         let proofStartTime = Time.now();
-        let proof = MerkleTree.getMerkleProof(cert.certificate_hash, certificates);
+        // O(log n): walks the pre-built tree upward via parent links
+        let proof = MerkleTree.getMerkleProof(cert.certificate_hash, merkleNodes);
         let proofEndTime = Time.now();
         
         recordMetric(#merkleProofGeneration, proofStartTime, proofEndTime, true, certificateId);

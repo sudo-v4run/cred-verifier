@@ -108,9 +108,13 @@ const theme = createTheme({
 });
 
 function TabPanel({ children, value, index }) {
+  // Always keep tab content mounted so internal state (like registration)
+  // is preserved when switching between tabs. We only hide it visually.
   return (
     <div hidden={value !== index} style={{ paddingTop: '24px' }}>
-      {value === index && <Box>{children}</Box>}
+      <Box sx={{ display: value === index ? 'block' : 'none' }}>
+        {children}
+      </Box>
     </div>
   );
 }
