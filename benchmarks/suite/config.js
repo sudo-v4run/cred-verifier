@@ -51,26 +51,57 @@ export const RESULTS_DIR = resolve(__dir, "../results");
 // ---------------------------------------------------------------------------
 
 /** N values used in the scalability benchmark (issued + verified each) */
-export const SCALABILITY_N = [1, 10, 50, 100];
+export const SCALABILITY_N = [1, 5, 10, 25, 50, 100];
 
 /**
  * Concurrency levels for the throughput benchmark.
  * At each level we submit this many issueCertificate calls simultaneously
  * and measure total wall-clock time + effective ops/sec.
  */
-export const CONCURRENCY_LEVELS = [1, 2, 5, 10, 20, 50];
+export const CONCURRENCY_LEVELS = [1, 2, 5, 10, 20, 50, 100];
 
 /** Total certificates issued per concurrency level */
-export const CONCURRENCY_TOTAL_CERTS = 50;
+export const CONCURRENCY_TOTAL_CERTS = 100;
 
 /** Number of individual finality measurements */
-export const FINALITY_SAMPLES = 25;
+export const FINALITY_SAMPLES = 50;
 
 /** Number of query-call latency samples per N during verification */
-export const VERIFY_SAMPLES = 30;
+export const VERIFY_SAMPLES = 50;
 
 /** Warm-up calls before any timed measurement begins */
-export const WARMUP_CALLS = 3;
+export const WARMUP_CALLS = 5;
+
+// ---------------------------------------------------------------------------
+// Stress test parameters
+// ---------------------------------------------------------------------------
+
+/**
+ * Burst Storm: number of issueCertificate calls fired simultaneously.
+ * Tests canister ingress queue limits and back-pressure.
+ */
+export const STRESS_BURST_COUNT = 200;
+
+/**
+ * Sustained Load: target operations per second and test duration.
+ * Measures latency degradation and Merkle tree rebalancing spikes over time.
+ */
+export const STRESS_SUSTAINED_RATE       = 10;   // ops/sec
+export const STRESS_SUSTAINED_DURATION_S = 60;   // seconds
+
+/**
+ * Mixed Workload: concurrency level and total ops.
+ * 70% verify (query) + 30% issue (update) — simulates real-world traffic.
+ */
+export const STRESS_MIXED_CONCURRENCY = 20;
+export const STRESS_MIXED_TOTAL       = 300;
+
+/**
+ * Memory Pressure: bulk issuance followed by high-volume reads.
+ * Validates O(log N) Merkle proof stays flat as tree grows.
+ */
+export const STRESS_MEMORY_ISSUE_COUNT  = 500;
+export const STRESS_MEMORY_VERIFY_COUNT = 1000;
 
 // Metadata embedded in every result file
 export const SUITE_META = {

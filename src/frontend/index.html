@@ -4,13 +4,149 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width" />
-  <title>IC Hello Starter</title>
+  <title>TrustVault — Zero Trust Credential System</title>
+  <meta name="description" content="Issue and verify tamper-proof academic credentials on the Internet Computer blockchain. Cryptographically certified with threshold BLS signatures." />
+  <meta name="theme-color" content="#07071a" />
   <base href="/" />
   <link rel="icon" href="/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #07071a;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    #starfield {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* Dark vignette — pulls edges darker so center content pops */
+    #vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(ellipse at 50% 40%, transparent 35%, rgba(2,2,14,0.72) 100%);
+    }
+    /* Grain / film-noise texture */
+    #grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.055;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 300px 300px;
+    }
+    #root {
+      position: relative;
+      z-index: 1;
+    }
+  </style>
 </head>
 
 <body>
+  <canvas id="starfield"></canvas>
+  <div id="vignette"></div>
+  <div id="grain"></div>
   <div id="root"></div>
+  <script>
+    (function () {
+      const canvas = document.getElementById('starfield');
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initStars();
+        draw();
+      }
+
+      function initStars() {
+        stars = [];
+        const count = Math.floor((canvas.width * canvas.height) / 6000);
+        for (let i = 0; i < count; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.1 + 0.2,
+            alpha: Math.random() * 0.45 + 0.1,
+            speed: Math.random() * 0.004 + 0.002,
+            phase: Math.random() * Math.PI * 2,
+          });
+        }
+      }
+
+      function draw(ts) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Deep space gradient base
+        const bg = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        bg.addColorStop(0,   '#07071a');
+        bg.addColorStop(0.5, '#0b0820');
+        bg.addColorStop(1,   '#07071a');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Purple nebula glow – top-right
+        const n1 = ctx.createRadialGradient(
+          canvas.width * 0.75, canvas.height * 0.18, 0,
+          canvas.width * 0.75, canvas.height * 0.18, canvas.width * 0.42
+        );
+        n1.addColorStop(0, 'rgba(112, 40, 200, 0.10)');
+        n1.addColorStop(1, 'transparent');
+        ctx.fillStyle = n1;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Blue nebula glow – bottom-left
+        const n2 = ctx.createRadialGradient(
+          canvas.width * 0.18, canvas.height * 0.78, 0,
+          canvas.width * 0.18, canvas.height * 0.78, canvas.width * 0.32
+        );
+        n2.addColorStop(0, 'rgba(37, 60, 200, 0.07)');
+        n2.addColorStop(1, 'transparent');
+        ctx.fillStyle = n2;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Subtle grid
+        ctx.save();
+        ctx.strokeStyle = 'rgba(139, 92, 246, 0.04)';
+        ctx.lineWidth = 1;
+        const gs = 80;
+        for (let x = 0; x < canvas.width; x += gs) {
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += gs) {
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
+        ctx.restore();
+
+        // Stars (twinkling)
+        const t = ts ? ts / 1000 : 0;
+        for (const s of stars) {
+          const twinkle = s.alpha * (0.7 + 0.3 * Math.sin(t * s.speed * 60 + s.phase));
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,255,255,${twinkle.toFixed(3)})`;
+          ctx.fill();
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+    })();
+  </script>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 

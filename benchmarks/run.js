@@ -21,6 +21,7 @@ import { log }             from "./suite/reporter.js";
 import { runScalability }  from "./suite/scalability.js";
 import { runConcurrency }  from "./suite/concurrency.js";
 import { runFinality }     from "./suite/finality.js";
+import { runStress }       from "./suite/stress.js";
 import { CANISTER_ID, NETWORK, HOST } from "./suite/config.js";
 
 // ─── Argument parsing ───────────────────────────────────────────────────────
@@ -42,7 +43,13 @@ ICP Credential Verification — Benchmark Runner
 Usage: node run.js [options]
 
 Options:
-  --suite     Which benchmark to run: all | scalability | concurrency | finality
+  --suite     Which benchmark to run:
+                all          — standard suites (scalability + concurrency + finality)
+                full         — all suites including stress tests
+                scalability  — latency vs N=1,5,10,25,50,100
+                concurrency  — throughput at C=1,2,5,10,20,50,100
+                finality     — ICP finality vs Ethereum/Bitcoin (50 samples)
+                stress       — burst storm, sustained load, mixed workload, memory pressure
               (default: all)
   --dry-run   Operate on synthetic data — no canister required.
               Useful for testing the visualisation pipeline.
@@ -116,18 +123,22 @@ async function main() {
     }
   };
 
-  if (SUITE === "all" || SUITE === "scalability") {
+  if (SUITE === "all" || SUITE === "scalability" || SUITE === "full") {
     await run("scalability", runScalability);
   }
-  if (SUITE === "all" || SUITE === "concurrency") {
+  if (SUITE === "all" || SUITE === "concurrency" || SUITE === "full") {
     await run("concurrency", runConcurrency);
   }
-  if (SUITE === "all" || SUITE === "finality") {
+  if (SUITE === "all" || SUITE === "finality" || SUITE === "full") {
     await run("finality", runFinality);
   }
+  if (SUITE === "stress" || SUITE === "full") {
+    await run("stress", runStress);
+  }
 
-  if (!["all", "scalability", "concurrency", "finality"].includes(SUITE)) {
-    log.err(`Unknown suite: "${SUITE}". Valid: all | scalability | concurrency | finality`);
+  const validSuites = ["all", "full", "scalability", "concurrency", "finality", "stress"];
+  if (!validSuites.includes(SUITE)) {
+    log.err(`Unknown suite: "${SUITE}". Valid: ${validSuites.join(" | ")}`);
     process.exit(1);
   }
 

@@ -9,15 +9,39 @@ import {
   MenuItem,
   Alert,
   CircularProgress,
-  Paper,
-  Divider,
   IconButton,
   Tooltip,
+  Chip,
+  InputAdornment,
 } from '@mui/material';
-import SchoolIcon from '@mui/icons-material/School';
+import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SendIcon from '@mui/icons-material/Send';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+
+const SectionLabel = ({ children }) => (
+  <Typography sx={{
+    fontSize: '0.76rem', fontWeight: 700, letterSpacing: '0.08em',
+    textTransform: 'uppercase', color: '#94a3b8', mb: 0.6,
+  }}>
+    {children}
+  </Typography>
+);
+
+const Field = ({ name, label, required, value, onChange, ...props }) => (
+  <Box>
+    <SectionLabel>{label}{required && ' *'}</SectionLabel>
+    <TextField
+      fullWidth size="small"
+      name={name}
+      value={value}
+      onChange={onChange}
+      required={required}
+      {...props}
+    />
+  </Box>
+);
 
 function UniversityPortal() {
   const [isRegistered, setIsRegistered] = useState(false);
@@ -26,70 +50,41 @@ function UniversityPortal() {
   const [message, setMessage] = useState({ type: '', text: '' });
 
   const [certificateForm, setCertificateForm] = useState({
-    certificateId: '',
-    universityName: '',
-    verificationUrl: '',
-    recipientName: '',
-    studentId: '',
-    recipientPrincipal: '',
-    degreeType: '',
-    major: '',
-    graduationDate: '',
-    issueDate: '',
-    gpa: '',
-    honors: ''
+    certificateId: '', universityName: '', verificationUrl: '',
+    recipientName: '', studentId: '', recipientPrincipal: '',
+    degreeType: '', major: '', graduationDate: '', issueDate: '',
+    gpa: '', honors: '',
   });
 
-  // Hydrate registration state from localStorage so universities don't need
-  // to re-register on every tab change or page refresh in the same browser.
   useEffect(() => {
     try {
       const storedRegistered = window.localStorage.getItem('cv_university_isRegistered');
       const storedName = window.localStorage.getItem('cv_university_name');
-
       if (storedRegistered === 'true' && storedName) {
         setIsRegistered(true);
         setUniversityName(storedName);
-        setCertificateForm(prev => ({
-          ...prev,
-          universityName: storedName,
-        }));
+        setCertificateForm(prev => ({ ...prev, universityName: storedName }));
       }
-    } catch {
-      // If localStorage is unavailable (e.g., privacy mode), fail silently.
-    }
+    } catch { /* ignore */ }
   }, []);
 
   const handleRegister = async () => {
     if (!universityName.trim()) {
-      setMessage({ type: 'error', text: 'Please enter university name' });
+      setMessage({ type: 'error', text: 'Please enter a university name' });
       return;
     }
-
     setLoading(true);
     setMessage({ type: '', text: '' });
-
     try {
       const result = await credential_backend.registerUniversity(universityName);
       if (result) {
         setIsRegistered(true);
-        setMessage({ type: 'success', text: `Successfully registered as ${universityName}` });
-
-        // Persist registration locally so the UI remembers it across tab
-        // switches and reloads. The backend already persists registration
-        // by principal; this is purely a UX optimization.
+        setMessage({ type: 'success', text: `Registered as ${universityName}` });
         try {
           window.localStorage.setItem('cv_university_isRegistered', 'true');
           window.localStorage.setItem('cv_university_name', universityName);
-        } catch {
-          // Ignore storage errors; UX fallback is just to re-register.
-        }
-
-        // Pre-fill the form with the registered university name.
-        setCertificateForm(prev => ({
-          ...prev,
-          universityName,
-        }));
+        } catch { /* ignore */ }
+        setCertificateForm(prev => ({ ...prev, universityName }));
       }
     } catch (error) {
       setMessage({ type: 'error', text: error.message });
@@ -98,26 +93,15 @@ function UniversityPortal() {
     }
   };
 
-  const handleLogoutUniversity = () => {
-    // Clear local registration state so a new institution can be registered.
+  const handleLogout = () => {
     setIsRegistered(false);
     setUniversityName('');
-    setCertificateForm(prev => ({
-      ...prev,
-      universityName: '',
-    }));
-
+    setCertificateForm(prev => ({ ...prev, universityName: '' }));
     try {
       window.localStorage.removeItem('cv_university_isRegistered');
       window.localStorage.removeItem('cv_university_name');
-    } catch {
-      // Ignore storage errors.
-    }
-
-    setMessage({
-      type: 'info',
-      text: 'You have been logged out. Register a new institution to continue issuing certificates.',
-    });
+    } catch { /* ignore */ }
+    setMessage({ type: 'info', text: 'Logged out. Register a new institution to continue.' });
   };
 
   const handleInputChange = (e) => {
@@ -129,41 +113,26 @@ function UniversityPortal() {
     e.preventDefault();
     setLoading(true);
     setMessage({ type: '', text: '' });
-
     try {
       const result = await credential_backend.issueCertificate(
-        certificateForm.certificateId,
-        certificateForm.universityName,
+        certificateForm.certificateId, certificateForm.universityName,
         certificateForm.verificationUrl || window.location.origin,
-        certificateForm.recipientName,
-        certificateForm.studentId,
+        certificateForm.recipientName, certificateForm.studentId,
         certificateForm.recipientPrincipal || 'anonymous',
-        certificateForm.degreeType,
-        certificateForm.major,
-        certificateForm.graduationDate,
-        certificateForm.issueDate,
-        parseFloat(certificateForm.gpa) || 0.0,
-        certificateForm.honors
+        certificateForm.degreeType, certificateForm.major,
+        certificateForm.graduationDate, certificateForm.issueDate,
+        parseFloat(certificateForm.gpa) || 0.0, certificateForm.honors,
       );
-
       if (result.includes('Error')) {
         setMessage({ type: 'error', text: result });
       } else {
-        setMessage({ type: 'success', text: `Certificate issued successfully! ID: ${result}` });
-        setCertificateForm({
-          certificateId: '',
-          universityName: certificateForm.universityName,
-          verificationUrl: certificateForm.verificationUrl,
-          recipientName: '',
-          studentId: '',
-          recipientPrincipal: '',
-          degreeType: '',
-          major: '',
-          graduationDate: '',
-          issueDate: '',
-          gpa: '',
-          honors: ''
-        });
+        setMessage({ type: 'success', text: `Issued — ID: ${result}` });
+        setCertificateForm(prev => ({
+          ...prev,
+          certificateId: '', recipientName: '', studentId: '',
+          recipientPrincipal: '', degreeType: '', major: '',
+          graduationDate: '', issueDate: '', gpa: '', honors: '',
+        }));
       }
     } catch (error) {
       setMessage({ type: 'error', text: error.message });
@@ -173,272 +142,265 @@ function UniversityPortal() {
   };
 
   const generateCertificateId = () => {
-    const prefix = 'CERT';
     const year = new Date().getFullYear();
-    const random = Math.random().toString(36).substring(2, 15).toUpperCase();
-    const id = `${prefix}-${year}-MIT-CS-${random}`;
-    setCertificateForm(prev => ({ ...prev, certificateId: id }));
+    const random = Math.random().toString(36).substring(2, 10).toUpperCase();
+    setCertificateForm(prev => ({ ...prev, certificateId: `CERT-${year}-${random}` }));
   };
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h5" gutterBottom fontWeight="700" sx={{ color: 'text.primary' }}>
+    <Box sx={{ px: { xs: 3, sm: 4 }, py: 3.5 }}>
+
+      {/* ── Header ─────────────────────────────────────────── */}
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h6" sx={{ color: '#e2e8f0', mb: 0.25 }}>
           Issue Certificate
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.95rem' }}>
-          Create blockchain-verified academic credentials
-        </Typography>
+
       </Box>
 
+      {/* ── Register gate ──────────────────────────────────── */}
       {!isRegistered ? (
-        <Paper sx={{ p: 4, borderRadius: 2 }} elevation={1}>
-          <Typography variant="h6" gutterBottom fontWeight="600">
+        <Box sx={{
+          p: 3, borderRadius: 0,
+          background: 'rgba(139,92,246,0.05)',
+          border: '1px solid rgba(139,92,246,0.14)',
+          borderLeft: '3px solid rgba(139,92,246,0.4)',
+        }}>
+          <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: '#c4b5fd', mb: 0.5 }}>
             Register Institution
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Register your institution to start issuing certificates
+          <Typography sx={{ fontSize: '0.78rem', color: '#94a3b8', mb: 2.5 }}>
+            Enter your institution name to activate certificate issuance
           </Typography>
-          <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+          <Box sx={{ display: 'flex', gap: 1.5 }}>
             <TextField
-              fullWidth
+              fullWidth size="small"
               value={universityName}
               onChange={(e) => setUniversityName(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleRegister()}
               placeholder="Massachusetts Institute of Technology"
-              variant="outlined"
               disabled={loading}
             />
             <Button
               variant="contained"
               onClick={handleRegister}
               disabled={loading}
-              sx={{ minWidth: 140, px: 3 }}
+              sx={{ minWidth: 110, height: 40, flexShrink: 0 }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Register'}
+              {loading ? <CircularProgress size={16} color="inherit" /> : 'Register'}
             </Button>
           </Box>
-        </Paper>
+          {message.text && (
+            <Alert severity={message.type} sx={{ mt: 2 }}>{message.text}</Alert>
+          )}
+        </Box>
       ) : (
-        <Paper sx={{ p: 4, borderRadius: 2 }} elevation={1}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              mb: 2,
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <SchoolIcon color="primary" />
-              <Box>
-                <Typography variant="h6" gutterBottom fontWeight="600" sx={{ mb: 0 }}>
-                  Certificate Information
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Logged in as{' '}
-                  <Typography component="span" fontWeight={600}>
-                    {universityName || certificateForm.universityName || 'Registered Institution'}
-                  </Typography>
-                </Typography>
-              </Box>
+        <Box component="form" onSubmit={handleIssueCertificate}>
+
+          {/* ── Institution badge ───────────────────────────── */}
+          <Box sx={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            px: 2.5, py: 1.5, mb: 3, borderRadius: 0,
+            background: 'rgba(139,92,246,0.06)',
+            border: '1px solid rgba(139,92,246,0.14)',
+            borderLeft: '3px solid rgba(139,92,246,0.5)',
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+              <SchoolOutlinedIcon sx={{ fontSize: 17, color: '#8b5cf6' }} />
+              <Typography sx={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                Issuing as{' '}
+                <Box component="span" sx={{ color: '#c4b5fd', fontWeight: 600 }}>
+                  {universityName}
+                </Box>
+              </Typography>
+              <Chip label="ACTIVE" color="success" size="small" />
             </Box>
-            <Tooltip title="Log out and register a different institution">
+            <Tooltip title="Switch institution">
               <Button
-                variant="text"
-                color="error"
-                size="small"
-                onClick={handleLogoutUniversity}
-                startIcon={<LogoutIcon fontSize="small" />}
-                sx={{ fontWeight: 600 }}
+                variant="text" size="small" color="error"
+                onClick={handleLogout}
+                startIcon={<LogoutIcon sx={{ fontSize: 15 }} />}
+                sx={{ fontSize: '0.75rem', px: 1.5, py: 0.5, minWidth: 0 }}
               >
                 Logout
               </Button>
             </Tooltip>
           </Box>
 
-          <Divider sx={{ mb: 4 }} />
-          
-          <Box component="form" onSubmit={handleIssueCertificate}>
+          {/* ── Certificate ID ─────────────────────────────── */}
+          <Box sx={{ mb: 3 }}>
+            <SectionLabel>Certificate ID *</SectionLabel>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <TextField
+                fullWidth size="small"
+                name="certificateId"
+                value={certificateForm.certificateId}
+                onChange={handleInputChange}
+                placeholder="CERT-2026-MIT-CS-001234"
+                required
+              />
+              <Tooltip title="Auto-generate ID">
+                <IconButton
+                  onClick={generateCertificateId}
+                  sx={{
+                    width: 40, height: 40, flexShrink: 0,
+                    border: '1px solid rgba(139,92,246,0.35)',
+                    color: '#8b5cf6',
+                    borderRadius: '50%',
+                    '&:hover': {
+                      border: '1px solid rgba(139,92,246,0.7)',
+                      background: 'rgba(139,92,246,0.1)',
+                    },
+                  }}
+                >
+                  <AutoFixHighIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
+
+          {/* ── Institution ────────────────────────────────── */}
+          <Box sx={{
+            pb: 2.5, mb: 2.5,
+            borderBottom: '1px solid rgba(139,92,246,0.08)',
+          }}>
+            <Typography sx={{
+              fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em',
+              textTransform: 'uppercase', color: '#8394aa', mb: 1.5,
+              display: 'flex', alignItems: 'center', gap: 1,
+            }}>
+              <Box sx={{ width: 2, height: 14, borderRadius: 1, background: '#7c3aed', display: 'inline-block' }} />
+              Institution
+            </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Box sx={{ display: 'flex', gap: 1 }}>
+              <Grid item xs={12} sm={6}>
+                <Box>
+                  <SectionLabel>University Name *</SectionLabel>
                   <TextField
-                    fullWidth
-                    name="certificateId"
-                    label="Certificate ID"
-                    value={certificateForm.certificateId}
-                    onChange={handleInputChange}
-                    placeholder="CERT-2024-MIT-CS-001234"
-                    required
+                    fullWidth size="small"
+                    value={certificateForm.universityName}
+                    InputProps={{
+                      readOnly: true,
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <LockOutlinedIcon sx={{ fontSize: 14, color: '#8b5cf6' }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        background: 'rgba(139,92,246,0.06)',
+                        '& input': { color: '#a78bfa', fontWeight: 600, cursor: 'default' },
+                        '& fieldset': { borderColor: 'rgba(139,92,246,0.3)' },
+                      },
+                    }}
                   />
-                  <Tooltip title="Generate ID">
-                    <IconButton 
-                      color="primary" 
-                      onClick={generateCertificateId}
-                      sx={{ border: 1, borderColor: 'primary.main' }}
-                    >
-                      <AutoFixHighIcon />
-                    </IconButton>
-                  </Tooltip>
                 </Box>
               </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  name="universityName"
-                  label="University Name"
-                  value={certificateForm.universityName}
-                  onChange={handleInputChange}
-                  placeholder="Massachusetts Institute of Technology"
-                  required
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  name="verificationUrl"
-                  label="Verification URL (Optional)"
-                  value={certificateForm.verificationUrl}
-                  onChange={handleInputChange}
-                  placeholder="https://ic0.app/canister/..."
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  name="recipientName"
-                  label="Student Name"
-                  value={certificateForm.recipientName}
-                  onChange={handleInputChange}
-                  placeholder="Alice Johnson"
-                  required
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  name="studentId"
-                  label="Student ID"
-                  value={certificateForm.studentId}
-                  onChange={handleInputChange}
-                  placeholder="20210001"
-                  required
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  select
-                  fullWidth
-                  name="degreeType"
-                  label="Degree Type"
-                  value={certificateForm.degreeType}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <MenuItem value="">Select Degree</MenuItem>
-                  <MenuItem value="Bachelor of Science">Bachelor of Science</MenuItem>
-                  <MenuItem value="Bachelor of Arts">Bachelor of Arts</MenuItem>
-                  <MenuItem value="Master of Science">Master of Science</MenuItem>
-                  <MenuItem value="Master of Arts">Master of Arts</MenuItem>
-                  <MenuItem value="Doctor of Philosophy">Doctor of Philosophy</MenuItem>
-                </TextField>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  name="major"
-                  label="Major"
-                  value={certificateForm.major}
-                  onChange={handleInputChange}
-                  placeholder="Computer Science"
-                  required
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  type="date"
-                  name="graduationDate"
-                  label="Graduation Date"
-                  value={certificateForm.graduationDate}
-                  onChange={handleInputChange}
-                  InputLabelProps={{ shrink: true }}
-                  required
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  type="date"
-                  name="issueDate"
-                  label="Issue Date"
-                  value={certificateForm.issueDate}
-                  onChange={handleInputChange}
-                  InputLabelProps={{ shrink: true }}
-                  required
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  type="number"
-                  name="gpa"
-                  label="GPA"
-                  value={certificateForm.gpa}
-                  onChange={handleInputChange}
-                  placeholder="3.85"
-                  inputProps={{ step: 0.01, min: 0, max: 4 }}
-                  required
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  select
-                  fullWidth
-                  name="honors"
-                  label="Honors"
-                  value={certificateForm.honors}
-                  onChange={handleInputChange}
-                >
-                  <MenuItem value="">None</MenuItem>
-                  <MenuItem value="Cum Laude">Cum Laude</MenuItem>
-                  <MenuItem value="Magna Cum Laude">Magna Cum Laude</MenuItem>
-                  <MenuItem value="Summa Cum Laude">Summa Cum Laude</MenuItem>
-                </TextField>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Button 
-                  fullWidth
-                  type="submit" 
-                  variant="contained" 
-                  size="large"
-                  disabled={loading}
-                  startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
-                  sx={{ mt: 3, py: 1.5, fontSize: '1rem', fontWeight: 600 }}
-                >
-                  {loading ? 'Issuing on Blockchain...' : 'Issue Certificate'}
-                </Button>
+              <Grid item xs={12} sm={6}>
+                <Field name="verificationUrl" label="Verification URL" value={certificateForm.verificationUrl} onChange={handleInputChange} placeholder="https://ic0.app/…" />
               </Grid>
             </Grid>
           </Box>
-        </Paper>
-      )}
 
-      {message.text && (
-        <Alert severity={message.type} sx={{ mt: 2 }}>
-          {message.text}
-        </Alert>
+          {/* ── Recipient ──────────────────────────────────── */}
+          <Box sx={{
+            pb: 2.5, mb: 2.5,
+            borderBottom: '1px solid rgba(139,92,246,0.08)',
+          }}>
+            <Typography sx={{
+              fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em',
+              textTransform: 'uppercase', color: '#8394aa', mb: 1.5,
+              display: 'flex', alignItems: 'center', gap: 1,
+            }}>
+              <Box sx={{ width: 2, height: 14, borderRadius: 1, background: '#2563eb', display: 'inline-block' }} />
+              Recipient
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <Field name="recipientName" label="Student Name" required value={certificateForm.recipientName} onChange={handleInputChange} placeholder="Alice Johnson" />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Field name="studentId" label="Student ID" required value={certificateForm.studentId} onChange={handleInputChange} placeholder="20210001" />
+              </Grid>
+            </Grid>
+          </Box>
+
+          {/* ── Credential ─────────────────────────────────── */}
+          <Box sx={{ mb: 2.5 }}>
+            <Typography sx={{
+              fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em',
+              textTransform: 'uppercase', color: '#8394aa', mb: 1.5,
+              display: 'flex', alignItems: 'center', gap: 1,
+            }}>
+              <Box sx={{ width: 2, height: 14, borderRadius: 1, background: '#059669', display: 'inline-block' }} />
+              Credential
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <Box>
+                  <SectionLabel>Degree Type *</SectionLabel>
+                  <TextField select fullWidth size="small" name="degreeType"
+                    value={certificateForm.degreeType} onChange={handleInputChange} required>
+                    <MenuItem value="">Select degree</MenuItem>
+                    <MenuItem value="Bachelor of Science">Bachelor of Science</MenuItem>
+                    <MenuItem value="Bachelor of Arts">Bachelor of Arts</MenuItem>
+                    <MenuItem value="Master of Science">Master of Science</MenuItem>
+                    <MenuItem value="Master of Arts">Master of Arts</MenuItem>
+                    <MenuItem value="Doctor of Philosophy">Doctor of Philosophy</MenuItem>
+                  </TextField>
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Field name="major" label="Major" required value={certificateForm.major} onChange={handleInputChange} placeholder="Computer Science" />
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <Box>
+                  <SectionLabel>Graduation Date *</SectionLabel>
+                  <TextField fullWidth size="small" type="date" name="graduationDate"
+                    value={certificateForm.graduationDate} onChange={handleInputChange}
+                    InputLabelProps={{ shrink: true }} required />
+                </Box>
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <Box>
+                  <SectionLabel>Issue Date *</SectionLabel>
+                  <TextField fullWidth size="small" type="date" name="issueDate"
+                    value={certificateForm.issueDate} onChange={handleInputChange}
+                    InputLabelProps={{ shrink: true }} required />
+                </Box>
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <Field name="gpa" label="GPA *" required value={certificateForm.gpa} onChange={handleInputChange} placeholder="3.85"
+                  type="number" inputProps={{ step: 0.01, min: 0, max: 4 }} />
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <Box>
+                  <SectionLabel>Honors</SectionLabel>
+                  <TextField select fullWidth size="small" name="honors"
+                    value={certificateForm.honors} onChange={handleInputChange}>
+                    <MenuItem value="">None</MenuItem>
+                    <MenuItem value="Cum Laude">Cum Laude</MenuItem>
+                    <MenuItem value="Magna Cum Laude">Magna Cum Laude</MenuItem>
+                    <MenuItem value="Summa Cum Laude">Summa Cum Laude</MenuItem>
+                  </TextField>
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
+
+          {/* ── Submit ─────────────────────────────────────── */}
+          {message.text && (
+            <Alert severity={message.type} sx={{ mb: 2 }}>{message.text}</Alert>
+          )}
+          <Button
+            fullWidth type="submit" variant="contained" disabled={loading}
+            startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <SendIcon sx={{ fontSize: 17 }} />}
+            sx={{ py: 1.25, fontSize: '0.875rem' }}
+          >
+            {loading ? 'Issuing on Blockchain…' : 'Issue Certificate'}
+          </Button>
+        </Box>
       )}
     </Box>
   );
