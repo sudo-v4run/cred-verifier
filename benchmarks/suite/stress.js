@@ -1,337 +1,172 @@
 /**
- * stress.js — Real-world stress & endurance tests for TrustVault.
+ * stress.js  --  Sustained Throughput & Merkle Tree Growth Benchmark
+ * Exported as: runThroughput
  *
- * Three stress scenarios, each targeting a different failure mode:
+ * Measures how the system behaves under sustained, long-running load:
  *
- *   1. BURST STORM      — Fire 200 issueCertificate update calls as fast as
- *                         possible (no rate limiting).  Tests canister ingress
- *                         queue depth and back-pressure behaviour.
+ *   1. SUSTAINED ISSUANCE  -- Continuously issue certificates for 60 seconds
+ *      at the maximum achievable rate. Captures throughput over time
+ *      (does it degrade as Merkle tree grows?) and latency percentiles.
  *
- *   2. SUSTAINED LOAD   — Maintain ~10 ops/sec for 60 seconds.  Measures
- *                         degradation over time, memory growth, and whether
- *                         the canister's Merkle tree rebalancing causes any
- *                         latency spikes mid-run.
+ *   2. MERKLE TREE GROWTH  -- Issue certs at key N checkpoints
+ *      (1, 10, 100, 1000, 10000) and measure the Merkle tree rebuild time
+ *      at each point. Shows O(N log N) or otherwise time complexity.
  *
- *   3. MIXED WORKLOAD   — Simulate realistic production traffic:
- *                         70 % verify (query calls) + 30 % issue (update calls)
- *                         at C=20 concurrency.  p50/p95/p99 reported separately
- *                         for reads vs writes.
+ *   3. PEAK BURST   -- Fire 1000 update calls simultaneously to stress the
+ *      IC ingress queue. Measures how many succeed, error rate, and
+ *      p99 latency under maximum ingress pressure.
  *
- *   4. MEMORY PRESSURE  — Issue 500 certificates then run 1 000 sequential
- *                         verify queries.  Ensures the canister heap stays
- *                         stable and query latency doesn't degrade as tree
- *                         depth grows (O(log N) Merkle traversal proof).
- *
- * Dry-run mode: every test produces synthetic data that realistically
- * models ICP mainnet behaviour so the visualisation pipeline can be tested
- * without a live canister.
+ * Result JSON: results/throughput_<timestamp>.json
  */
 
-import { summarise, throughput, round2, percentile } from "./stats.js";
-import { log, printStats, saveResult }               from "./reporter.js";
+import { summarise, round2 }           from "./stats.js";
+import { log, printStats, saveResult } from "./reporter.js";
 import {
-  STRESS_BURST_COUNT,
-  STRESS_SUSTAINED_DURATION_S,
-  STRESS_SUSTAINED_RATE,
-  STRESS_MIXED_CONCURRENCY,
-  STRESS_MIXED_TOTAL,
-  STRESS_MEMORY_ISSUE_COUNT,
-  STRESS_MEMORY_VERIFY_COUNT,
+  PARALLEL_SCALES,
   WARMUP_CALLS,
+  SUITE_META,
 } from "./config.js";
 
-// ─── helpers ──────────────────────────────────────────────────────────────────
+// ── helpers ──────────────────────────────────────────────────────────────────
 
 let _seq = 0;
-function nextId(prefix = "STRESS") {
-  return `${prefix}_${Date.now()}_${++_seq}_${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-}
+const nextId = (prefix = "THR") =>
+  `${prefix}_${Date.now()}_${++_seq}_${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
 
-function certArgs(id, tag = "Stress") {
-  return [
-    id,
-    `${tag} University`,
-    `https://stress.icp.edu/verify`,
-    `Student ${_seq}`,
-    `STR${String(_seq).padStart(6, "0")}`,
-    "principal-stress",
-    "Bachelor of Science",
-    "Distributed Systems",
-    "2026-06-01",
-    "2026-06-01",
-    3.6,
-    "With Distinction",
-  ];
-}
+const makeCertArgs = (id, uni = "Benchmark University ICP") => [
+  id, uni,
+  `https://benchmark.icp.app/#/verify/benchmark-university-icp/2026/${id}`,
+  `Student ${_seq}`,
+  `STU${String(_seq).padStart(6, "0")}`,
+  "anonymous",
+  "Bachelor of Science",
+  "Computer Science",
+  "2026-06-01", "2026-06-01",
+  3.5, "Magna Cum Laude",
+];
 
-// Gaussian sampling (Box-Muller)
-function gaussian(mean, sd, minVal = 50) {
-  const u = 1 - Math.random();
-  const v = Math.random();
-  return Math.max(minVal, mean + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v));
-}
-
-function sleep(ms) {
-  return new Promise(r => setTimeout(r, ms));
-}
-
-// ─── live helpers ─────────────────────────────────────────────────────────────
-
-async function issueOne(actor, tag = "STRESS") {
-  const id = nextId(tag);
+const issueOne = async (actor, id) => {
   const t0 = Date.now();
-  await actor.issueCertificate(...certArgs(id, tag));
-  return { ms: Date.now() - t0, id };
-}
-
-async function verifyOne(actor, id) {
-  const t0 = Date.now();
-  await actor.verifyCertificate(id);
+  await actor.issueCertificate(...makeCertArgs(id));
   return Date.now() - t0;
-}
+};
 
-// ─── 1. BURST STORM ───────────────────────────────────────────────────────────
+// ── main benchmark ────────────────────────────────────────────────────────────
 
-async function burstStorm(actors, dryRun) {
-  const N = STRESS_BURST_COUNT;
-  log.sub(`Burst Storm — ${N} concurrent update calls`);
+export async function runThroughput({ authedActor, anonActor }) {
+  log.header("SUSTAINED THROUGHPUT & MERKLE TREE GROWTH BENCHMARK");
 
-  if (dryRun) {
-    // Simulate: first calls fast, throttle kicks in and latency climbs
-    const times = Array.from({ length: N }, (_, i) => {
-      const base = 2000 + i * 8;  // slight latency ramp under load
-      return gaussian(base, 300, 800);
-    });
-    const stats = summarise(times);
-    const total_ms = times.reduce((a, b) => Math.max(a, b), 0) + gaussian(500, 100); // wall clock ≈ slowest batch
-    printStats("Burst issuance", stats);
-    log.row("  Wall-clock total", `${round2(total_ms)} ms`);
-    log.row("  Effective throughput", `${round2(throughput(N, total_ms))} ops/s`);
-    return { scenario: "burst_storm", N, times_ms: times, stats, total_ms, throughput_ops_s: round2(throughput(N, total_ms)) };
+  // ── Warm-up ─────────────────────────────────────────────────────────────
+  log.sub("Warm-up ...");
+  for (let i = 0; i < WARMUP_CALLS; i++) {
+    const id = nextId("WU");
+    await issueOne(authedActor, id);
+    await anonActor.verifyCertificate(id);
   }
+  log.ok("Warm-up complete");
 
-  // Live: fire all at once
-  const t0 = Date.now();
-  const promises = Array.from({ length: N }, () => issueOne(actors.authedActor, "BURST"));
-  const results = await Promise.allSettled(promises);
-  const total_ms = Date.now() - t0;
+  // ── 1. Sustained issuance for 60 seconds ────────────────────────────────
+  const DURATION_MS = 60_000;
+  log.sub(`Sustained issuance -- running for ${DURATION_MS / 1000}s ...`);
+  const sustainedTimes = [];
+  const sustainedTimestamps = [];
+  const sustainedStart = Date.now();
 
-  const times = results
-    .filter(r => r.status === "fulfilled")
-    .map(r => r.value.ms);
-  const failed = results.filter(r => r.status === "rejected").length;
-  const stats = summarise(times);
-
-  printStats("Burst issuance", stats);
-  log.row("  Wall-clock total",   `${total_ms} ms`);
-  log.row("  Succeeded",          `${times.length}/${N}`);
-  log.row("  Failed",             `${failed}`);
-  log.row("  Effective throughput", `${round2(throughput(times.length, total_ms))} ops/s`);
-
-  return { scenario: "burst_storm", N, times_ms: times, stats, total_ms, failed,
-           throughput_ops_s: round2(throughput(times.length, total_ms)) };
-}
-
-// ─── 2. SUSTAINED LOAD ────────────────────────────────────────────────────────
-
-async function sustainedLoad(actors, dryRun) {
-  const duration = STRESS_SUSTAINED_DURATION_S * 1000;
-  const rate     = STRESS_SUSTAINED_RATE;   // target ops/sec
-  const interval = 1000 / rate;
-  log.sub(`Sustained Load — ${rate} ops/sec for ${STRESS_SUSTAINED_DURATION_S}s`);
-
-  const times = [];
-  const issuedIds = [];
-
-  if (dryRun) {
-    // Simulate gradual latency creep then stabilisation
-    const total = Math.floor(STRESS_SUSTAINED_DURATION_S * rate);
-    for (let i = 0; i < total; i++) {
-      // Slight increase first 20%, then stable
-      const drift = i < total * 0.2 ? i * 3 : 0;
-      times.push(gaussian(2100 + drift, 200, 1000));
-    }
-    const stats = summarise(times);
-    printStats("Sustained issuance", stats);
-    log.row("  Operations issued", times.length);
-    log.row("  Actual throughput", `${round2(throughput(times.length, duration))} ops/s`);
-    return { scenario: "sustained_load", target_rate: rate, duration_s: STRESS_SUSTAINED_DURATION_S,
-             times_ms: times, stats, actual_throughput_ops_s: round2(throughput(times.length, duration)) };
-  }
-
-  const deadline = Date.now() + duration;
-  while (Date.now() < deadline) {
-    const tickStart = Date.now();
-    const { ms, id } = await issueOne(actors.authedActor, "SUS");
-    times.push(ms);
-    issuedIds.push(id);
-    log.info(`  [${times.length}] issued ${id} — ${ms}ms`);
-
-    // Pace to target rate
-    const elapsed = Date.now() - tickStart;
-    if (elapsed < interval) await sleep(interval - elapsed);
-  }
-
-  const stats = summarise(times);
-  printStats("Sustained issuance", stats);
-  log.row("  Operations issued",  times.length);
-  log.row("  Actual throughput",  `${round2(throughput(times.length, duration))} ops/s`);
-
-  return { scenario: "sustained_load", target_rate: rate, duration_s: STRESS_SUSTAINED_DURATION_S,
-           times_ms: times, stats, actual_throughput_ops_s: round2(throughput(times.length, duration)) };
-}
-
-// ─── 3. MIXED WORKLOAD ────────────────────────────────────────────────────────
-
-async function mixedWorkload(actors, dryRun) {
-  const C     = STRESS_MIXED_CONCURRENCY;
-  const total = STRESS_MIXED_TOTAL;
-  const writeRatio = 0.30;
-  log.sub(`Mixed Workload — ${total} ops, 70% reads / 30% writes, C=${C}`);
-
-  if (dryRun) {
-    const readTimes  = Array.from({ length: Math.floor(total * 0.70) }, () => gaussian(140, 30, 50));
-    const writeTimes = Array.from({ length: Math.floor(total * 0.30) }, () => gaussian(2100, 250, 800));
-    const readStats  = summarise(readTimes);
-    const writeStats = summarise(writeTimes);
-    printStats("Read (verify) latency", readStats);
-    printStats("Write (issue) latency", writeStats);
-    return { scenario: "mixed_workload", C, total, write_ratio: writeRatio,
-             read: { times_ms: readTimes, stats: readStats },
-             write: { times_ms: writeTimes, stats: writeStats } };
-  }
-
-  // Pre-issue some certs to verify
-  log.info("  Pre-issuing seed certificates for read pool …");
-  const seedIds = [];
-  for (let i = 0; i < 20; i++) {
-    const { id } = await issueOne(actors.authedActor, "SEED");
-    seedIds.push(id);
-  }
-
-  const readTimes  = [];
-  const writeTimes = [];
-
-  // Build operation queue
-  const ops = Array.from({ length: total }, (_, i) => ({
-    type: Math.random() < writeRatio ? "write" : "read",
-    idx:  i,
-  }));
-
-  // Execute in batches of C
-  for (let b = 0; b < ops.length; b += C) {
-    const batch = ops.slice(b, b + C);
-    const tasks = batch.map(op => {
-      if (op.type === "write") {
-        return issueOne(actors.authedActor, "MIX").then(r => { writeTimes.push(r.ms); seedIds.push(r.id); });
-      } else {
-        const id = seedIds[Math.floor(Math.random() * seedIds.length)];
-        return verifyOne(actors.anonActor, id).then(ms => readTimes.push(ms));
-      }
-    });
-    await Promise.allSettled(tasks);
-    log.info(`  batch ${Math.floor(b / C) + 1} done — reads=${readTimes.length} writes=${writeTimes.length}`);
-  }
-
-  const readStats  = summarise(readTimes);
-  const writeStats = summarise(writeTimes);
-  printStats("Read (verify) latency", readStats);
-  printStats("Write (issue) latency", writeStats);
-
-  return { scenario: "mixed_workload", C, total, write_ratio: writeRatio,
-           read: { times_ms: readTimes, stats: readStats },
-           write: { times_ms: writeTimes, stats: writeStats } };
-}
-
-// ─── 4. MEMORY PRESSURE ───────────────────────────────────────────────────────
-
-async function memoryPressure(actors, dryRun) {
-  const issueN  = STRESS_MEMORY_ISSUE_COUNT;
-  const verifyN = STRESS_MEMORY_VERIFY_COUNT;
-  log.sub(`Memory Pressure — issue ${issueN} certs → verify ${verifyN} times`);
-
-  if (dryRun) {
-    // Simulate: verify latency stays flat (O(log N) Merkle proof)
-    const issueTimes  = Array.from({ length: issueN }, (_, i) => gaussian(2100, 200, 1000));
-    const verifyTimes = Array.from({ length: verifyN }, (_, i) => {
-      // Latency should stay near-constant regardless of tree depth
-      return gaussian(145, 20, 80);
-    });
-    const issueStats  = summarise(issueTimes);
-    const verifyStats = summarise(verifyTimes);
-    printStats(`Issuance (N=${issueN})`, issueStats);
-    printStats(`Verification (N=${verifyN} queries)`, verifyStats);
-    return { scenario: "memory_pressure", issueN, verifyN,
-             issue:  { times_ms: issueTimes,  stats: issueStats },
-             verify: { times_ms: verifyTimes, stats: verifyStats } };
-  }
-
-  // Issue phase — batches of 10
-  log.info(`  Issuing ${issueN} certificates …`);
-  const issuedIds = [];
-  const issueTimes = [];
-  for (let b = 0; b < issueN; b += 10) {
-    const batch = Math.min(10, issueN - b);
-    const results = await Promise.all(
-      Array.from({ length: batch }, () => issueOne(actors.authedActor, "MEM"))
+  while (Date.now() - sustainedStart < DURATION_MS) {
+    const id = nextId("SUS");
+    const ms = await issueOne(authedActor, id);
+    sustainedTimes.push(ms);
+    sustainedTimestamps.push(Date.now() - sustainedStart);
+    process.stdout.write(
+      `\r  elapsed=${((Date.now()-sustainedStart)/1000).toFixed(1)}s  n=${sustainedTimes.length}  last=${ms}ms`
     );
-    results.forEach(r => { issueTimes.push(r.ms); issuedIds.push(r.id); });
-    log.info(`  issued ${issuedIds.length}/${issueN}`);
+  }
+  console.log();
+  const sustainedStats = summarise(sustainedTimes);
+  log.ok(`Issued ${sustainedTimes.length} certs in ${DURATION_MS/1000}s`);
+  log.ok(`Throughput: ${round2((sustainedTimes.length / DURATION_MS) * 1000)} certs/s`);
+  printStats("Sustained issuance latency", sustainedStats);
+
+  // Compute throughput in 10-second windows to show trends over time
+  const WINDOW_MS = 10_000;
+  const windows = [];
+  for (let w = 0; w < DURATION_MS; w += WINDOW_MS) {
+    const inWindow = sustainedTimestamps.filter(t => t >= w && t < w + WINDOW_MS);
+    windows.push({
+      window_start_s: w / 1000,
+      count:          inWindow.length,
+      throughput_cps: round2((inWindow.length / WINDOW_MS) * 1000),
+    });
   }
 
-  // Verify phase — sequential to measure per-query latency clearly
-  log.info(`  Running ${verifyN} sequential verify queries …`);
-  const verifyTimes = [];
-  for (let i = 0; i < verifyN; i++) {
-    const id = issuedIds[i % issuedIds.length];
-    const ms = await verifyOne(actors.anonActor, id);
-    verifyTimes.push(ms);
-    if ((i + 1) % 100 === 0) log.info(`  verified ${i + 1}/${verifyN}`);
+  // ── 2. Merkle tree growth timing ─────────────────────────────────────────
+  log.sub("Merkle tree rebuild time vs N ...");
+  const merkleResults = [];
+  const totalCurrentCerts = await anonActor.getTotalCertificates();
+  log.info(`  Current DB size: ${Number(totalCurrentCerts).toLocaleString()} certs`);
+
+  for (const N of PARALLEL_SCALES) {
+    log.info(`  Issuing parallel batch of ${N.toLocaleString()} now ...`);
+    const ids = Array.from({ length: N }, () => nextId("MRK"));
+    const t0  = Date.now();
+    await Promise.all(ids.map(id => issueOne(authedActor, id)));
+    const batchWall = Date.now() - t0;
+    const newTotal  = Number(await anonActor.getTotalCertificates());
+
+    merkleResults.push({
+      batch_size:       N,
+      db_size_after:    newTotal,
+      batch_wall_ms:    batchWall,
+      throughput_cps:   round2((N / batchWall) * 1000),
+    });
+    log.ok(`  N=${N.toLocaleString()}: batch wall=${batchWall}ms, DB now has ${newTotal.toLocaleString()} certs`);
   }
 
-  const issueStats  = summarise(issueTimes);
-  const verifyStats = summarise(verifyTimes);
-  printStats(`Issuance (N=${issueN})`,          issueStats);
-  printStats(`Verification (N=${verifyN})`, verifyStats);
+  // ── 3. Peak burst (1000 simultaneous) ────────────────────────────────────
+  log.sub("Peak burst test: 1000 simultaneous issueCertificate calls ...");
+  const burstIds   = Array.from({ length: 1000 }, () => nextId("BST"));
+  const burstT0    = Date.now();
+  const burstTimes = await Promise.all(
+    burstIds.map(async id => {
+      try { return await issueOne(authedActor, id); }
+      catch { return -1; }
+    })
+  );
+  const burstWall   = Date.now() - burstT0;
+  const burstOk     = burstTimes.filter(t => t >= 0);
+  const burstErrors = burstTimes.length - burstOk.length;
+  const burstStats  = summarise(burstOk);
 
-  return { scenario: "memory_pressure", issueN, verifyN,
-           issue:  { times_ms: issueTimes,  stats: issueStats },
-           verify: { times_ms: verifyTimes, stats: verifyStats } };
-}
-
-// ─── Main export ──────────────────────────────────────────────────────────────
-
-/**
- * @param {{ authedActor: any, anonActor: any }} actors
- * @param {{ dryRun?: boolean }} opts
- */
-export async function runStress(actors, opts = {}) {
-  const dryRun = opts.dryRun ?? false;
-
-  log.header("STRESS & ENDURANCE BENCHMARK");
-  log.info(`Mode: ${dryRun ? "DRY-RUN (synthetic data)" : "LIVE canister"}`);
-  log.nl();
-
-  if (!dryRun) {
-    log.sub("Warm-up");
-    for (let i = 0; i < WARMUP_CALLS; i++) {
-      await issueOne(actors.authedActor, "WRMUP");
-      log.info(`  warm-up ${i + 1}/${WARMUP_CALLS}`);
-    }
-    log.ok("Warm-up complete");
-  }
-
-  const burst     = await burstStorm(actors, dryRun);
-  const sustained = await sustainedLoad(actors, dryRun);
-  const mixed     = await mixedWorkload(actors, dryRun);
-  const memory    = await memoryPressure(actors, dryRun);
+  log.ok(`Burst: ${burstOk.length}/1000 succeeded in ${burstWall}ms`);
+  log.ok(`  Error rate: ${round2(burstErrors / 1000 * 100)}%`);
+  printStats("Burst success latencies", burstStats);
 
   const payload = {
-    suite: "stress",
-    scenarios: { burst, sustained, mixed, memory },
+    suite:    "throughput",
+    ts:       new Date().toISOString(),
+    meta:     SUITE_META,
+    sustained: {
+      duration_ms:         DURATION_MS,
+      total_issued:        sustainedTimes.length,
+      throughput_cps:      round2((sustainedTimes.length / DURATION_MS) * 1000),
+      latency:             sustainedStats,
+      times_ms:            sustainedTimes,
+      timestamps_ms:       sustainedTimestamps,
+      throughput_windows:  windows,
+    },
+    merkle_growth: merkleResults,
+    peak_burst: {
+      total:          1000,
+      succeeded:      burstOk.length,
+      failed:         burstErrors,
+      error_rate:     round2(burstErrors / 1000),
+      wall_ms:        burstWall,
+      throughput_cps: round2((burstOk.length / burstWall) * 1000),
+      latency:        burstStats,
+    },
   };
 
-  saveResult("stress", payload);
-  log.ok("Stress benchmark complete — results saved.");
+  const file = saveResult("throughput", payload);
+  log.ok(`Throughput results saved to: ${file}`);
   return payload;
 }

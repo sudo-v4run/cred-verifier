@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { credential_backend } from 'declarations/credential_backend';
 import {
   Box,
@@ -49,21 +49,31 @@ const DataRow = ({ label, value, mono = false }) => (
 
 // ─── component ───────────────────────────────────────────────────────────────
 
-function VerificationPortal() {
-  const [certificateId, setCertificateId] = useState('');
+function VerificationPortal({ initialCertId = '' }) {
+  const [certificateId, setCertificateId] = useState(initialCertId);
   const [loading, setLoading] = useState(false);
   const [verificationResult, setVerificationResult] = useState(null);
   const [certifiedData, setCertifiedData] = useState(null);
   const [certificateProof, setCertificateProof] = useState(null);
+  const autoVerified = useRef(false);
 
-  const verifyCertificate = async () => {
-    if (!certificateId.trim()) return;
+  // Auto-verify when opened from a shared link
+  useEffect(() => {
+    if (initialCertId && !autoVerified.current) {
+      autoVerified.current = true;
+      runVerify(initialCertId);
+    }
+  }, [initialCertId]);
+
+  const runVerify = async (id) => {
+    const idToVerify = (id || certificateId).trim();
+    if (!idToVerify) return;
     setLoading(true);
     setVerificationResult(null);
     setCertifiedData(null);
     setCertificateProof(null);
     try {
-      const result = await credential_backend.verifyCertificate(certificateId);
+      const result = await credential_backend.verifyCertificate(idToVerify);
       const certData = await credential_backend.getCertifiedData();
       const isLocal = window.location.hostname.includes('localhost') ||
                       window.location.hostname.includes('127.0.0.1');
@@ -90,6 +100,8 @@ function VerificationPortal() {
     }
   };
 
+  const verifyCertificate = () => runVerify(certificateId);
+
   const cert = verificationResult?.certificate?.[0] ?? null;
 
   return (
@@ -101,7 +113,7 @@ function VerificationPortal() {
           Verify Certificate
         </Typography>
         <Typography sx={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-          Enter a certificate ID to validate its authenticity on-chain
+          Open a shared verification link or paste a certificate ID to validate on-chain
         </Typography>
       </Box>
 
@@ -310,8 +322,9 @@ function VerificationPortal() {
         }}>
           <Typography sx={{ fontSize: '0.78rem', color: '#8394aa', lineHeight: 1.75 }}>
             <Box component="span" sx={{ color: '#94a3b8', fontWeight: 700 }}>How it works: </Box>
-            The query is cryptographically certified by the IC subnet — verified via Merkle proof and
-            threshold BLS signatures in your browser. No backend trust required.
+            Opening a shared verification link auto-fills and verifies instantly. You can also paste any
+            certificate ID manually. Every query is cryptographically certified by the IC subnet —
+            verified via Merkle proof and threshold BLS signatures in your browser. No backend trust required.
           </Typography>
         </Box>
       )}

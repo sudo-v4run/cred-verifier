@@ -1,20 +1,21 @@
 /**
- * config.js — Central configuration for the benchmark suite.
- * All values can be overridden with environment variables.
+ * config.js — Mainnet-only research benchmark configuration.
  *
- * Required env vars (set after `dfx deploy --network ic`):
- *   CANISTER_ID  — canister principal of credential_backend on the chosen network
- *   DFX_NETWORK  — "ic" (mainnet) or "local" (default: "ic")
+ * All tests run exclusively against the deployed IC mainnet canister.
+ * This benchmark suite is designed to generate research-paper-quality data.
+ *
+ * Prerequisites:
+ *   dfx deploy --network ic
+ *   export CANISTER_ID=<credential_backend-canister-id>   # or add to .env
  */
 
 import { readFileSync, existsSync } from "fs";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
+import { resolve, dirname }         from "path";
+import { fileURLToPath }            from "url";
 
-const __dir = dirname(fileURLToPath(import.meta.url));
+const __dir   = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dir, "../..");
 
-// Parse the .env file that dfx generates after deployment
 function loadDfxEnv() {
   const envPath = resolve(rootDir, ".env");
   if (!existsSync(envPath)) return {};
@@ -22,92 +23,61 @@ function loadDfxEnv() {
   return Object.fromEntries(
     raw.split("\n")
        .filter(l => l.includes("=") && !l.startsWith("#"))
-       .map(l => l.split("=").map(s => s.trim()))
+       .map(l => {
+         const idx = l.indexOf("=");
+         return [l.slice(0, idx).trim(), l.slice(idx + 1).trim()];
+       })
   );
 }
 
 const dfxEnv = loadDfxEnv();
 
-export const NETWORK = process.env.DFX_NETWORK ?? dfxEnv.DFX_NETWORK ?? "ic";
+// ── Network — IC mainnet only ────────────────────────────────────────────────
+
+export const NETWORK = "ic";
+export const HOST    = "https://ic0.app";
 
 export const CANISTER_ID =
   process.env.CANISTER_ID ??
   dfxEnv.CANISTER_ID_CREDENTIAL_BACKEND ??
-  null;           // will throw a clear error in agent.js when null
+  null;
 
-export const HOST =
-  NETWORK === "local"
-    ? (process.env.LOCAL_HOST ?? "http://localhost:4943")
-    : "https://ic0.app";
-
-/** Ed25519 key persisted between runs so the university identity is stable */
+/** Ed25519 key file — stable benchmark identity between runs */
 export const IDENTITY_FILE = resolve(__dir, ".benchmark_identity.json");
 
-/** Directory where each benchmark writes its result JSON */
+/** Directory for result JSON files */
 export const RESULTS_DIR = resolve(__dir, "../results");
 
-// ---------------------------------------------------------------------------
-// Test parameters — sensible defaults, tweak as needed
-// ---------------------------------------------------------------------------
+// ── Research benchmark scales ─────────────────────────────────────────────────
+//
+//  N = number of certificates in each workload batch.
+//
+//  ISSUANCE_SEQ_SCALES  — sequential issuance (awaited one by one).
+//    Stops at 1 000 to keep run time practical (~45 min for 1 000 at 2.5 s/call).
+//
+//  PARALLEL_SCALES      — all N certs fired simultaneously.
+//    Captures wall-clock "burst" time and effective ops/sec.
+//
+//  VERIFY_SCALES        — N concurrent verification (query) calls.
+//    Query calls are fast (~150–350 ms) so 10 000 is safe.
+//
+//  CONCURRENCY_LEVELS   — simultaneous callers hitting the canister.
 
-/** N values used in the scalability benchmark (issued + verified each) */
-export const SCALABILITY_N = [1, 5, 10, 25, 50, 100];
+export const ISSUANCE_SEQ_SCALES = [1, 10, 100, 1_000];
+export const PARALLEL_SCALES     = [1, 10, 100, 1_000, 10_000];
+export const VERIFY_SCALES       = [1, 10, 100, 1_000, 10_000];
+export const CONCURRENCY_LEVELS  = [1, 5, 10, 25, 50, 100, 500];
 
-/**
- * Concurrency levels for the throughput benchmark.
- * At each level we submit this many issueCertificate calls simultaneously
- * and measure total wall-clock time + effective ops/sec.
- */
-export const CONCURRENCY_LEVELS = [1, 2, 5, 10, 20, 50, 100];
+/** Warm-up calls before each suite (primes IC routing caches) */
+export const WARMUP_CALLS = 3;
 
-/** Total certificates issued per concurrency level */
-export const CONCURRENCY_TOTAL_CERTS = 100;
+/** Repeat each N-point measurement this many times for stable mean/p95/p99 */
+export const REPEAT_PER_N = 5;
 
-/** Number of individual finality measurements */
-export const FINALITY_SAMPLES = 50;
-
-/** Number of query-call latency samples per N during verification */
-export const VERIFY_SAMPLES = 50;
-
-/** Warm-up calls before any timed measurement begins */
-export const WARMUP_CALLS = 5;
-
-// ---------------------------------------------------------------------------
-// Stress test parameters
-// ---------------------------------------------------------------------------
-
-/**
- * Burst Storm: number of issueCertificate calls fired simultaneously.
- * Tests canister ingress queue limits and back-pressure.
- */
-export const STRESS_BURST_COUNT = 200;
-
-/**
- * Sustained Load: target operations per second and test duration.
- * Measures latency degradation and Merkle tree rebalancing spikes over time.
- */
-export const STRESS_SUSTAINED_RATE       = 10;   // ops/sec
-export const STRESS_SUSTAINED_DURATION_S = 60;   // seconds
-
-/**
- * Mixed Workload: concurrency level and total ops.
- * 70% verify (query) + 30% issue (update) — simulates real-world traffic.
- */
-export const STRESS_MIXED_CONCURRENCY = 20;
-export const STRESS_MIXED_TOTAL       = 300;
-
-/**
- * Memory Pressure: bulk issuance followed by high-volume reads.
- * Validates O(log N) Merkle proof stays flat as tree grows.
- */
-export const STRESS_MEMORY_ISSUE_COUNT  = 500;
-export const STRESS_MEMORY_VERIFY_COUNT = 1000;
-
-// Metadata embedded in every result file
+// Metadata written into every result JSON
 export const SUITE_META = {
-  project:  "ICP Academic Credential Verification",
-  version:  "1.0.0",
-  network:  NETWORK,
-  host:     HOST,
-  canisterId: CANISTER_ID,
+  project:   "ICP Academic Credential Verification — Mainnet Research Benchmark",
+  network:   NETWORK,
+  host:      HOST,
+  canisterId: CANISTER_ID ?? "not-set",
 };

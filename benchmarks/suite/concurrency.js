@@ -1,207 +1,167 @@
 /**
- * concurrency.js — Throughput under varying concurrency levels.
+ * concurrency.js  --  Certificate Verification Benchmark
+ * Exported as: runVerification
  *
- * Key ICP claim: horizontal scalability means throughput grows near-linearly
- * with concurrent requests (up to subnet capacity).
+ * Measures verification (query-call) latency and throughput as N grows
+ * from 1 to 10,000 on IC mainnet.
  *
- * Protocol:
- *   For each concurrency level C in [1, 2, 5, 10, 20, 50]:
- *     1. Submit CONCURRENCY_TOTAL_CERTS issueCertificate calls in batches of C.
- *     2. Record wall-clock time for each batch + total.
- *     3. Compute per-batch and overall throughput (ops/sec).
- *     4. Also run the same number of verifyCertificate query calls in parallel
- *        to show the query-call side of ICP's performance.
+ * IC query calls are answered by a single replica node directly (no
+ * consensus needed) making them extremely fast (~150-350 ms observed).
+ * This suite quantifies that speed and its scaling behaviour.
+ *
+ * Two modes per N:
+ *   * Sequential  -- verify one cert at a time, captures steady-state latency.
+ *   * Concurrent  -- all N fired simultaneously, captures throughput ceiling.
+ *
+ * Also measures certificate lookup by studentId and by universityName.
+ *
+ * Result JSON: results/verification_<timestamp>.json
  */
 
-import { summarise, throughput, round2, mean }  from "./stats.js";
-import { log, printStats, saveResult }           from "./reporter.js";
-import { CONCURRENCY_LEVELS, CONCURRENCY_TOTAL_CERTS, WARMUP_CALLS } from "./config.js";
+import { summarise, round2 }           from "./stats.js";
+import { log, printStats, saveResult } from "./reporter.js";
+import {
+  VERIFY_SCALES,
+  WARMUP_CALLS,
+  REPEAT_PER_N,
+  SUITE_META,
+} from "./config.js";
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
+// ── helpers ──────────────────────────────────────────────────────────────────
 
 let _seq = 0;
-function nextId(prefix = "CONC") {
-  return `${prefix}_${Date.now()}_${++_seq}_${Math.random().toString(36).slice(2, 6)}`;
-}
+const nextId = (prefix = "VER") =>
+  `${prefix}_${Date.now()}_${++_seq}_${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
 
-function certArgs(id) {
-  return [
-    id,
-    "ICP Throughput Lab",
-    "https://throughput.icp.edu/verify",
-    `ThreadStudent ${_seq}`,
-    `CON${String(_seq).padStart(6, "0")}`,
-    "principal-conc-bench",
-    "Bachelor of Science",
-    "Distributed Systems",
-    "2026-06-01",
-    "2026-06-01",
-    3.7,
-    "With Distinction",
-  ];
-}
+const makeCertArgs = (id, uni = "Benchmark University ICP") => [
+  id, uni,
+  `https://benchmark.icp.app/#/verify/benchmark-university-icp/2026/${id}`,
+  `Student ${_seq}`,
+  `STU${String(_seq).padStart(6, "0")}`,
+  "anonymous",
+  "Bachelor of Science",
+  "Computer Science",
+  "2026-06-01", "2026-06-01",
+  3.5, "Magna Cum Laude",
+];
 
-function gaussian(mean, sd) {
-  const u = 1 - Math.random();
-  const v = Math.random();
-  return Math.max(10, mean + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v));
-}
-
-// ─── Live canister helpers ─────────────────────────────────────────────────
-
-async function issueOne(actor, id) {
-  const t0 = Date.now();
-  await actor.issueCertificate(...certArgs(id));
-  return Date.now() - t0;
-}
-
-async function verifyOne(actor, id) {
+const verifyOne = async (actor, id) => {
   const t0 = Date.now();
   await actor.verifyCertificate(id);
   return Date.now() - t0;
-}
+};
 
-// ─── Issue TOTAL certs in batches of `concurrency` ────────────────────────
+// ── main benchmark ────────────────────────────────────────────────────────────
 
-async function runIssuanceBatched(actor, total, concurrency, dryRun) {
-  const issuedIds   = [];
-  const allLatencies = [];
-  let   totalWall   = 0;
+export async function runVerification({ authedActor, anonActor }) {
+  log.header("VERIFICATION BENCHMARK");
+  log.info(`N values: ${VERIFY_SCALES.join(", ")}`);
 
-  for (let done = 0; done < total; ) {
-    const batchSize = Math.min(concurrency, total - done);
-    const batchT0   = Date.now();
-
-    if (dryRun) {
-      const lats = Array.from({ length: batchSize }, () => gaussian(2100, 200));
-      allLatencies.push(...lats);
-      const wallBatch = Math.max(...lats) + gaussian(30, 10);
-      totalWall += wallBatch;
-      for (let i = 0; i < batchSize; i++) issuedIds.push(nextId("DR"));
-    } else {
-      const promises = Array.from({ length: batchSize }, () => {
-        const id = nextId();
-        issuedIds.push(id);
-        return issueOne(actor, id);
-      });
-      const lats = await Promise.all(promises);
-      allLatencies.push(...lats);
-      totalWall += Date.now() - batchT0;
-    }
-
-    done += batchSize;
-    process.stdout.write(`\r    issued ${Math.min(done, total)}/${total}`);
+  // ── Pre-populate: issue enough certs to cover the largest N ─────────────
+  const maxN    = Math.max(...VERIFY_SCALES);
+  log.sub(`Pre-populating canister with ${maxN.toLocaleString()} certificates ...`);
+  const allIds  = [];
+  const batchSz = 100;
+  for (let i = 0; i < maxN; i += batchSz) {
+    const batch = Array.from({ length: Math.min(batchSz, maxN - i) }, () => nextId("PRE"));
+    await Promise.all(batch.map(id => authedActor.issueCertificate(...makeCertArgs(id))));
+    allIds.push(...batch);
+    process.stdout.write(`\r  Issued ${allIds.length}/${maxN}`);
   }
   console.log();
-  return { issuedIds, allLatencies, totalWall };
-}
+  log.ok(`Pre-population complete: ${allIds.length} certificates in canister`);
 
-// ─── Verify all IDs in one parallel blast ─────────────────────────────────
-
-async function runVerifyParallel(actor, ids, dryRun) {
-  if (dryRun) {
-    const times = ids.map(() => gaussian(140, 25));
-    return { times, totalWall: Math.max(...times) + gaussian(15, 5) };
+  // ── Warm-up ─────────────────────────────────────────────────────────────
+  log.sub("Warm-up queries ...");
+  for (let i = 0; i < WARMUP_CALLS; i++) {
+    await verifyOne(anonActor, allIds[i % allIds.length]);
   }
-  const t0    = Date.now();
-  const times = await Promise.all(ids.map(id => verifyOne(actor, id)));
-  return { times, totalWall: Date.now() - t0 };
-}
+  log.ok("Warm-up complete");
 
-// ─── Main benchmark ────────────────────────────────────────────────────────
+  const seqResults   = [];
+  const concResults  = [];
+  const lookupResults = [];
 
-/**
- * @param {{ authedActor: any, anonActor: any }} actors
- * @param {{ dryRun?: boolean }} opts
- */
-export async function runConcurrency(actors, opts = {}) {
-  const { authedActor, anonActor } = actors;
-  const dryRun = opts.dryRun ?? false;
-  const TOTAL  = CONCURRENCY_TOTAL_CERTS;
-
-  log.header("CONCURRENCY / THROUGHPUT BENCHMARK");
-  log.info(`Mode:           ${dryRun ? "DRY-RUN (synthetic data)" : "LIVE canister"}`);
-  log.info(`Total certs:    ${TOTAL} per concurrency level`);
-  log.info(`Concurrency:    ${CONCURRENCY_LEVELS.join(", ")}`);
-
-  // ── Warm-up ──────────────────────────────────────────────────────────────
-  if (!dryRun) {
-    log.sub("Warm-up");
-    for (let i = 0; i < WARMUP_CALLS; i++) {
-      const id = nextId("WU");
-      await issueOne(authedActor, id);
+  // ── Sequential verification ──────────────────────────────────────────────
+  log.sub("Sequential verification -- one query at a time");
+  for (const N of VERIFY_SCALES) {
+    const sample = allIds.slice(0, N);
+    log.info(`  N = ${N.toLocaleString()} (${REPEAT_PER_N} repeat(s)) ...`);
+    const allTimes = [];
+    for (let rep = 0; rep < REPEAT_PER_N; rep++) {
+      for (const id of sample) {
+        allTimes.push(await verifyOne(anonActor, id));
+      }
     }
-    log.ok("Warm-up complete");
+    const stats = summarise(allTimes);
+    seqResults.push({ n: N, times_ms: allTimes, ...stats });
+    printStats(`Sequential N=${N}`, stats);
   }
 
-  const results = [];
+  // ── Concurrent verification ──────────────────────────────────────────────
+  log.sub("Concurrent verification -- all N queries fired simultaneously");
+  for (const N of VERIFY_SCALES) {
+    const sample = allIds.slice(0, N);
+    log.info(`  N = ${N.toLocaleString()} (${REPEAT_PER_N} repeat(s)) ...`);
+    const repWalls       = [];
+    const repThroughputs = [];
+    let   lastIndividual = [];
 
-  for (const C of CONCURRENCY_LEVELS) {
-    log.sub(`Concurrency = ${C}`);
+    for (let rep = 0; rep < REPEAT_PER_N; rep++) {
+      const t0    = Date.now();
+      const times = await Promise.all(sample.map(id => verifyOne(anonActor, id)));
+      const wall  = Date.now() - t0;
+      repWalls.push(wall);
+      repThroughputs.push(round2((N / wall) * 1000));
+      lastIndividual = times;
+    }
 
-    // ── Issuance ─────────────────────────────────────────────────────────
-    log.info(`Issuing ${TOTAL} certs in batches of ${C} …`);
-    const { issuedIds, allLatencies: issueLats, totalWall: issueWall } =
-      await runIssuanceBatched(authedActor, TOTAL, C, dryRun);
-
-    const issueStats       = summarise(issueLats);
-    const issueThroughput  = throughput(TOTAL, issueWall);
-
-    printStats("Issuance latency distribution (per-call)", issueStats);
-    log.row("total wall-clock (ms)",  round2(issueWall));
-    log.row("throughput (ops/s)",     issueThroughput);
-
-    // ── Verification (full parallel blast) ────────────────────────────────
-    log.info(`Verifying all ${issuedIds.length} certs simultaneously …`);
-    const { times: verifyTimes, totalWall: verifyWall } =
-      await runVerifyParallel(anonActor, issuedIds, dryRun);
-
-    const verifyStats      = summarise(verifyTimes);
-    const verifyThroughput = throughput(issuedIds.length, verifyWall);
-
-    printStats("Verification latency distribution (per-call)", verifyStats);
-    log.row("total wall-clock (ms)",  round2(verifyWall));
-    log.row("throughput (ops/s)",     verifyThroughput);
-
-    results.push({
-      concurrency: C,
-      totalCerts:  TOTAL,
-      issuance: {
-        times_ms:         issueLats,
-        stats:            issueStats,
-        total_ms:         round2(issueWall),
-        throughput_ops_s: issueThroughput,
-      },
-      verification: {
-        times_ms:         verifyTimes,
-        stats:            verifyStats,
-        total_ms:         round2(verifyWall),
-        throughput_ops_s: verifyThroughput,
-      },
+    const wallStats = summarise(repWalls);
+    concResults.push({
+      n:              N,
+      wall_ms:        wallStats,
+      throughput_qps: summarise(repThroughputs),
+      individual_ms:  summarise(lastIndividual),
     });
+    log.ok(`  N=${N.toLocaleString()}: mean wall=${wallStats.mean}ms, ${summarise(repThroughputs).mean} queries/s`);
   }
 
-  // ── Summary table ────────────────────────────────────────────────────────
-  log.header("CONCURRENCY — THROUGHPUT SUMMARY");
-  console.log(
-    "  " +
-    "Concurrency".padEnd(14) +
-    "Issue ops/s".padEnd(16) +
-    "Issue p95(ms)".padEnd(18) +
-    "Verify ops/s".padEnd(16) +
-    "Verify p95(ms)"
-  );
-  for (const r of results) {
-    console.log(
-      "  " +
-      String(r.concurrency).padEnd(14) +
-      String(r.issuance.throughput_ops_s).padEnd(16) +
-      String(r.issuance.stats.p95).padEnd(18) +
-      String(r.verification.throughput_ops_s).padEnd(16) +
-      String(r.verification.stats.p95)
-    );
+  // ── Lookup by studentId / universityName (at max DB size) ───────────────
+  log.sub("Certificate lookup benchmark (at full DB size) ...");
+  {
+    const lookupTimes = [];
+    for (let i = 0; i < 50; i++) {
+      const t0 = Date.now();
+      await anonActor.getCertificatesByStudent(`STU${String(i % maxN).padStart(6, "0")}`);
+      lookupTimes.push(Date.now() - t0);
+    }
+    const stuStats = summarise(lookupTimes);
+    lookupResults.push({ type: "byStudentId", ...stuStats });
+    printStats("Lookup by studentId (50 samples)", stuStats);
+  }
+  {
+    const lookupTimes = [];
+    for (let i = 0; i < 50; i++) {
+      const t0 = Date.now();
+      await anonActor.getCertificatesByUniversity("Benchmark University ICP");
+      lookupTimes.push(Date.now() - t0);
+    }
+    const uniStats = summarise(lookupTimes);
+    lookupResults.push({ type: "byUniversity", ...uniStats });
+    printStats("Lookup by university (50 samples)", uniStats);
   }
 
-  const file = saveResult("concurrency", { results });
-  return { results, file };
+  const payload = {
+    suite:      "verification",
+    ts:         new Date().toISOString(),
+    meta:       SUITE_META,
+    dbSize:     allIds.length,
+    sequential: seqResults,
+    concurrent: concResults,
+    lookup:     lookupResults,
+  };
+
+  const file = saveResult("verification", payload);
+  log.ok(`Verification results saved to: ${file}`);
+  return payload;
 }

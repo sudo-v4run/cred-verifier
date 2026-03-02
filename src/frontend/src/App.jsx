@@ -17,6 +17,15 @@ import UniversityPortal from './components/UniversityPortal';
 import VerificationPortal from './components/VerificationPortal';
 import StudentPortal from './components/StudentPortal';
 
+// Parse a verification link from the URL hash:
+//   #/verify/{univ-slug}/{batch-year}/{cert-id}
+function parseVerifyHash() {
+  const hash = window.location.hash; // e.g. #/verify/mit/2026/2026-MIT-A3B7C2D1
+  const match = hash.match(/^#\/verify\/([^/]+)\/([^/]+)\/(.+)$/);
+  if (match) return decodeURIComponent(match[3]);
+  return null;
+}
+
 const theme = createTheme({
   palette: {
     mode: 'dark',
@@ -272,7 +281,11 @@ const TABS = [
 ];
 
 function App() {
-  const [activeTab, setActiveTab] = useState(0);
+  // If URL is a shared verification link, start on Verify tab and pre-load the cert ID
+  const [initialCertId] = useState(() => parseVerifyHash() ?? '');
+  const [activeTab, setActiveTab] = useState(() =>
+    parseVerifyHash() ? 0 : 0   // always start on Verify tab when link is shared
+  );
 
   return (
     <ThemeProvider theme={theme}>
@@ -382,7 +395,7 @@ function App() {
             borderTop: '2px solid rgba(139,92,246,0.28)',
             boxShadow: '0 8px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02)',
           }}>
-            {activeTab === 0 && <VerificationPortal />}
+            {activeTab === 0 && <VerificationPortal initialCertId={initialCertId} />}
             {activeTab === 1 && <UniversityPortal />}
             {activeTab === 2 && <StudentPortal />}
           </Box>

@@ -1,209 +1,176 @@
 /**
- * finality.js — ICP consensus finality time measurement.
+ * finality.js  --  Concurrent Mixed Workload Benchmark
+ * Exported as: runConcurrent
  *
- * ICP's key differentiator vs other blockchains: ~1-2 second finality
- * (compare: Ethereum checkpoint finality ~768 s / ~12.8 min, Bitcoin ~60 min).
+ * Simulates real-world load where multiple universities are issuing
+ * certificates while verifiers are simultaneously querying them.
  *
- * Reference values used for comparison (not measured here — these are
- * well-documented published specifications):
- *   Ethereum: 2 Casper FFG epochs × 32 slots × 12 s/slot = 768 s
- *             Source: ethereum.org/en/developers/docs/consensus-mechanisms/pos
- *   Bitcoin:  6 confirmations × ~10 min/block = ~60 min
- *             Source: bitcoin.org/en/faq ("6 confirmations")
+ * For C concurrent callers:
+ *   - 30% issue (update calls)  -- universities issuing certificates
+ *   - 70% verify (query calls)  -- employers / institutions verifying
  *
- * When an update call returns from the IC, the state change is already
- * irreversibly committed — there is no "confirmation wait".  The round-trip
- * time of an update call IS the finality time.
+ * Metrics captured per concurrency level C:
+ *   - Total wall-clock time for all operations
+ *   - Effective throughput (mixed ops/s)
+ *   - Separate latency distributions for issuance vs verification
+ *   - Error/timeout rate (measures IC ingress queue behaviour)
  *
- * We issue FINALITY_SAMPLES certificates one-by-one, recording the exact
- * wall-clock milliseconds from the moment the HTTP request is dispatched
- * until the canister response is received.  The distribution of these
- * times directly characterises ICP's finality latency.
+ * Also measures ICP finality time:
+ *   - Time from submitting an issueCertificate call
+ *     to the cert being readable via verifyCertificate
  *
- * Additional measurement: `verifyCertificateWithMetrics` (an *update* call
- * on purpose) to show that non-issuance updates also achieve the same
- * finality guarantee at the same latency.
+ * Result JSON: results/concurrent_<timestamp>.json
  */
 
-import { summarise, throughput, round2, percentile } from "./stats.js";
-import { log, printStats, saveResult }               from "./reporter.js";
-import { FINALITY_SAMPLES, WARMUP_CALLS }            from "./config.js";
+import { summarise, round2 }           from "./stats.js";
+import { log, printStats, saveResult } from "./reporter.js";
+import {
+  CONCURRENCY_LEVELS,
+  WARMUP_CALLS,
+  REPEAT_PER_N,
+  SUITE_META,
+} from "./config.js";
+
+// ── helpers ──────────────────────────────────────────────────────────────────
 
 let _seq = 0;
-function nextId(prefix = "FIN") {
-  return `${prefix}_${Date.now()}_${++_seq}_${Math.random().toString(36).slice(2, 6)}`;
-}
-function certArgs(id) {
-  return [
-    id,
-    "ICP Finality Lab",
-    "https://finality.icp.edu/verify",
-    `FinalityStudent ${_seq}`,
-    `FIN${String(_seq).padStart(6, "0")}`,
-    "principal-finality",
-    "Master of Science",
-    "Blockchain Technology",
-    "2026-06-01",
-    "2026-06-01",
-    3.9,
-    "Summa Cum Laude",
-  ];
-}
+const nextId = (prefix = "CON") =>
+  `${prefix}_${Date.now()}_${++_seq}_${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
 
-function gaussian(mean, sd) {
-  const u = 1 - Math.random();
-  const v = Math.random();
-  return Math.max(800, mean + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v));
-}
+const makeCertArgs = (id, uni = "Benchmark University ICP") => [
+  id, uni,
+  `https://benchmark.icp.app/#/verify/benchmark-university-icp/2026/${id}`,
+  `Student ${_seq}`,
+  `STU${String(_seq).padStart(6, "0")}`,
+  "anonymous",
+  "Bachelor of Science",
+  "Computer Science",
+  "2026-06-01", "2026-06-01",
+  3.5, "Magna Cum Laude",
+];
 
-// ─── Main benchmark ────────────────────────────────────────────────────────
+// ── main benchmark ────────────────────────────────────────────────────────────
 
-/**
- * @param {{ authedActor: any, anonActor: any }} actors
- * @param {{ dryRun?: boolean }} opts
- */
-export async function runFinality(actors, opts = {}) {
-  const { authedActor, anonActor } = actors;
-  const dryRun = opts.dryRun ?? false;
+export async function runConcurrent({ authedActor, anonActor }) {
+  log.header("CONCURRENT MIXED WORKLOAD BENCHMARK");
+  log.info(`Concurrency levels: ${CONCURRENCY_LEVELS.join(", ")}`);
+  log.info("Mix: 30% isssuance (update) + 70% verification (query)");
 
-  log.header("FINALITY TIME BENCHMARK");
-  log.info(`Mode:    ${dryRun ? "DRY-RUN (synthetic data)" : "LIVE canister"}`);
-  log.info(`Samples: ${FINALITY_SAMPLES}`);
-  log.info("Measuring: time from HTTP call dispatch to canister response");
-  log.nl();
-
-  // ── 1. Warm-up ────────────────────────────────────────────────────────────
-  if (!dryRun) {
-    log.sub("Warm-up");
-    for (let i = 0; i < WARMUP_CALLS; i++) {
-      await authedActor.issueCertificate(...certArgs(nextId("WU")));
-    }
-    log.ok("Warm-up complete");
-  }
-
-  // ── 2. Issuance finality ──────────────────────────────────────────────────
-  log.sub(`Issuance finality (${FINALITY_SAMPLES} samples)`);
-  const issuanceTimes = [];
-  const issuedIds     = [];
-
-  for (let i = 0; i < FINALITY_SAMPLES; i++) {
-    const id = nextId();
-    let ms;
-    if (dryRun) {
-      ms = gaussian(2050, 180);
-    } else {
-      const t0 = Date.now();
-      await authedActor.issueCertificate(...certArgs(id));
-      ms = Date.now() - t0;
-    }
-    issuanceTimes.push(ms);
-    issuedIds.push(id);
-    process.stdout.write(`\r    sample ${i + 1}/${FINALITY_SAMPLES}  (${ms.toFixed(0)} ms)`);
+  // ── Seed some existing certs to verify ──────────────────────────────────
+  log.sub("Seeding 500 certificates for verifiers to query ...");
+  const seedIds = [];
+  const seedBatch = 50;
+  for (let i = 0; i < 500; i += seedBatch) {
+    const ids = Array.from({ length: seedBatch }, () => nextId("SEED"));
+    await Promise.all(ids.map(id => authedActor.issueCertificate(...makeCertArgs(id))));
+    seedIds.push(...ids);
+    process.stdout.write(`\r  Seeded ${seedIds.length}/500`);
   }
   console.log();
+  log.ok("Seed complete");
 
-  const issStats = summarise(issuanceTimes);
-  printStats("Issuance finality distribution", issStats);
+  // ── Warm-up ─────────────────────────────────────────────────────────────
+  log.sub("Warm-up ...");
+  for (let i = 0; i < WARMUP_CALLS; i++) {
+    await anonActor.verifyCertificate(seedIds[i % seedIds.length]);
+  }
+  log.ok("Warm-up complete");
 
-  // ── 3. Update-call verification finality ─────────────────────────────────
-  // verifyCertificateWithMetrics is an update call — intentionally — so we
-  // can measure that non-mutating update calls have the same finality time.
-  log.sub(`Update-call verification finality (${issuedIds.length} samples)`);
-  const updateVerifyTimes = [];
+  const concResults  = [];
+  const finalityData = [];
 
-  for (let i = 0; i < issuedIds.length; i++) {
-    let ms;
-    if (dryRun) {
-      ms = gaussian(2020, 170);
-    } else {
-      const t0 = Date.now();
-      await authedActor.verifyCertificateWithMetrics(issuedIds[i]);
-      ms = Date.now() - t0;
+  // ── ICP finality measurement ─────────────────────────────────────────────
+  log.sub("ICP finality measurement (50 samples) ...");
+  log.info("  Measures: submit issueCertificate -> cert readable via verifyCertificate");
+  for (let i = 0; i < 50; i++) {
+    const id = nextId("FIN");
+    const t0 = Date.now();
+    await authedActor.issueCertificate(...makeCertArgs(id));
+    // Poll until the cert is verifiable (confirm finality)
+    let readable = false;
+    while (!readable) {
+      const result = await anonActor.verifyCertificate(id);
+      if (result.is_valid) {
+        readable = true;
+      } else {
+        await new Promise(r => setTimeout(r, 100));
+      }
     }
-    updateVerifyTimes.push(ms);
-    process.stdout.write(`\r    sample ${i + 1}/${issuedIds.length}  (${ms.toFixed(0)} ms)`);
+    const finalityMs = Date.now() - t0;
+    finalityData.push(finalityMs);
+    process.stdout.write(`\r  sample ${i + 1}/50: ${finalityMs}ms`);
   }
   console.log();
+  const finalityStats = summarise(finalityData);
+  printStats("ICP Finality (submit->readable)", finalityStats);
 
-  const uvStats = summarise(updateVerifyTimes);
-  printStats("Update-call verification finality distribution", uvStats);
+  // ── Concurrent mixed workload ────────────────────────────────────────────
+  for (const C of CONCURRENCY_LEVELS) {
+    log.sub(`Concurrency C = ${C} simultaneous callers`);
 
-  // ── 4. Query-call latency (for contrast) ──────────────────────────────────
-  log.sub(`Query-call verification latency (${issuedIds.length} samples)`);
-  const queryTimes = [];
+    const issueCount = Math.ceil(C * 0.30);   // 30% issuance
+    const verifyCount = C - issueCount;        // 70% verification
+    log.info(`  ${issueCount} issuance + ${verifyCount} verification calls`);
 
-  for (let i = 0; i < issuedIds.length; i++) {
-    let ms;
-    if (dryRun) {
-      ms = Math.max(10, gaussian(140, 25));
-    } else {
+    const repResults = [];
+    for (let rep = 0; rep < REPEAT_PER_N; rep++) {
+      const issueIds  = Array.from({ length: issueCount }, () => nextId("MIX"));
+      const verifyIds = Array.from({ length: verifyCount }, () =>
+        seedIds[Math.floor(Math.random() * seedIds.length)]
+      );
+
       const t0 = Date.now();
-      await anonActor.verifyCertificate(issuedIds[i]);
-      ms = Date.now() - t0;
+
+      const [issueTimes, verifyTimes] = await Promise.all([
+        Promise.all(issueIds.map(async id => {
+          const t = Date.now();
+          try { await authedActor.issueCertificate(...makeCertArgs(id)); return Date.now() - t; }
+          catch { return -1; }
+        })),
+        Promise.all(verifyIds.map(async id => {
+          const t = Date.now();
+          try { await anonActor.verifyCertificate(id); return Date.now() - t; }
+          catch { return -1; }
+        })),
+      ]);
+
+      const wall        = Date.now() - t0;
+      const totalOps    = C;
+      const errors      = [...issueTimes, ...verifyTimes].filter(t => t < 0).length;
+      const successOps  = totalOps - errors;
+
+      repResults.push({
+        wall_ms:       wall,
+        throughput_ops: round2((successOps / wall) * 1000),
+        issuance_ms:   summarise(issueTimes.filter(t => t >= 0)),
+        verification_ms: summarise(verifyTimes.filter(t => t >= 0)),
+        error_count:   errors,
+        error_rate:    round2(errors / totalOps),
+      });
     }
-    queryTimes.push(ms);
-    process.stdout.write(`\r    sample ${i + 1}/${issuedIds.length}  (${ms.toFixed(0)} ms)`);
+
+    const walls      = repResults.map(r => r.wall_ms);
+    const throughputs = repResults.map(r => r.throughput_ops);
+    concResults.push({
+      c:               C,
+      issueCount,
+      verifyCount,
+      reps:            repResults,
+      wall_ms:         summarise(walls),
+      throughput_ops:  summarise(throughputs),
+    });
+    log.ok(`  C=${C}: mean wall=${summarise(walls).mean}ms, ${summarise(throughputs).mean} ops/s`);
   }
-  console.log();
 
-  const qStats = summarise(queryTimes);
-  printStats("Query-call verification latency distribution", qStats);
+  const payload = {
+    suite:       "concurrent",
+    ts:          new Date().toISOString(),
+    meta:        SUITE_META,
+    finality_ms: { samples: finalityData, ...finalityStats },
+    concurrent:  concResults,
+  };
 
-  // ── 5. Key ICP comparisons ────────────────────────────────────────────────
-  log.header("FINALITY — KEY METRICS FOR RESEARCH PAPER");
-  log.row("ICP update call (finality) p50",    `${issStats.p50} ms`);
-  log.row("ICP update call (finality) p95",    `${issStats.p95} ms`);
-  log.row("ICP update call (finality) p99",    `${issStats.p99} ms`);
-  log.row("ICP query call p50",                `${qStats.p50} ms`);
-  log.row("ICP query call p95",                `${qStats.p95} ms`);
-  log.row("Speedup: query vs update (p50)",    `${round2(issStats.p50 / qStats.p50)}×`);
-  log.row("Ethereum checkpoint finality [ref]", "~768,000 ms (~12.8 min, 2 Casper FFG epochs)");
-  log.row("Bitcoin 6-conf finality [ref]",      "~3,600,000 ms (~60 min)");
-  log.row("ICP vs Ethereum speedup (p50)",       `${Math.round(768000 / issStats.p50)}×`);
-  log.row("Source: Ethereum",  "ethereum.org/en/developers/docs/consensus-mechanisms/pos");
-  log.row("Source: Bitcoin",   "bitcoin.org (6 confirmations ≈ 60 min)");
-  log.nl();
-
-  // CDF buckets for the finality distribution graph
-  const allSamples = [...issuanceTimes, ...updateVerifyTimes];
-  const cdfBuckets = buildCDF(allSamples);
-
-  const file = saveResult("finality", {
-    samples:         FINALITY_SAMPLES,
-    issuanceFinality: {
-      times_ms: issuanceTimes,
-      stats:    issStats,
-    },
-    updateVerifyFinality: {
-      times_ms: updateVerifyTimes,
-      stats:    uvStats,
-    },
-    queryLatency: {
-      times_ms: queryTimes,
-      stats:    qStats,
-    },
-    cdfBuckets,
-    blockchainComparison: {
-      ICP_update_p50_ms:    issStats.p50,
-      ICP_query_p50_ms:     qStats.p50,
-      // Ethereum checkpoint finality: 2 epochs × 32 slots × 12 s/slot = 768 s
-      // Source: ethereum.org/en/developers/docs/consensus-mechanisms/pos
-      Ethereum_finality_ms: 768_000,
-      Ethereum_block_time_ms: 12_000,   // single slot — NOT finality
-      // Bitcoin 6-confirmation convention: 6 × ~10 min = ~60 min
-      // Source: bitcoin.org/en/faq
-      Bitcoin_finality_ms:  3_600_000,
-    },
-  });
-
-  return { file, issStats, uvStats, qStats };
-}
-
-/** Build a CDF as [{x_ms, cdf}] for plotting */
-function buildCDF(times) {
-  const s = times.slice().sort((a, b) => a - b);
-  return s.map((v, i) => ({
-    x_ms: round2(v),
-    cdf:  round2((i + 1) / s.length),
-  }));
+  const file = saveResult("concurrent", payload);
+  log.ok(`Concurrent results saved to: ${file}`);
+  return payload;
 }

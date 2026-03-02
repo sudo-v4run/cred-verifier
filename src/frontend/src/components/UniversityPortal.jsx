@@ -20,6 +20,13 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import SendIcon from '@mui/icons-material/Send';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
+// Convert an institution name to a URL-safe slug
+const toSlug = (name) =>
+  name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
 const SectionLabel = ({ children }) => (
   <Typography sx={{
     fontSize: '0.76rem', fontWeight: 700, letterSpacing: '0.08em',
@@ -48,9 +55,10 @@ function UniversityPortal() {
   const [universityName, setUniversityName] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [issuedCertUrl, setIssuedCertUrl] = useState('');
 
   const [certificateForm, setCertificateForm] = useState({
-    certificateId: '', universityName: '', verificationUrl: '',
+    certificateId: '', universityName: '',
     recipientName: '', studentId: '', recipientPrincipal: '',
     degreeType: '', major: '', graduationDate: '', issueDate: '',
     gpa: '', honors: '',
@@ -113,10 +121,20 @@ function UniversityPortal() {
     e.preventDefault();
     setLoading(true);
     setMessage({ type: '', text: '' });
+    setIssuedCertUrl('');
     try {
+      // Auto-compute a canonical verification URL — no custom URL option
+      const univSlug = toSlug(certificateForm.universityName);
+      const batchYear = certificateForm.graduationDate
+        ? certificateForm.graduationDate.split('-')[0]
+        : new Date().getFullYear().toString();
+      const certId = certificateForm.certificateId;
+      const verificationUrl =
+        `${window.location.origin}/#/verify/${univSlug}/${batchYear}/${encodeURIComponent(certId)}`;
+
       const result = await credential_backend.issueCertificate(
-        certificateForm.certificateId, certificateForm.universityName,
-        certificateForm.verificationUrl || window.location.origin,
+        certId, certificateForm.universityName,
+        verificationUrl,
         certificateForm.recipientName, certificateForm.studentId,
         certificateForm.recipientPrincipal || 'anonymous',
         certificateForm.degreeType, certificateForm.major,
@@ -126,7 +144,8 @@ function UniversityPortal() {
       if (result.includes('Error')) {
         setMessage({ type: 'error', text: result });
       } else {
-        setMessage({ type: 'success', text: `Issued — ID: ${result}` });
+        setIssuedCertUrl(verificationUrl);
+        setMessage({ type: 'success', text: `Certificate issued on-chain — ID: ${result}` });
         setCertificateForm(prev => ({
           ...prev,
           certificateId: '', recipientName: '', studentId: '',
@@ -143,8 +162,16 @@ function UniversityPortal() {
 
   const generateCertificateId = () => {
     const year = new Date().getFullYear();
-    const random = Math.random().toString(36).substring(2, 10).toUpperCase();
-    setCertificateForm(prev => ({ ...prev, certificateId: `CERT-${year}-${random}` }));
+    // Include a short slug from the university name so IDs are human-readable
+    const slug = toSlug(universityName)
+      .split('-')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(w => w.slice(0, 3).toUpperCase())
+      .join('-');
+    const random = Math.random().toString(36).substring(2, 9).toUpperCase();
+    const id = slug ? `${year}-${slug}-${random}` : `${year}-${random}`;
+    setCertificateForm(prev => ({ ...prev, certificateId: id }));
   };
 
   return (
@@ -273,7 +300,7 @@ function UniversityPortal() {
               Institution
             </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <Box>
                   <SectionLabel>University Name *</SectionLabel>
                   <TextField
@@ -296,9 +323,6 @@ function UniversityPortal() {
                     }}
                   />
                 </Box>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Field name="verificationUrl" label="Verification URL" value={certificateForm.verificationUrl} onChange={handleInputChange} placeholder="https://ic0.app/…" />
               </Grid>
             </Grid>
           </Box>
@@ -389,10 +413,57 @@ function UniversityPortal() {
             </Grid>
           </Box>
 
-          {/* ── Submit ─────────────────────────────────────── */}
+          {/* ── Result ─────────────────────────────────────── */}
           {message.text && (
             <Alert severity={message.type} sx={{ mb: 2 }}>{message.text}</Alert>
           )}
+
+          {/* Shareable verification link — shown after successful issuance */}
+          {issuedCertUrl && (
+            <Box sx={{
+              mb: 2, p: 2, borderRadius: 0,
+              background: 'rgba(16,185,129,0.07)',
+              border: '1px solid rgba(16,185,129,0.18)',
+              borderLeft: '3px solid rgba(16,185,129,0.5)',
+            }}>
+              <Typography sx={{ fontSize: '0.76rem', fontWeight: 700, color: '#34d399', mb: 0.75, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                Shareable Verification Link
+              </Typography>
+              <Typography sx={{ fontSize: '0.73rem', color: '#94a3b8', mb: 1.25 }}>
+                Share this link with anyone who needs to verify this certificate. Opening it auto-verifies instantly.
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <TextField
+                  fullWidth size="small"
+                  value={issuedCertUrl}
+                  InputProps={{ readOnly: true }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      fontFamily: '"JetBrains Mono","Fira Code",monospace',
+                      fontSize: '0.72rem',
+                      background: 'rgba(0,0,0,0.3)',
+                      '& input': { color: '#6ee7b7' },
+                      '& fieldset': { borderColor: 'rgba(16,185,129,0.25)' },
+                    },
+                  }}
+                />
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => navigator.clipboard.writeText(issuedCertUrl)}
+                  sx={{
+                    minWidth: 64, height: 40, flexShrink: 0,
+                    borderColor: 'rgba(16,185,129,0.4)',
+                    color: '#34d399',
+                    '&:hover': { borderColor: '#34d399', background: 'rgba(16,185,129,0.1)' },
+                  }}
+                >
+                  Copy
+                </Button>
+              </Box>
+            </Box>
+          )}
+
           <Button
             fullWidth type="submit" variant="contained" disabled={loading}
             startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <SendIcon sx={{ fontSize: 17 }} />}
