@@ -3,3 +3,5 @@ numpy>=1.24
 scipy>=1.11
 seaborn>=0.13
 pandas>=2.0
+plotly>=5.18       # optional — for interactive HTML dashboard
+kaleido>=0.2       # optional — for Plotly static image export

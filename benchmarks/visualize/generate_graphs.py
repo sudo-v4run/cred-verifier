@@ -1,890 +1,698 @@
 #!/usr/bin/env python3
 """
-generate_graphs.py — Publication-quality figures for the ICP credential
-verification research paper.
+generate_graphs.py
+==================
+Research-paper-quality visualisations for the ICP Academic Credential
+Verification mainnet benchmark results.
 
-Reads the most-recent JSON result files produced by the Node.js benchmark
-runner (benchmarks/results/) and generates:
-
-  Fig 1  — Latency comparison:  query call vs update call (bar + error bars)
-  Fig 2  — Scalability — issuance: p50 latency vs N (sequential & parallel)
-  Fig 3  — Scalability — verification: p50 latency vs N
-  Fig 4  — Throughput vs concurrency level (issuance + verification)
-  Fig 5  — Finality CDF: ICP vs Ethereum vs Bitcoin
-  Fig 6  — Finality histogram + KDE (ICP update calls)
-  Fig 7  — Merkle proof time vs tree size (O(log N) overlay)
-  Fig 8  — Concurrent throughput: stacked area showing scalability claim
-
-Also generates:
-  • dashboard.html   — Interactive Chart.js dashboard (all 8 figures)
-  • summary_table.tex — LaTeX table for the paper
+Run after executing: node benchmarks/run.js
 
 Usage:
-  pip install -r requirements.txt
-  python3 generate_graphs.py [--results-dir ../results] [--out-dir ./figures]
+    cd benchmarks/visualize
+    pip install -r requirements.txt
+    python3 generate_graphs.py
 
-If no real data is found in results/, synthetic data matching expected ICP
-characteristics is used so the full output can be previewed offline.
+Outputs (in ./figures/):
+    Fig 01 — issuance_latency.pdf/.png
+    Fig 02 — verification_latency.pdf/.png
+    Fig 03 — throughput_comparison.pdf/.png
+    Fig 04 — concurrent_users.pdf/.png
+    Fig 05 — latency_cdf.pdf/.png
+    Fig 06 — merkle_growth.pdf/.png
+    Fig 07 — latency_boxplots.pdf/.png
+    Fig 08 — throughput_over_time.pdf/.png
+    Fig 09 — burst_error_rate.pdf/.png
+    Fig 10 — summary_dashboard.pdf/.png
+    dashboard.html    — interactive Plotly dashboard
+    summary_table.tex — LaTeX table for the paper
 """
 
-import argparse
-import glob
-import json
-import math
-import os
-import sys
-import textwrap
-from datetime import datetime, timezone
+import json, glob, os, sys
 from pathlib import Path
+from datetime import datetime
 
-import matplotlib
-matplotlib.use("Agg")               # headless rendering
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 import numpy as np
-from scipy.stats import gaussian_kde
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+from matplotlib.gridspec import GridSpec
+from scipy import stats as scipy_stats
 
-# ─── Setup ─────────────────────────────────────────────────────────────────
+# ── optional HTML dashboard ──────────────────────────────────────────────────
+try:
+    import plotly.graph_objects as go
+    import plotly.subplots as psp
+    HAS_PLOTLY = True
+except ImportError:
+    HAS_PLOTLY = False
 
-SCRIPT_DIR   = Path(__file__).parent
-DEFAULT_RES  = SCRIPT_DIR / ".." / "results"
-DEFAULT_OUT  = SCRIPT_DIR / "figures"
+# ── paths ─────────────────────────────────────────────────────────────────────
+HERE       = Path(__file__).parent
+RESULTS_DIR = HERE.parent / "results"
+FIGURES_DIR = HERE / "figures"
+FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
-# Publication style
-plt.rcParams.update({
-    "font.family":       "serif",
-    "font.size":         11,
-    "axes.titlesize":    13,
-    "axes.labelsize":    12,
-    "xtick.labelsize":   10,
-    "ytick.labelsize":   10,
-    "legend.fontsize":   10,
-    "figure.dpi":        150,
-    "savefig.dpi":       300,
-    "savefig.bbox":      "tight",
+# ── style ─────────────────────────────────────────────────────────────────────
+PAPER_STYLE = {
+    "figure.facecolor":  "white",
+    "axes.facecolor":    "#f8fafc",
     "axes.grid":         True,
-    "grid.alpha":        0.3,
-    "lines.linewidth":   2.0,
-    "lines.markersize":  6,
-})
-
-PALETTE = {
-    "icp_update": "#2563eb",
-    "icp_query":  "#16a34a",
-    "seq":        "#9333ea",
-    "par":        "#ea580c",
-    "eth":        "#dc2626",
-    "btc":        "#b45309",
-    "shade":      "#e0f2fe",
+    "grid.color":        "#e2e8f0",
+    "grid.linewidth":    0.6,
+    "axes.spines.top":   False,
+    "axes.spines.right": False,
+    "axes.labelsize":    11,
+    "axes.titlesize":    12,
+    "axes.titleweight":  "bold",
+    "xtick.labelsize":   9,
+    "ytick.labelsize":   9,
+    "legend.fontsize":   9,
+    "legend.framealpha": 0.8,
+    "font.family":       "sans-serif",
+    "font.size":         10,
+    "lines.linewidth":   2,
+    "lines.markersize":  7,
 }
+plt.rcParams.update(PAPER_STYLE)
 
-# ─── Published reference values for blockchain comparison ────────────────────
-# These are NOT measured — they are hardcoded from publicly documented specs
-# and must be clearly labelled as such in every figure and table.
-#
-# Ethereum: checkpoint finality = 2 Casper FFG epochs
-#           = 2 epochs × 32 slots/epoch × 12 s/slot = 768 s
-#   Source: https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/gasper/
-#   Note:  12 s is the *block time* (single slot), NOT finality.
-#
-# Bitcoin: 6-confirmation convention ≈ 6 × ~10 min = ~60 min
-#   Source: https://bitcoin.org/en/faq#how-long-does-it-take-for-a-bitcoin-transaction-to-be-confirmed
-REFERENCE = {
-    "ETH_finality_ms":   768_000,    # 768 s — Casper FFG checkpoint (2 epochs)
-    "ETH_block_time_ms":  12_000,    # 12 s  — single slot (NOT finality)
-    "BTC_finality_ms":  3_600_000,   # 60 min — 6-confirmation convention
-    "ETH_source": "ethereum.org — Gasper consensus (Casper FFG + LMD-GHOST)",
-    "BTC_source": "bitcoin.org — 6-confirmation convention (~60 min)",
+COLORS = {
+    "seq":   "#7c3aed",
+    "par":   "#2563eb",
+    "ver":   "#0891b2",
+    "con":   "#059669",
+    "burst": "#dc2626",
+    "tree":  "#ea580c",
+    "mix":   "#7c3aed",
 }
+MARKERS = ["o", "s", "^", "D", "v", "P"]
 
-# ─── Data loading ────────────────────────────────────────────────────────────
+# ── helpers ───────────────────────────────────────────────────────────────────
 
-def latest_file(results_dir: Path, suite: str):
-    pattern = str(results_dir / f"{suite}_*.json")
-    files   = sorted(glob.glob(pattern))
-    return files[-1] if files else None
+def load_latest(pattern):
+    files = sorted(glob.glob(str(RESULTS_DIR / pattern)))
+    if not files:
+        return None
+    with open(files[-1]) as f:
+        return json.load(f)
 
-
-def load_suite(results_dir: Path, suite: str):
-    path = latest_file(results_dir, suite)
-    if path:
-        print(f"  ✓ Loaded {suite}: {os.path.basename(path)}")
-        with open(path) as f:
-            return json.load(f)
-    print(f"  ⚠  No {suite} results — using synthetic data")
-    return None
-
-
-# ─── Synthetic data (offline preview) ───────────────────────────────────────
-
-def rng_gauss(mu, sigma, n, floor=10):
-    rng = np.random.default_rng(42)
-    return np.maximum(floor, rng.normal(mu, sigma, n)).tolist()
-
-def make_stats(times):
-    a = np.array(times)
-    return {
-        "samples": len(times),
-        "min":     round(float(a.min()), 2),
-        "max":     round(float(a.max()), 2),
-        "mean":    round(float(a.mean()), 2),
-        "stddev":  round(float(a.std()), 2),
-        "p50":     round(float(np.percentile(a, 50)), 2),
-        "p75":     round(float(np.percentile(a, 75)), 2),
-        "p95":     round(float(np.percentile(a, 95)), 2),
-        "p99":     round(float(np.percentile(a, 99)), 2),
-    }
-
-def throughput(N, total_ms):
-    return round(N / total_ms * 1000, 2) if total_ms else 0
-
-
-def synthetic_scalability():
-    results = []
-    for N in [1, 10, 50, 100]:
-        seq_t   = rng_gauss(2100, 190, N, floor=900)
-        par_t   = rng_gauss(2200, 220, N, floor=900)
-        par_tot = max(par_t) + np.random.normal(60, 15)
-        vseq_t  = rng_gauss(140, 22, N * 2, floor=30)
-        vpar_t  = rng_gauss(145, 25, N * 2, floor=30)
-        vpar_tot= max(vpar_t) + 15
-        results.append({
-            "N": N,
-            "totalCertsIssued": N * 2,
-            "sequentialIssuance":    {"times_ms": seq_t,  "stats": make_stats(seq_t),
-                                      "throughput_ops_s": throughput(N, sum(seq_t))},
-            "parallelIssuance":      {"times_ms": par_t,  "stats": make_stats(par_t),
-                                      "throughput_ops_s": throughput(N, par_tot),
-                                      "total_ms": round(par_tot, 2)},
-            "sequentialVerification":{"times_ms": vseq_t, "stats": make_stats(vseq_t)},
-            "parallelVerification":  {"times_ms": vpar_t, "stats": make_stats(vpar_t),
-                                      "throughput_ops_s": throughput(N * 2, vpar_tot),
-                                      "total_ms": round(vpar_tot, 2)},
-            "serverMerkleProofUs":   round(50 * math.log2(max(2, N * 2)) + 15, 2),
-        })
-    return {"results": results}
-
-
-def synthetic_concurrency():
-    levels  = [1, 2, 5, 10, 20, 50]
-    TOTAL   = 50
-    results = []
-    for C in levels:
-        factor    = 1 + 0.7 * math.log2(C)
-        iss_wall  = 2200 * TOTAL / C / factor + np.random.normal(0, 100)
-        ver_wall  = 145 * TOTAL / C / (factor * 1.2) + np.random.normal(0, 10)
-        iss_times = rng_gauss(2100, 200, TOTAL, floor=900)
-        ver_times = rng_gauss(142, 22, TOTAL, floor=30)
-        results.append({
-            "concurrency": C,
-            "totalCerts":  TOTAL,
-            "issuance":    {"times_ms": iss_times, "stats": make_stats(iss_times),
-                            "total_ms": round(iss_wall, 2),
-                            "throughput_ops_s": throughput(TOTAL, iss_wall)},
-            "verification":{"times_ms": ver_times, "stats": make_stats(ver_times),
-                            "total_ms": round(ver_wall, 2),
-                            "throughput_ops_s": throughput(TOTAL, ver_wall)},
-        })
-    return {"results": results}
-
-
-def synthetic_finality():
-    iss_t = rng_gauss(2050, 175, 25, floor=900)
-    upd_t = rng_gauss(2020, 165, 25, floor=900)
-    qry_t = rng_gauss(138, 24,  25, floor=30)
-    all_t = iss_t + upd_t
-    cdf   = sorted(all_t)
-    n     = len(cdf)
-    return {
-        "samples": 25,
-        "issuanceFinality":     {"times_ms": iss_t, "stats": make_stats(iss_t)},
-        "updateVerifyFinality": {"times_ms": upd_t, "stats": make_stats(upd_t)},
-        "queryLatency":         {"times_ms": qry_t, "stats": make_stats(qry_t)},
-        "cdfBuckets":           [{"x_ms": round(v, 2), "cdf": round((i+1)/n, 4)}
-                                  for i, v in enumerate(cdf)],
-        "blockchainComparison": {
-            "ICP_update_p50_ms":    make_stats(iss_t)["p50"],
-            "ICP_query_p50_ms":     make_stats(qry_t)["p50"],
-            "Ethereum_finality_ms": REFERENCE["ETH_finality_ms"],
-            "Ethereum_block_time_ms": REFERENCE["ETH_block_time_ms"],
-            "Bitcoin_finality_ms":  REFERENCE["BTC_finality_ms"],
-        },
-    }
-
-
-# ─── Figure generators ───────────────────────────────────────────────────────
-
-def fig1_latency_comparison(finality, out_dir):
-    """Bar chart: query call vs update call — p50 / p95 / p99."""
-    f_stats = finality["issuanceFinality"]["stats"]
-    q_stats = finality["queryLatency"]["stats"]
-
-    labels = ["p50", "p95", "p99"]
-    upd    = [f_stats[p] for p in labels]
-    qry    = [q_stats[p] for p in labels]
-
-    x   = np.arange(len(labels))
-    w   = 0.35
-
-    fig, ax = plt.subplots(figsize=(7, 4.5))
-    b1 = ax.bar(x - w/2, upd, w, label="Update call\n(finality incl.)",
-                color=PALETTE["icp_update"], edgecolor="white", linewidth=0.5)
-    b2 = ax.bar(x + w/2, qry, w, label="Query call\n(no finality needed)",
-                color=PALETTE["icp_query"],  edgecolor="white", linewidth=0.5)
-
-    ax.bar_label(b1, fmt="%.0f ms", padding=3, fontsize=9)
-    ax.bar_label(b2, fmt="%.0f ms", padding=3, fontsize=9)
-
-    ax.set_xticks(x)
-    ax.set_xticklabels(["p50 (median)", "p95", "p99"])
-    ax.set_ylabel("Latency (ms)")
-    ax.set_title("Fig 1 — ICP Update Call vs Query Call Latency\n"
-                 "(Update call = finality included; Query call = instant read)")
-    ax.legend()
-    ax.set_ylim(0, max(upd) * 1.25)
-
-    # Annotation
-    ax.annotate(f"Query is {upd[0]/qry[0]:.0f}× faster at p50",
-                xy=(x[0] + w/2, qry[0]), xytext=(x[0] + w/2 + 0.5, qry[0] * 5),
-                arrowprops=dict(arrowstyle="->", color="grey"),
-                fontsize=9, color="grey")
-
-    plt.tight_layout()
-    _save(fig, out_dir, "fig1_latency_comparison")
-
-
-def fig2_scalability_issuance(scale, out_dir):
-    """Line chart: issuance p50 latency vs N (sequential vs parallel)."""
-    rows     = scale["results"]
-    Ns       = [r["N"] for r in rows]
-    seq_p50  = [r["sequentialIssuance"]["stats"]["p50"] for r in rows]
-    par_p50  = [r["parallelIssuance"]["stats"]["p50"]   for r in rows]
-    par_tput = [r["parallelIssuance"]["throughput_ops_s"] for r in rows]
-
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.5))
-
-    # Left: per-call latency
-    ax1.plot(Ns, seq_p50, "o-", color=PALETTE["seq"], label="Sequential (per-call p50)")
-    ax1.plot(Ns, par_p50, "s-", color=PALETTE["par"], label="Parallel (per-call p50)")
-    ax1.set_xlabel("Number of certificates (N)")
-    ax1.set_ylabel("Latency per call (ms)")
-    ax1.set_title("Issuance Latency vs N")
-    ax1.legend()
-    ax1.set_xscale("log")
-
-    # Right: parallel throughput
-    ax2.plot(Ns, par_tput, "D-", color=PALETTE["icp_update"], label="Parallel issuance")
-    ax2.fill_between(Ns, 0, par_tput, alpha=0.15, color=PALETTE["icp_update"])
-    ax2.set_xlabel("Number of certificates (N)")
-    ax2.set_ylabel("Throughput (ops/sec)")
-    ax2.set_title("Issuance Throughput vs N")
-    ax2.set_xscale("log")
-    ax2.legend()
-
-    fig.suptitle("Fig 2 — Issuance Scalability on ICP", fontsize=13, fontweight="bold")
-    plt.tight_layout()
-    _save(fig, out_dir, "fig2_scalability_issuance")
-
-
-def fig3_scalability_verification(scale, out_dir):
-    """Line chart: verification p50 latency vs N — shows O(log N) behaviour."""
-    rows      = scale["results"]
-    Ns        = [r["N"] for r in rows]
-    seq_p50   = [r["sequentialVerification"]["stats"]["p50"] for r in rows]
-    par_tput  = [r["parallelVerification"]["throughput_ops_s"] for r in rows]
-    merkle_us = [r.get("serverMerkleProofUs") for r in rows]
-    valid_mk  = [(n, m) for n, m in zip(Ns, merkle_us) if m is not None]
-
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4.5))
-
-    # Left: client-side query latency
-    axes[0].plot(Ns, seq_p50, "o-", color=PALETTE["icp_query"], label="Query p50")
-    axes[0].axhline(y=np.mean(seq_p50), color="grey", linestyle="--",
-                    linewidth=1, label=f"Mean ≈ {np.mean(seq_p50):.0f} ms")
-    axes[0].set_xlabel("Tree size N")
-    axes[0].set_ylabel("Client latency (ms)")
-    axes[0].set_title("Query Latency Stability")
-    axes[0].legend()
-    axes[0].set_xscale("log")
-
-    # Middle: throughput
-    axes[1].plot(Ns, par_tput, "s-", color=PALETTE["par"], label="Parallel verify")
-    axes[1].fill_between(Ns, 0, par_tput, alpha=0.15, color=PALETTE["par"])
-    axes[1].set_xlabel("Tree size N")
-    axes[1].set_ylabel("Throughput (ops/sec)")
-    axes[1].set_title("Verification Throughput vs N")
-    axes[1].set_xscale("log")
-
-    # Right: Merkle proof time (server-side, O(log N))
-    if valid_mk:
-        mk_ns = [v[0] for v in valid_mk]
-        mk_us = [v[1] for v in valid_mk]
-        axes[2].scatter(mk_ns, mk_us, color=PALETTE["icp_update"], zorder=5,
-                        label="Measured server time")
-        # Overlay O(log N) fit
-        fit_ns = np.linspace(min(mk_ns), max(mk_ns), 200)
-        # Fit: a * log2(N) + b
-        log_ns = np.log2(np.maximum(mk_ns, 2))
-        a, b   = np.polyfit(log_ns, mk_us, 1)
-        axes[2].plot(fit_ns, a * np.log2(np.maximum(fit_ns, 2)) + b,
-                     "--", color="grey", label=f"O(log N) fit: {a:.1f}·log₂N + {b:.1f}")
-    axes[2].set_xlabel("Tree size N (# certs)")
-    axes[2].set_ylabel("Server-side proof time (µs)")
-    axes[2].set_title("Merkle Proof: O(log N) Scaling")
-    axes[2].legend()
-    axes[2].set_xscale("log")
-
-    fig.suptitle("Fig 3 — Verification Scalability (O(log N) Merkle Proofs)", fontsize=13, fontweight="bold")
-    plt.tight_layout()
-    _save(fig, out_dir, "fig3_scalability_verification")
-
-
-def fig4_throughput_concurrency(conc, out_dir):
-    """Line chart: issuance + verification throughput vs concurrency level."""
-    rows       = conc["results"]
-    levels     = [r["concurrency"]                    for r in rows]
-    iss_tput   = [r["issuance"]["throughput_ops_s"]   for r in rows]
-    ver_tput   = [r["verification"]["throughput_ops_s"] for r in rows]
-    iss_p95    = [r["issuance"]["stats"]["p95"]        for r in rows]
-
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.5))
-
-    # Left: throughput
-    ax1.plot(levels, iss_tput, "o-", color=PALETTE["icp_update"],
-             label="Issuance (update calls)")
-    ax1.plot(levels, ver_tput, "s-", color=PALETTE["icp_query"],
-             label="Verification (query calls)")
-
-    # Ideal linear scaling reference
-    ideal = [iss_tput[0] * c for c in levels]
-    ax1.plot(levels, ideal, "--", color="grey", linewidth=1,
-             label="Ideal linear scaling")
-
-    ax1.set_xlabel("Concurrency level (parallel requests)")
-    ax1.set_ylabel("Throughput (ops/sec)")
-    ax1.set_title("Throughput Scaling with Concurrency")
-    ax1.legend()
-
-    # Right: issuance p95 latency stays stable
-    ax2.plot(levels, iss_p95, "D-", color=PALETTE["seq"],
-             label="Issuance p95 latency")
-    ax2.fill_between(levels, 0, iss_p95, alpha=0.1, color=PALETTE["seq"])
-    ax2.set_xlabel("Concurrency level")
-    ax2.set_ylabel("p95 Latency (ms)")
-    ax2.set_title("p95 Latency Under Concurrent Load\n(Stable = good resilience)")
-    ax2.legend()
-
-    fig.suptitle("Fig 4 — ICP Throughput & Latency vs Concurrency", fontsize=13, fontweight="bold")
-    plt.tight_layout()
-    _save(fig, out_dir, "fig4_throughput_concurrency")
-
-
-def fig5_finality_cdf(finality, out_dir):
-    """CDF plot: ICP vs Ethereum vs Bitcoin finality times."""
-    iss_times = finality["issuanceFinality"]["times_ms"]
-    qry_times = finality["queryLatency"]["times_ms"]
-    cmp       = finality["blockchainComparison"]
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-
-    # ICP update call CDF
-    icp_upd_sorted = np.sort(iss_times)
-    cdf_y          = np.arange(1, len(icp_upd_sorted) + 1) / len(icp_upd_sorted)
-    ax.plot(icp_upd_sorted, cdf_y, color=PALETTE["icp_update"],
-            label="ICP Update Call (finality, measured)")
-
-    # ICP query call CDF
-    qry_sorted = np.sort(qry_times)
-    cdf_qry    = np.arange(1, len(qry_sorted) + 1) / len(qry_sorted)
-    ax.plot(qry_sorted, cdf_qry, color=PALETTE["icp_query"],
-            label="ICP Query Call (measured)")
-
-    # Ethereum checkpoint finality reference line — use REFERENCE constant, not JSON
-    eth_ms = REFERENCE["ETH_finality_ms"]
-    ax.axvline(x=eth_ms, color=PALETTE["eth"],
-               linestyle=":", linewidth=2,
-               label=f"Ethereum checkpoint finality ≈ {eth_ms:,} ms\n"
-                     f"(2 Casper FFG epochs; published spec¹)")
-
-    ax.set_xlabel("Time (ms) — log scale")
-    ax.set_ylabel("Cumulative Probability")
-    ax.set_title("Fig 5 — Finality Time CDF: ICP (measured) vs Ethereum (published spec)")
-    ax.set_xscale("log")
-    ax.set_ylim(0, 1.05)
-    ax.legend(fontsize=9)
-
-    # Bitcoin annotation — use REFERENCE constant, not JSON
-    btc_ms = REFERENCE["BTC_finality_ms"]
-    ax.annotate(f"Bitcoin: ~{btc_ms//60000} min\n(6-conf., published²; off scale →)",
-                xy=(ax.get_xlim()[1], 0.5),
-                xytext=(ax.get_xlim()[1] * 0.6, 0.5),
-                fontsize=9, color=PALETTE["btc"],
-                arrowprops=dict(arrowstyle="->", color=PALETTE["btc"]))
-
-    # Source footnote
-    fig.text(0.01, -0.04,
-             f"¹ {REFERENCE['ETH_source']}\n"
-             f"² {REFERENCE['BTC_source']}",
-             fontsize=7, color="grey", va="top")
-
-    plt.tight_layout()
-    _save(fig, out_dir, "fig5_finality_cdf")
-
-
-def fig6_finality_histogram(finality, out_dir):
-    """Histogram + KDE of ICP update-call finality times."""
-    iss_times = np.array(finality["issuanceFinality"]["times_ms"])
-    upd_times = np.array(finality["updateVerifyFinality"]["times_ms"])
-    all_times = np.concatenate([iss_times, upd_times])
-
-    fig, ax = plt.subplots(figsize=(8, 4.5))
-
-    # Histogram
-    ax.hist(all_times, bins=20, density=True, alpha=0.5,
-            color=PALETTE["icp_update"], edgecolor="white",
-            label="Finality time samples")
-
-    # KDE
-    kde = gaussian_kde(all_times)
-    xs  = np.linspace(all_times.min() * 0.9, all_times.max() * 1.1, 300)
-    ax.plot(xs, kde(xs), color=PALETTE["icp_update"], linewidth=2, label="KDE")
-
-    # Percentile markers
-    for p, label, ls in [(50, "median", "-"), (95, "p95", "--"), (99, "p99", ":")]:
-        v = float(np.percentile(all_times, p))
-        ax.axvline(x=v, color="grey", linestyle=ls, linewidth=1.5,
-                   label=f"{label}: {v:.0f} ms")
-
-    ax.set_xlabel("Finality time (ms)")
-    ax.set_ylabel("Density")
-    ax.set_title("Fig 6 — ICP Finality Time Distribution\n"
-                 "(includes both issuance and update-call verification)")
-    ax.legend()
-    plt.tight_layout()
-    _save(fig, out_dir, "fig6_finality_histogram")
-
-
-def fig7_blockchain_comparison(finality, out_dir):
-    """Bar chart: log-scale finality comparison — ICP vs ETH vs BTC."""
-    cmp = finality["blockchainComparison"]
-
-    # Use REFERENCE constants directly so we never depend on stale JSON values
-    blocks = {
-        "ICP Update\n(measured,\nfinality incl.)":      cmp["ICP_update_p50_ms"],
-        "ICP Query\n(measured,\nno finality wait)":     cmp["ICP_query_p50_ms"],
-        "Ethereum\n(checkpoint\nfinality\u00b9)": REFERENCE["ETH_finality_ms"],
-        "Bitcoin\n(6-conf.\nconvention\u00b2)":  REFERENCE["BTC_finality_ms"],
-    }
-    labels = list(blocks.keys())
-    values = list(blocks.values())
-    colors = [PALETTE["icp_update"], PALETTE["icp_query"], PALETTE["eth"], PALETTE["btc"]]
-    hatches = ["", "", "//", "//"]   # hatching marks reference-only bars
-
-    fig, ax = plt.subplots(figsize=(10, 5.5))
-    bars = ax.bar(labels, values, color=colors, edgecolor="white",
-                  linewidth=0.5, hatch=hatches)
-
-    for bar, val in zip(bars, values):
-        ax.text(bar.get_x() + bar.get_width() / 2,
-                bar.get_height() * 1.8,
-                f"{val:,.0f} ms" if val < 10_000 else
-                  (f"{val/1000:.0f} s" if val < 3_600_000 else f"{val//60000:.0f} min"),
-                ha="center", va="bottom", fontsize=9, fontweight="bold")
-
-    ax.set_yscale("log")
-    ax.set_ylabel("Time (ms) — log scale")
-    ax.set_title("Fig 7 — Finality Time Comparison: ICP (measured) vs Other Chains (published specs)")
-    ax.yaxis.set_major_formatter(
-        matplotlib.ticker.FuncFormatter(lambda x, _:
-            f"{x:.0f} ms" if x < 1000 else f"{x/1000:.0f} s" if x < 600_000 else f"{x//60000:.0f} min"))
-
-    # Legend for hatch pattern
-    measured_patch  = mpatches.Patch(facecolor="#94a3b8", label="ICP — directly measured")
-    reference_patch = mpatches.Patch(facecolor="#94a3b8", hatch="//",
-                                     label="Reference — published specification (not measured here)")
-    ax.legend(handles=[measured_patch, reference_patch], loc="upper left", fontsize=9)
-
-    # Source footnote
-    fig.text(0.01, -0.06,
-             f"¹ {REFERENCE['ETH_source']}\n"
-             f"² {REFERENCE['BTC_source']}",
-             fontsize=7, color="grey", va="top")
-
-    plt.tight_layout()
-    _save(fig, out_dir, "fig7_blockchain_comparison")
-
-
-def fig8_concurrency_stacked(conc, scale, out_dir):
-    """Comprehensive overhead breakdown and scaling summary."""
-    conc_rows  = conc["results"]
-    scale_rows = scale["results"]
-
-    levels   = [r["concurrency"] for r in conc_rows]
-    iss_tput = [r["issuance"]["throughput_ops_s"]    for r in conc_rows]
-    ver_tput = [r["verification"]["throughput_ops_s"] for r in conc_rows]
-
-    Ns          = [r["N"] for r in scale_rows]
-    seq_iss_p50 = [r["sequentialIssuance"]["stats"]["p50"]    for r in scale_rows]
-    seq_ver_p50 = [r["sequentialVerification"]["stats"]["p50"] for r in scale_rows]
-
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
-
-    # Left: throughput area chart
-    ax1.fill_between(levels, iss_tput, alpha=0.4, color=PALETTE["icp_update"],
-                     label="Issuance throughput")
-    ax1.fill_between(levels, ver_tput, alpha=0.4, color=PALETTE["icp_query"],
-                     label="Verification throughput")
-    ax1.plot(levels, iss_tput, "o-", color=PALETTE["icp_update"])
-    ax1.plot(levels, ver_tput, "s-", color=PALETTE["icp_query"])
-    ax1.set_xlabel("Concurrent requests")
-    ax1.set_ylabel("Throughput (ops/sec)")
-    ax1.set_title("Throughput Area — ICP Auto-scales with Load")
-    ax1.legend()
-
-    # Right: latency stays constant as tree grows
-    ax2.plot(Ns, seq_iss_p50, "o-", color=PALETTE["icp_update"],
-             label="Issuance p50")
-    ax2.plot(Ns, seq_ver_p50, "s-", color=PALETTE["icp_query"],
-             label="Verification p50")
-    ax2.set_xlabel("Tree size (N certificates)")
-    ax2.set_ylabel("p50 Latency (ms)")
-    ax2.set_title("Latency Stability — Stays Constant as N Grows")
-    ax2.set_xscale("log")
-    ax2.legend()
-
-    fig.suptitle("Fig 8 — ICP Scalability Claims: Throughput & Latency Stability",
-                 fontsize=13, fontweight="bold")
-    plt.tight_layout()
-    _save(fig, out_dir, "fig8_overview")
-
-
-# ─── Summary LaTeX table ────────────────────────────────────────────────────
-
-def write_latex_table(finality, scale, conc, out_dir):
-    f_st  = finality["issuanceFinality"]["stats"]
-    q_st  = finality["queryLatency"]["stats"]
-    # NOTE: do NOT read Ethereum/Bitcoin values from the JSON — use REFERENCE constants
-    # so the table is always academically correct regardless of stale dry-run files.
-
-    # Best throughput from concurrency results
-    best_c    = max(conc["results"], key=lambda r: r["issuance"]["throughput_ops_s"])
-    best_tput = best_c["issuance"]["throughput_ops_s"]
-
-    eth_ms = REFERENCE["ETH_finality_ms"]   # 768_000 (2 Casper FFG epochs)
-    btc_ms = REFERENCE["BTC_finality_ms"]   # 3_600_000 (6 confirmations)
-
-    lines = [
-        r"\begin{table}[ht]",
-        r"\centering",
-        r"\caption{ICP Credential Verification System --- Key Performance Metrics}",
-        r"\label{tab:perf}",
-        r"\begin{tabular}{lrrl}",
-        r"\hline",
-        r"\textbf{Metric} & \textbf{Value} & \textbf{Unit} & \textbf{Source} \\",
-        r"\hline",
-        r"\multicolumn{4}{l}{\textit{ICP --- directly measured on mainnet}} \\",
-        r"\hline",
-        rf"Update call latency (p50) & {f_st['p50']:.0f} & ms & Measured \\",
-        rf"Update call latency (p95) & {f_st['p95']:.0f} & ms & Measured \\",
-        rf"Update call latency (p99) & {f_st['p99']:.0f} & ms & Measured \\",
-        rf"Query call latency (p50) & {q_st['p50']:.0f} & ms & Measured \\",
-        rf"Query call latency (p95) & {q_st['p95']:.0f} & ms & Measured \\",
-        rf"Query vs Update speedup (p50) & {f_st['p50']/q_st['p50']:.0f} & $\\times$ & Derived \\",
-        rf"Peak issuance throughput & {best_tput:.2f} & ops/sec & Measured \\",
-        r"\hline",
-        r"\multicolumn{4}{l}{\textit{Reference values --- published specifications, not measured here}} \\",
-        r"\hline",
-        rf"Ethereum checkpoint finality\textsuperscript{{1}} & {eth_ms:,} & ms & ethereum.org \\",
-        rf"Bitcoin 6-conf.\ finality\textsuperscript{{2}} & {btc_ms//60000:.0f} & min & bitcoin.org \\",
-        r"\hline",
-        r"\multicolumn{4}{p{12cm}}{\textsuperscript{1} 2 Casper FFG epochs $\times$ 32 slots $\times$ 12\,s/slot = 768\,s. "
-        r"Source: \url{https://ethereum.org/en/developers/docs/consensus-mechanisms/pos}} \\",
-        r"\multicolumn{4}{p{12cm}}{\textsuperscript{2} 6 confirmations $\times$ $\approx$10\,min/block. "
-        r"Source: \url{https://bitcoin.org/en/faq}} \\",
-        r"\end{tabular}",
-        r"\end{table}",
-    ]
-
-    path = out_dir / "summary_table.tex"
-    path.write_text("\n".join(lines))
-    print(f"  ✓ LaTeX table → {path.name}")
-
-
-# ─── Interactive HTML dashboard ─────────────────────────────────────────────
-
-def write_dashboard(finality, scale, conc, out_dir):
-    """Write a single self-contained dashboard.html with Chart.js."""
-    f_st     = finality["issuanceFinality"]["stats"]
-    q_st     = finality["queryLatency"]["stats"]
-    conc_r   = conc["results"]
-    scale_r  = scale["results"]
-
-    # Serialise all needed data into JS
-    data_js = f"""
-const CONCURRENCY_LEVELS = {json.dumps([r['concurrency'] for r in conc_r])};
-const ISSUE_THROUGHPUT  = {json.dumps([r['issuance']['throughput_ops_s'] for r in conc_r])};
-const VERIFY_THROUGHPUT = {json.dumps([r['verification']['throughput_ops_s'] for r in conc_r])};
-const ISSUE_P95_LATENCY = {json.dumps([r['issuance']['stats']['p95'] for r in conc_r])};
-const SCALE_NS          = {json.dumps([r['N'] for r in scale_r])};
-const SCALE_SEQ_P50     = {json.dumps([r['sequentialIssuance']['stats']['p50'] for r in scale_r])};
-const SCALE_VER_P50     = {json.dumps([r['sequentialVerification']['stats']['p50'] for r in scale_r])};
-const FINALITY_TIMES    = {json.dumps(sorted(finality['issuanceFinality']['times_ms']))};
-const QUERY_TIMES       = {json.dumps(sorted(finality['queryLatency']['times_ms']))};
-const CDF_BUCKETS       = {json.dumps(finality['cdfBuckets'])};
-const F_STATS = {json.dumps(f_st)};
-const Q_STATS = {json.dumps(q_st)};
-const BLOCKCHAIN_CMP = {json.dumps(finality['blockchainComparison'])};
-const GENERATED_AT = "{datetime.now(timezone.utc).isoformat()}Z";
-"""
-
-    html = """<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ICP Credential Verification — Benchmark Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4/dist/chart.umd.min.js"></script>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Segoe UI',sans-serif;background:#f1f5f9;color:#1e293b}
-  header{background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:#fff;padding:2rem}
-  header h1{font-size:1.6rem;font-weight:700}
-  header p{margin-top:.5rem;opacity:.85;font-size:.95rem}
-  .meta{font-size:.8rem;opacity:.7;margin-top:.3rem}
-  main{max-width:1400px;margin:2rem auto;padding:0 1.5rem}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:1.5rem}
-  .card{background:#fff;border-radius:12px;padding:1.5rem;
-        box-shadow:0 2px 8px rgba(0,0,0,.08)}
-  .card h2{font-size:1rem;font-weight:600;color:#374151;margin-bottom:1rem;
-           border-bottom:2px solid #e0f2fe;padding-bottom:.5rem}
-  .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
-  .kpi{background:#fff;border-radius:10px;padding:1.2rem;
-       box-shadow:0 2px 8px rgba(0,0,0,.07);text-align:center}
-  .kpi .value{font-size:2rem;font-weight:800;color:#2563eb}
-  .kpi .unit{font-size:.75rem;color:#64748b;margin-top:.2rem}
-  .kpi .label{font-size:.85rem;color:#374151;margin-top:.3rem}
-  canvas{max-height:260px}
-  footer{text-align:center;padding:2rem;font-size:.8rem;color:#64748b}
-  .badge{display:inline-block;background:#dbeafe;color:#1d4ed8;
-         border-radius:6px;padding:.15rem .5rem;font-size:.75rem;margin-left:.5rem}
-</style>
-</head>
-<body>
-<header>
-  <h1>ICP Academic Credential Verification</h1>
-  <p>Benchmark Dashboard — Internet Computer Protocol (ICP) Performance Metrics</p>
-  <p class="meta">Generated: <span id="ts"></span></p>
-</header>
-<main>
-
-<!-- KPI Cards -->
-<div class="kpi-grid" id="kpis"></div>
-
-<!-- Charts -->
-<div class="grid">
-  <div class="card">
-    <h2>Throughput vs Concurrency <span class="badge">Update + Query</span></h2>
-    <canvas id="cThroughput"></canvas>
-  </div>
-  <div class="card">
-    <h2>p95 Latency Under Load</h2>
-    <canvas id="cLatency"></canvas>
-  </div>
-  <div class="card">
-    <h2>Scalability: Latency vs N Certificates</h2>
-    <canvas id="cScale"></canvas>
-  </div>
-  <div class="card">
-    <h2>Finality Time CDF <span class="badge">ICP vs Ethereum</span></h2>
-    <canvas id="cCDF"></canvas>
-  </div>
-  <div class="card">
-    <h2>Call Latency Percentiles</h2>
-    <canvas id="cPercentiles"></canvas>
-  </div>
-  <div class="card">
-    <h2>Blockchain Finality Comparison</h2>
-    <canvas id="cBlockchain"></canvas>
-  </div>
-</div>
-</main>
-<footer>ICP Credential Verification Research &mdash; Benchmark results are generated from mainnet measurements.</footer>
-
-<script>
-""" + data_js + """
-document.getElementById("ts").textContent = GENERATED_AT;
-
-// KPIs
-const kpiData = [
-  { value: F_STATS.p50.toFixed(0),  unit: "ms",      label: "Update Call p50" },
-  { value: F_STATS.p95.toFixed(0),  unit: "ms",      label: "Update Call p95" },
-  { value: Q_STATS.p50.toFixed(0),  unit: "ms",      label: "Query Call p50"  },
-  { value: Q_STATS.p95.toFixed(0),  unit: "ms",      label: "Query Call p95"  },
-  { value: (F_STATS.p50/Q_STATS.p50).toFixed(0)+"×", unit: "faster", label: "Query vs Update" },
-  { value: Math.max(...ISSUE_THROUGHPUT).toFixed(2), unit: "ops/s", label: "Peak Issue Throughput" },
-];
-const kpiEl = document.getElementById("kpis");
-kpiData.forEach(k => {
-  kpiEl.innerHTML += `<div class="kpi">
-    <div class="value">${k.value}</div>
-    <div class="unit">${k.unit}</div>
-    <div class="label">${k.label}</div>
-  </div>`;
-});
-
-// Helper
-const rgb = (r,g,b,a=1) => `rgba(${r},${g},${b},${a})`;
-const blue  = "#2563eb"; const green = "#16a34a";
-const purp  = "#9333ea"; const ora   = "#ea580c";
-
-// Chart 1: Throughput vs Concurrency
-new Chart(document.getElementById("cThroughput"), {
-  type:"line",
-  data:{
-    labels: CONCURRENCY_LEVELS,
-    datasets:[
-      {label:"Issuance (update)",data:ISSUE_THROUGHPUT,  borderColor:blue, backgroundColor:rgb(37,99,235,.1), fill:true},
-      {label:"Verification (query)",data:VERIFY_THROUGHPUT,borderColor:green,backgroundColor:rgb(22,163,74,.1),fill:true},
-    ]
-  },
-  options:{responsive:true,scales:{x:{title:{display:true,text:"Concurrent Requests"}},
-    y:{title:{display:true,text:"ops/sec"}}}}
-});
-
-// Chart 2: p95 latency vs concurrency
-new Chart(document.getElementById("cLatency"), {
-  type:"bar",
-  data:{labels:CONCURRENCY_LEVELS,
-    datasets:[{label:"Issuance p95 (ms)",data:ISSUE_P95_LATENCY,backgroundColor:rgb(147,51,234,.7)}]},
-  options:{responsive:true,scales:{x:{title:{display:true,text:"Concurrency"}},
-    y:{title:{display:true,text:"p95 Latency (ms)"}}}}
-});
-
-// Chart 3: Scalability
-new Chart(document.getElementById("cScale"), {
-  type:"line",
-  data:{labels:SCALE_NS.map(n=>"N="+n),
-    datasets:[
-      {label:"Issuance p50",data:SCALE_SEQ_P50,borderColor:purp,fill:false},
-      {label:"Verification p50",data:SCALE_VER_P50,borderColor:green,fill:false},
-    ]},
-  options:{responsive:true,scales:{y:{title:{display:true,text:"p50 Latency (ms)"}}}}
-});
-
-// Chart 4: Finality CDF
-const cdfX = CDF_BUCKETS.map(b=>b.x_ms);
-const cdfY = CDF_BUCKETS.map(b=>b.cdf);
-new Chart(document.getElementById("cCDF"), {
-  type:"line",
-  data:{labels:cdfX, datasets:[
-    {label:"ICP Update Call CDF",data:cdfY,borderColor:blue,fill:false,pointRadius:0},
-  ]},
-  options:{responsive:true,scales:{
-    x:{title:{display:true,text:"Time (ms)"},ticks:{maxTicksLimit:6}},
-    y:{min:0,max:1,title:{display:true,text:"CDF"}}}}
-});
-
-// Chart 5: Percentiles bar
-const pctLabels = ["p50","p75","p95","p99"];
-new Chart(document.getElementById("cPercentiles"), {
-  type:"bar",
-  data:{labels:pctLabels,datasets:[
-    {label:"Update Call (ms)",data:[F_STATS.p50,F_STATS.p75,F_STATS.p95,F_STATS.p99],
-     backgroundColor:rgb(37,99,235,.7)},
-    {label:"Query Call (ms)", data:[Q_STATS.p50,Q_STATS.p75,Q_STATS.p95,Q_STATS.p99],
-     backgroundColor:rgb(22,163,74,.7)},
-  ]},
-  options:{responsive:true,scales:{y:{title:{display:true,text:"Latency (ms)"}}}}
-});
-
-    # Chart 6: Blockchain comparison (log scale)
-new Chart(document.getElementById("cBlockchain"), {
-  type:"bar",
-  data:{labels:[
-    "ICP Update\n(measured)",
-    "ICP Query\n(measured)",
-    "Ethereum\n(checkpoint, 768s — spec¹)"
-  ],
-    datasets:[{label:"Finality (ms, log scale)",
-      data:[BLOCKCHAIN_CMP.ICP_update_p50_ms, BLOCKCHAIN_CMP.ICP_query_p50_ms, BLOCKCHAIN_CMP.Ethereum_finality_ms],
-      backgroundColor:[rgb(37,99,235,.8),rgb(22,163,74,.8),rgb(220,38,38,.8)]}]},
-  options:{responsive:true,
-    plugins:{tooltip:{callbacks:{label:ctx=>{
-      const v=ctx.raw; return v<1000?v+' ms': v<60000?(v/1000).toFixed(1)+' s':(v/60000).toFixed(1)+' min';
-    }}},
-    subtitle:{display:true,text:[
-      '¹ Ethereum: 2 Casper FFG epochs × 32 slots × 12s/slot = 768s (ethereum.org)',
-      '  Bitcoin (~60 min, 6-confirmation convention) is off-scale and not shown.'
-    ],font:{size:9},color:'#64748b'}},
-    scales:{y:{type:"logarithmic",
-      title:{display:true,text:"Finality (ms, log scale)"}}}}}
-});
-</script>
-</body>
-</html>"""
-
-    path = out_dir / "dashboard.html"
-    path.write_text(html)
-    print(f"  ✓ Dashboard → {path.name}")
-
-
-# ─── Helpers ────────────────────────────────────────────────────────────────
-
-def _save(fig, out_dir: Path, name: str):
+def savefig(fig, name, dpi=200):
     for ext in ("png", "pdf"):
-        path = out_dir / f"{name}.{ext}"
-        fig.savefig(path)
+        path = FIGURES_DIR / f"{name}.{ext}"
+        fig.savefig(path, dpi=dpi, bbox_inches="tight")
+    print(f"  Saved: figures/{name}.png  +  .pdf")
+
+def fmt_n(n):
+    if n >= 10_000: return "10k"
+    if n >= 1_000:  return f"{n//1000}k"
+    return str(n)
+
+def pct(arr, p):
+    return float(np.percentile(arr, p))
+
+def cdf(data):
+    s = np.sort(data)
+    y = np.arange(1, len(s)+1) / len(s)
+    return s, y
+
+# ── load data ─────────────────────────────────────────────────────────────────
+
+iss  = load_latest("issuance_*.json")
+ver  = load_latest("verification_*.json")
+conc = load_latest("concurrent_*.json")
+thr  = load_latest("throughput_*.json")
+
+available = {k: v for k, v in [("iss", iss), ("ver", ver), ("conc", conc), ("thr", thr)] if v}
+print(f"\nLoaded benchmark files: {list(available.keys())}")
+if not available:
+    print("ERROR: No result JSON files found in benchmarks/results/")
+    print("Run: node benchmarks/run.js  first.")
+    sys.exit(1)
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Figure 1  —  Issuance Latency vs N
+# ═════════════════════════════════════════════════════════════════════════════
+
+if iss:
+    print("\nFig 01: Issuance latency …")
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.5))
+
+    # Left panel: sequential latency vs N
+    ax = axes[0]
+    if iss.get("sequential"):
+        ns   = [r["n"] for r in iss["sequential"]]
+        mns  = [r.get("mean", 0) for r in iss["sequential"]]
+        p50s = [r.get("median", r.get("p50", 0)) for r in iss["sequential"]]
+        p95s = [r.get("p95", 0) for r in iss["sequential"]]
+        p99s = [r.get("p99", 0) for r in iss["sequential"]]
+        ax.plot(ns, mns,  "o-", color=COLORS["seq"], label="Mean",   zorder=3)
+        ax.plot(ns, p50s, "s--",color=COLORS["seq"], alpha=0.7, label="p50",  zorder=3)
+        ax.plot(ns, p95s, "^-.", color=COLORS["par"], alpha=0.7, label="p95",  zorder=3)
+        ax.plot(ns, p99s, "D:",  color=COLORS["burst"], alpha=0.7, label="p99", zorder=3)
+        ax.fill_between(ns, p50s, p95s, alpha=0.08, color=COLORS["seq"])
+    ax.set_xscale("log"); ax.set_yscale("log")
+    ax.set_xlabel("Number of Certificates (N)"); ax.set_ylabel("Latency (ms)")
+    ax.set_title("Sequential Issuance Latency vs N\n(one cert at a time)")
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda v, _: fmt_n(int(v))))
+    ax.legend()
+
+    # Right panel: parallel throughput vs N
+    ax = axes[1]
+    if iss.get("parallel"):
+        ns  = [r["n"] for r in iss["parallel"]]
+        cps = [r.get("throughput_cps", {}).get("mean", 0) for r in iss["parallel"]]
+        wls = [r.get("wall_ms", {}).get("mean", 0) for r in iss["parallel"]]
+        ax2 = ax.twinx()
+        l1, = ax.plot(ns, cps, "o-", color=COLORS["par"], label="Throughput (certs/s)", zorder=3)
+        l2, = ax2.plot(ns, wls, "s--", color=COLORS["seq"], alpha=0.7, label="Wall time (ms)", zorder=3)
+        ax.set_xlabel("Batch Size (N)")
+        ax.set_ylabel("Throughput (certs/s)", color=COLORS["par"])
+        ax2.set_ylabel("Wall-clock Time (ms)", color=COLORS["seq"])
+        ax.set_title("Parallel (Burst) Issuance Throughput vs N")
+        ax.set_xscale("log")
+        ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda v, _: fmt_n(int(v))))
+        ax.legend(handles=[l1, l2], loc="upper left")
+
+    fig.suptitle("Fig 1 — Certificate Issuance Performance on IC Mainnet", fontsize=13, fontweight="bold", y=1.01)
+    savefig(fig, "Fig01_issuance_latency")
     plt.close(fig)
-    print(f"  ✓ {name}.png / .pdf")
 
+# ═════════════════════════════════════════════════════════════════════════════
+# Figure 2  —  Verification Latency vs N
+# ═════════════════════════════════════════════════════════════════════════════
 
-# ─── Main ────────────────────────────────────────────────────────────────────
+if ver:
+    print("Fig 02: Verification latency …")
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.5))
 
-def main():
-    ap = argparse.ArgumentParser(description="Generate benchmark visualisations")
-    ap.add_argument("--results-dir", default=str(DEFAULT_RES))
-    ap.add_argument("--out-dir",     default=str(DEFAULT_OUT))
-    args = ap.parse_args()
+    ax = axes[0]
+    if ver.get("sequential"):
+        ns   = [r["n"] for r in ver["sequential"]]
+        mns  = [r.get("mean", 0) for r in ver["sequential"]]
+        p50s = [r.get("median", r.get("p50", 0)) for r in ver["sequential"]]
+        p95s = [r.get("p95", 0) for r in ver["sequential"]]
+        p99s = [r.get("p99", 0) for r in ver["sequential"]]
+        ax.plot(ns, mns,  "o-", color=COLORS["ver"],   label="Mean")
+        ax.plot(ns, p50s, "s--",color=COLORS["ver"],   alpha=0.7, label="p50")
+        ax.plot(ns, p95s, "^-.",color=COLORS["par"],   alpha=0.7, label="p95")
+        ax.plot(ns, p99s, "D:", color=COLORS["burst"], alpha=0.7, label="p99")
+        ax.fill_between(ns, p50s, p95s, alpha=0.08, color=COLORS["ver"])
+    ax.set_xscale("log")
+    ax.set_xlabel("Number of Certificates Verified (N)"); ax.set_ylabel("Latency (ms)")
+    ax.set_title("Sequential Verification Latency vs N\n(query calls, O(log N) Merkle proof)")
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda v, _: fmt_n(int(v))))
+    ax.legend()
 
-    results_dir = Path(args.results_dir)
-    out_dir     = Path(args.out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
+    ax = axes[1]
+    if ver.get("concurrent"):
+        ns  = [r["n"] for r in ver["concurrent"]]
+        qps = [r.get("throughput_qps", {}).get("mean", 0) for r in ver["concurrent"]]
+        wls = [r.get("wall_ms", {}).get("mean", 0) for r in ver["concurrent"]]
+        ax2 = ax.twinx()
+        l1, = ax.plot(ns, qps, "o-", color=COLORS["ver"], label="Throughput (queries/s)")
+        l2, = ax2.plot(ns, wls, "s--", color=COLORS["par"], alpha=0.7, label="Wall time (ms)")
+        ax.set_xlabel("Concurrent Queries (N)")
+        ax.set_ylabel("Throughput (queries/s)", color=COLORS["ver"])
+        ax2.set_ylabel("Wall-clock Time (ms)", color=COLORS["par"])
+        ax.set_title("Concurrent Verification Throughput vs N")
+        ax.set_xscale("log")
+        ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda v, _: fmt_n(int(v))))
+        ax.legend(handles=[l1, l2], loc="upper left")
 
-    print("\n── Loading benchmark results ─────────────────────────────")
-    scale_raw   = load_suite(results_dir, "scalability")
-    conc_raw    = load_suite(results_dir, "concurrency")
-    finality_raw = load_suite(results_dir, "finality")
+    fig.suptitle("Fig 2 — Certificate Verification Performance on IC Mainnet", fontsize=13, fontweight="bold", y=1.01)
+    savefig(fig, "Fig02_verification_latency")
+    plt.close(fig)
 
-    scale    = scale_raw    or synthetic_scalability()
-    conc     = conc_raw     or synthetic_concurrency()
-    finality = finality_raw or synthetic_finality()
+# ═════════════════════════════════════════════════════════════════════════════
+# Figure 3  —  Throughput Comparison (all operations on one chart)
+# ═════════════════════════════════════════════════════════════════════════════
 
-    is_synthetic = not (scale_raw and conc_raw and finality_raw)
-    if is_synthetic:
-        print("\n  ℹ  Using synthetic data for missing suites.")
-        print("     Run 'node run.js --suite all' on a deployed canister for real data.\n")
+print("Fig 03: Throughput comparison …")
+fig, ax = plt.subplots(figsize=(9, 5))
 
-    print("\n── Generating figures ────────────────────────────────────")
-    fig1_latency_comparison(finality, out_dir)
-    fig2_scalability_issuance(scale, out_dir)
-    fig3_scalability_verification(scale, out_dir)
-    fig4_throughput_concurrency(conc, out_dir)
-    fig5_finality_cdf(finality, out_dir)
-    fig6_finality_histogram(finality, out_dir)
-    fig7_blockchain_comparison(finality, out_dir)
-    fig8_concurrency_stacked(conc, scale, out_dir)
+if iss and iss.get("parallel"):
+    ns  = [r["n"] for r in iss["parallel"]]
+    cps = [r.get("throughput_cps", {}).get("mean", 0) for r in iss["parallel"]]
+    ax.plot(ns, cps, "o-", color=COLORS["seq"], label="Issuance (parallel batch)", linewidth=2)
 
-    print("\n── Generating paper assets ───────────────────────────────")
-    write_latex_table(finality, scale, conc, out_dir)
-    write_dashboard(finality, scale, conc, out_dir)
+if ver and ver.get("concurrent"):
+    ns  = [r["n"] for r in ver["concurrent"]]
+    qps = [r.get("throughput_qps", {}).get("mean", 0) for r in ver["concurrent"]]
+    ax.plot(ns, qps, "s-", color=COLORS["ver"], label="Verification (concurrent)", linewidth=2)
 
-    print(f"\n✅  All outputs in: {out_dir.resolve()}")
-    print("   Figures (PNG + PDF): fig1_latency_comparison … fig8_overview")
-    print("   LaTeX table:         summary_table.tex")
-    print("   Dashboard:           dashboard.html")
-    if is_synthetic:
-        print("\n   ⚠  Data is SYNTHETIC — deploy to mainnet and re-run for paper-ready numbers.")
+if conc and conc.get("concurrent"):
+    ns  = [r["c"] for r in conc["concurrent"]]
+    ops = [r.get("throughput_ops", {}).get("mean", 0) for r in conc["concurrent"]]
+    ax.plot(ns, ops, "^-", color=COLORS["mix"], label="Mixed workload (30% issue + 70% verify)", linewidth=2)
 
+ax.set_xscale("log"); ax.set_yscale("log")
+ax.set_xlabel("Batch Size / Concurrency Level (N)"); ax.set_ylabel("Throughput (ops/s)")
+ax.set_title("Fig 3 — Operation Throughput vs Scale (IC Mainnet)")
+ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda v, _: fmt_n(int(v))))
+ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda v, _: f"{v:.0f}"))
+ax.legend()
+savefig(fig, "Fig03_throughput_comparison")
+plt.close(fig)
 
-if __name__ == "__main__":
-    main()
+# ═════════════════════════════════════════════════════════════════════════════
+# Figure 4  —  Concurrent Users vs Time & Throughput
+# ═════════════════════════════════════════════════════════════════════════════
+
+if conc and conc.get("concurrent"):
+    print("Fig 04: Concurrent users …")
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.5))
+
+    cs    = [r["c"] for r in conc["concurrent"]]
+    walls = [r.get("wall_ms", {}).get("mean", 0) for r in conc["concurrent"]]
+    ops   = [r.get("throughput_ops", {}).get("mean", 0) for r in conc["concurrent"]]
+    err_rates = []
+    for r in conc["concurrent"]:
+        reps = r.get("reps", [])
+        if reps:
+            err_rates.append(np.mean([rep.get("error_rate", 0) for rep in reps]))
+        else:
+            err_rates.append(0)
+
+    ax = axes[0]
+    ax.plot(cs, walls, "o-", color=COLORS["con"], label="Wall time (ms)")
+    ax.set_xlabel("Simultaneous Callers (C)"); ax.set_ylabel("Wall-clock Time (ms)")
+    ax.set_title("Total Wall-clock Time vs Concurrent Users")
+
+    ax = axes[1]
+    ax2 = ax.twinx()
+    l1, = ax.plot(cs, ops,       "o-", color=COLORS["con"],   label="Throughput (ops/s)")
+    l2, = ax2.plot(cs, [e*100 for e in err_rates], "s--", color=COLORS["burst"], alpha=0.8, label="Error rate (%)")
+    ax.set_xlabel("Simultaneous Callers (C)"); ax.set_ylabel("Throughput (ops/s)", color=COLORS["con"])
+    ax2.set_ylabel("Error Rate (%)", color=COLORS["burst"])
+    ax2.set_ylim(0, max(max(e*100 for e in err_rates) * 1.5, 5))
+    ax.set_title("Throughput & Error Rate vs Concurrent Users")
+    ax.legend(handles=[l1, l2])
+
+    fig.suptitle("Fig 4 — Concurrent Mixed Workload on IC Mainnet", fontsize=13, fontweight="bold", y=1.01)
+    savefig(fig, "Fig04_concurrent_users")
+    plt.close(fig)
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Figure 5  —  Latency CDFs
+# ═════════════════════════════════════════════════════════════════════════════
+
+print("Fig 05: Latency CDFs …")
+fig, ax = plt.subplots(figsize=(9, 5))
+
+if iss and iss.get("sequential"):
+    for i, r in enumerate(iss["sequential"]):
+        times = r.get("times_ms", [])
+        if times:
+            x, y = cdf(times)
+            ax.plot(x, y*100, alpha=0.8, label=f"Issuance N={fmt_n(r['n'])}", linestyle="-")
+
+if ver and ver.get("sequential"):
+    for i, r in enumerate(ver["sequential"][:3]):   # first 3 to keep chart readable
+        times = r.get("times_ms", [])
+        if times:
+            x, y = cdf(times)
+            ax.plot(x, y*100, alpha=0.8, label=f"Verification N={fmt_n(r['n'])}", linestyle="--")
+
+ax.axhline(y=50,  color="grey", linestyle=":", linewidth=0.8, alpha=0.6)
+ax.axhline(y=95,  color="grey", linestyle=":", linewidth=0.8, alpha=0.6)
+ax.axhline(y=99,  color="grey", linestyle=":", linewidth=0.8, alpha=0.6)
+ax.text(ax.get_xlim()[0] if ax.get_xlim()[0] > 0 else 1, 51, "p50", fontsize=8, color="grey")
+ax.text(ax.get_xlim()[0] if ax.get_xlim()[0] > 0 else 1, 96, "p95", fontsize=8, color="grey")
+ax.text(ax.get_xlim()[0] if ax.get_xlim()[0] > 0 else 1, 100, "p99", fontsize=8, color="grey")
+
+ax.set_xlabel("Latency (ms)"); ax.set_ylabel("Percentile (%)")
+ax.set_title("Fig 5 — Latency CDF: Issuance vs Verification")
+ax.legend(loc="lower right", fontsize=8)
+ax.set_ylim(0, 100)
+savefig(fig, "Fig05_latency_cdf")
+plt.close(fig)
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Figure 6  —  Merkle Tree Growth
+# ═════════════════════════════════════════════════════════════════════════════
+
+if thr and thr.get("merkle_growth"):
+    print("Fig 06: Merkle tree growth …")
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.5))
+    mg = thr["merkle_growth"]
+    db_sizes   = [r["db_size_after"] for r in mg]
+    cps_vals   = [r["throughput_cps"] for r in mg]
+    wall_vals  = [r["batch_wall_ms"] for r in mg]
+    batch_sizes = [r["batch_size"] for r in mg]
+
+    ax = axes[0]
+    ax.plot(db_sizes, wall_vals, "o-", color=COLORS["tree"], label="Batch wall time (ms)")
+    # Fit O(N log N) reference line
+    x   = np.array(db_sizes, dtype=float)
+    ref = x * np.log2(np.maximum(x, 2)) / x[0] * wall_vals[0] if len(x) > 1 else x
+    ax.plot(db_sizes, ref, "k--", alpha=0.4, label="O(N log N) reference")
+    ax.set_xlabel("Total Certs in Canister"); ax.set_ylabel("Batch Wall Time (ms)")
+    ax.set_title("Merkle Tree Rebuild Time vs DB Size")
+    ax.set_xscale("log")
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda v, _: fmt_n(int(v))))
+    ax.legend()
+
+    ax = axes[1]
+    ax.plot(db_sizes, cps_vals, "o-", color=COLORS["par"], label="Parallel batch throughput")
+    ax.set_xlabel("Total Certs in Canister"); ax.set_ylabel("Throughput (certs/s)")
+    ax.set_title("Parallel Issuance Throughput at Each DB Size")
+    ax.set_xscale("log")
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda v, _: fmt_n(int(v))))
+    ax.legend()
+
+    fig.suptitle("Fig 6 — Merkle Tree Scalability on IC Mainnet", fontsize=13, fontweight="bold", y=1.01)
+    savefig(fig, "Fig06_merkle_growth")
+    plt.close(fig)
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Figure 7  —  Latency Box Plots
+# ═════════════════════════════════════════════════════════════════════════════
+
+print("Fig 07: Latency box plots …")
+fig, ax = plt.subplots(figsize=(11, 5))
+
+box_data   = []
+box_labels = []
+box_colors = []
+
+if iss and iss.get("sequential"):
+    for r in iss["sequential"]:
+        t = r.get("times_ms", [])
+        if t:
+            box_data.append(t); box_labels.append(f"Issue\nN={fmt_n(r['n'])}"); box_colors.append(COLORS["seq"])
+
+if ver and ver.get("sequential"):
+    for r in ver["sequential"][:4]:
+        t = r.get("times_ms", [])
+        if t:
+            box_data.append(t); box_labels.append(f"Verify\nN={fmt_n(r['n'])}"); box_colors.append(COLORS["ver"])
+
+if box_data:
+    bp = ax.boxplot(box_data, labels=box_labels, patch_artist=True,
+                    medianprops=dict(color="black", linewidth=2),
+                    flierprops=dict(marker="o", markersize=3, alpha=0.3))
+    for patch, color in zip(bp["boxes"], box_colors):
+        patch.set_facecolor(color); patch.set_alpha(0.5)
+    ax.set_yscale("log")
+    ax.set_ylabel("Latency (ms)")
+    ax.set_title("Fig 7 — Latency Distribution: Issuance vs Verification (Box Plots)")
+    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda v, _: f"{v:.0f}"))
+
+savefig(fig, "Fig07_latency_boxplots")
+plt.close(fig)
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Figure 8  —  Throughput Over Time (Sustained benchmark)
+# ═════════════════════════════════════════════════════════════════════════════
+
+if thr and thr.get("sustained"):
+    print("Fig 08: Throughput over time …")
+    sus = thr["sustained"]
+    fig, axes = plt.subplots(2, 1, figsize=(11, 7))
+
+    # Rolling average of individual latencies over time
+    ts_ms  = sus.get("timestamps_ms", [])
+    lat_ms = sus.get("times_ms", [])
+    if ts_ms and lat_ms:
+        ts_s = [t / 1000 for t in ts_ms]
+        ax   = axes[0]
+        ax.scatter(ts_s, lat_ms, s=3, alpha=0.3, color=COLORS["seq"], label="Individual latency")
+        # Rolling mean
+        window = 20
+        rolling = [np.mean(lat_ms[max(0, i-window):i+1]) for i in range(len(lat_ms))]
+        ax.plot(ts_s, rolling, color=COLORS["par"], linewidth=2, label=f"Rolling mean (w={window})")
+        ax.set_xlabel("Time (s)"); ax.set_ylabel("Issuance Latency (ms)")
+        ax.set_title("Per-Operation Latency During 60-Second Sustained Load")
+        ax.legend()
+
+    # Throughput in 10-second windows
+    windows = sus.get("throughput_windows", [])
+    if windows:
+        w_starts = [w["window_start_s"] for w in windows]
+        w_tps    = [w["throughput_cps"] for w in windows]
+        ax = axes[1]
+        ax.bar(w_starts, w_tps, width=8, color=COLORS["con"], alpha=0.7, label="Certs/s per 10s window")
+        ax.axhline(y=np.mean(w_tps), color=COLORS["seq"], linestyle="--", linewidth=2, label=f"Mean = {np.mean(w_tps):.2f} certs/s")
+        ax.set_xlabel("Time Elapsed (s)"); ax.set_ylabel("Throughput (certs/s)")
+        ax.set_title("Throughput in 10-Second Windows During Sustained Load")
+        ax.legend()
+
+    fig.suptitle("Fig 8 — Throughput Stability Over Time (60s Sustained Load)", fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    savefig(fig, "Fig08_throughput_over_time")
+    plt.close(fig)
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Figure 9  —  Peak Burst Analysis
+# ═════════════════════════════════════════════════════════════════════════════
+
+if thr and thr.get("peak_burst"):
+    print("Fig 09: Peak burst …")
+    burst = thr["peak_burst"]
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+
+    # Pie: success vs failure
+    ax = axes[0]
+    ok  = burst.get("succeeded", 0)
+    err = burst.get("failed", 0)
+    ax.pie([ok, err],
+           labels=[f"Succeeded\n({ok})", f"Failed\n({err})"],
+           colors=[COLORS["con"], COLORS["burst"]],
+           autopct="%1.1f%%", startangle=90,
+           wedgeprops=dict(edgecolor="white", linewidth=2))
+    ax.set_title(f"Peak Burst (1000 simultaneous calls)\nTotal wall: {burst.get('wall_ms', '?')}ms")
+
+    # Bar: latency stats
+    ax = axes[1]
+    lat = burst.get("latency", {})
+    keys   = ["min", "median", "mean", "p95", "p99", "max"]
+    labels = ["Min", "p50", "Mean", "p95", "p99", "Max"]
+    vals   = [lat.get(k, lat.get("median" if k == "median" else k, 0)) for k in keys]
+    bars = ax.bar(labels, vals, color=[COLORS["con"]]*3 + [COLORS["par"]] + [COLORS["burst"]]*2, alpha=0.75)
+    ax.set_ylabel("Latency (ms)"); ax.set_title("Burst Success Latency Percentiles")
+    for bar, val in zip(bars, vals):
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 20,
+                f"{val:.0f}", ha="center", va="bottom", fontsize=8)
+
+    fig.suptitle("Fig 9 — Peak Burst (1000 Simultaneous Calls) Analysis", fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    savefig(fig, "Fig09_burst_analysis")
+    plt.close(fig)
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Figure 10  —  ICP Finality Time
+# ═════════════════════════════════════════════════════════════════════════════
+
+if conc and conc.get("finality_ms"):
+    print("Fig 10: ICP finality …")
+    fin = conc["finality_ms"]
+    samples = fin.get("samples", [])
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.5))
+
+    ax = axes[0]
+    ax.hist(samples, bins=20, color=COLORS["ver"], alpha=0.7, edgecolor="white")
+    for p, lbl in [(50, "Median"), (95, "p95")]:
+        v = float(np.percentile(samples, p)) if samples else 0
+        ax.axvline(v, color=COLORS["burst"], linestyle="--", linewidth=1.5, label=f"{lbl}={v:.0f}ms")
+    ax.set_xlabel("Time to Finality (ms)"); ax.set_ylabel("Count")
+    ax.set_title("ICP Finality Time Distribution\n(submit → cert readable via query)")
+    ax.legend()
+
+    # Comparison bar chart: ICP vs other chains (reference values)
+    ax = axes[1]
+    chains = ["ICP\n(Measured)", "Solana\n(~400ms)", "Ethereum\n(~12s slot)", "Bitcoin\n(~60min)"]
+    chain_vals = [fin.get("mean", 2000), 400, 12_000, 3_600_000]
+    chain_colors = [COLORS["con"], "#9333ea", "#f59e0b", "#f97316"]
+    bars = ax.bar(chains, chain_vals, color=chain_colors, alpha=0.75, edgecolor="white")
+    ax.set_yscale("log")
+    ax.set_ylabel("Finality Time (ms, log scale)")
+    ax.set_title("Finality Time: ICP vs Other Blockchains\n(reference values)")
+    for bar, val in zip(bars, chain_vals):
+        ax.text(bar.get_x() + bar.get_width()/2, val*1.1,
+                f"{val:.0f}ms" if val < 10000 else f"{val/1000:.0f}s",
+                ha="center", va="bottom", fontsize=8, fontweight="bold")
+
+    fig.suptitle("Fig 10 — ICP Consensus Finality Time", fontsize=13, fontweight="bold", y=1.01)
+    savefig(fig, "Fig10_finality_time")
+    plt.close(fig)
+
+# ═════════════════════════════════════════════════════════════════════════════
+# LaTeX Summary Table
+# ═════════════════════════════════════════════════════════════════════════════
+
+print("\nGenerating LaTeX summary table …")
+tex_rows = []
+tex_rows.append(r"\begin{table}[htbp]")
+tex_rows.append(r"\centering")
+tex_rows.append(r"\caption{ICP Academic Credential Verification — Mainnet Performance Summary}")
+tex_rows.append(r"\label{tab:perf_summary}")
+tex_rows.append(r"\begin{tabular}{llrrrr}")
+tex_rows.append(r"\toprule")
+tex_rows.append(r"Operation & Mode & N & Mean (ms) & p95 (ms) & Throughput (ops/s) \\")
+tex_rows.append(r"\midrule")
+
+if iss and iss.get("sequential"):
+    for r in iss["sequential"]:
+        tex_rows.append(
+            f"Issuance & Sequential & {fmt_n(r['n'])} & "
+            f"{r.get('mean',0):.0f} & {r.get('p95',0):.0f} & "
+            f"{round(1000/max(r.get('mean',1),1),2)} \\\\"
+        )
+
+if iss and iss.get("parallel"):
+    for r in iss["parallel"]:
+        cps = r.get("throughput_cps", {})
+        tex_rows.append(
+            f"Issuance & Parallel & {fmt_n(r['n'])} & "
+            f"{r.get('individual_ms',{}).get('mean',0):.0f} & "
+            f"{r.get('individual_ms',{}).get('p95',0):.0f} & "
+            f"{cps.get('mean',0):.1f} \\\\"
+        )
+
+tex_rows.append(r"\midrule")
+
+if ver and ver.get("sequential"):
+    for r in ver["sequential"]:
+        tex_rows.append(
+            f"Verification & Sequential & {fmt_n(r['n'])} & "
+            f"{r.get('mean',0):.0f} & {r.get('p95',0):.0f} & "
+            f"{round(1000/max(r.get('mean',1),1),2)} \\\\"
+        )
+
+if ver and ver.get("concurrent"):
+    for r in ver["concurrent"]:
+        qps = r.get("throughput_qps", {})
+        tex_rows.append(
+            f"Verification & Concurrent & {fmt_n(r['n'])} & "
+            f"{r.get('individual_ms',{}).get('mean',0):.0f} & "
+            f"{r.get('individual_ms',{}).get('p95',0):.0f} & "
+            f"{qps.get('mean',0):.1f} \\\\"
+        )
+
+tex_rows.append(r"\bottomrule")
+tex_rows.append(r"\end{tabular}")
+tex_rows.append(r"\end{table}")
+
+tex_path = FIGURES_DIR / "summary_table.tex"
+tex_path.write_text("\n".join(tex_rows))
+print(f"  Saved: figures/summary_table.tex")
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Interactive HTML Dashboard (Plotly)
+# ═════════════════════════════════════════════════════════════════════════════
+
+if HAS_PLOTLY:
+    print("Generating interactive HTML dashboard …")
+    fig_html = psp.make_subplots(
+        rows=3, cols=3,
+        subplot_titles=[
+            "Issuance: Sequential Latency vs N",
+            "Issuance: Parallel Throughput vs N",
+            "Verification: Concurrent Throughput vs N",
+            "Throughput Comparison (all ops)",
+            "Concurrent Users vs Throughput",
+            "ICP Finality Distribution",
+            "Merkle Tree Rebuild Time vs DB Size",
+            "Throughput Over Time (60s window)",
+            "Peak Burst: Error Rate vs Latency",
+        ],
+        horizontal_spacing=0.09, vertical_spacing=0.12,
+    )
+
+    # Row 1 Col 1: Sequential issuance
+    if iss and iss.get("sequential"):
+        ns   = [r["n"] for r in iss["sequential"]]
+        mns  = [r.get("mean", 0) for r in iss["sequential"]]
+        p95s = [r.get("p95", 0) for r in iss["sequential"]]
+        fig_html.add_trace(go.Scatter(x=ns, y=mns, mode="lines+markers", name="Mean", line=dict(color=COLORS["seq"])), 1, 1)
+        fig_html.add_trace(go.Scatter(x=ns, y=p95s, mode="lines+markers", name="p95", line=dict(color=COLORS["par"], dash="dash")), 1, 1)
+
+    # Row 1 Col 2: Parallel issuance throughput
+    if iss and iss.get("parallel"):
+        ns  = [r["n"] for r in iss["parallel"]]
+        cps = [r.get("throughput_cps", {}).get("mean", 0) for r in iss["parallel"]]
+        fig_html.add_trace(go.Scatter(x=ns, y=cps, mode="lines+markers", name="Certs/s", line=dict(color=COLORS["par"])), 1, 2)
+
+    # Row 1 Col 3: Concurrent verification throughput
+    if ver and ver.get("concurrent"):
+        ns  = [r["n"] for r in ver["concurrent"]]
+        qps = [r.get("throughput_qps", {}).get("mean", 0) for r in ver["concurrent"]]
+        fig_html.add_trace(go.Scatter(x=ns, y=qps, mode="lines+markers", name="Queries/s", line=dict(color=COLORS["ver"])), 1, 3)
+
+    # Row 2 Col 1: Throughput comparison
+    if iss and iss.get("parallel"):
+        ns  = [r["n"] for r in iss["parallel"]]
+        cps = [r.get("throughput_cps", {}).get("mean", 0) for r in iss["parallel"]]
+        fig_html.add_trace(go.Scatter(x=ns, y=cps, mode="lines+markers", name="Issuance parallel", line=dict(color=COLORS["seq"])), 2, 1)
+    if ver and ver.get("concurrent"):
+        ns  = [r["n"] for r in ver["concurrent"]]
+        qps = [r.get("throughput_qps", {}).get("mean", 0) for r in ver["concurrent"]]
+        fig_html.add_trace(go.Scatter(x=ns, y=qps, mode="lines+markers", name="Verification concurrent", line=dict(color=COLORS["ver"])), 2, 1)
+
+    # Row 2 Col 2: Concurrent users vs throughput
+    if conc and conc.get("concurrent"):
+        cs  = [r["c"] for r in conc["concurrent"]]
+        ops = [r.get("throughput_ops", {}).get("mean", 0) for r in conc["concurrent"]]
+        fig_html.add_trace(go.Scatter(x=cs, y=ops, mode="lines+markers", name="Mixed ops/s", line=dict(color=COLORS["mix"])), 2, 2)
+
+    # Row 2 Col 3: Finality histogram
+    if conc and conc.get("finality_ms"):
+        samples = conc["finality_ms"].get("samples", [])
+        if samples:
+            fig_html.add_trace(go.Histogram(x=samples, nbinsx=20, name="Finality (ms)", marker_color=COLORS["ver"]), 2, 3)
+
+    # Row 3 Col 1: Merkle tree
+    if thr and thr.get("merkle_growth"):
+        mg = thr["merkle_growth"]
+        fig_html.add_trace(go.Scatter(
+            x=[r["db_size_after"] for r in mg],
+            y=[r["batch_wall_ms"] for r in mg],
+            mode="lines+markers", name="Rebuild time (ms)", line=dict(color=COLORS["tree"])
+        ), 3, 1)
+
+    # Row 3 Col 2: Throughput over time
+    if thr and thr.get("sustained"):
+        wins = thr["sustained"].get("throughput_windows", [])
+        if wins:
+            fig_html.add_trace(go.Bar(
+                x=[w["window_start_s"] for w in wins],
+                y=[w["throughput_cps"] for w in wins],
+                name="Certs/s (10s window)", marker_color=COLORS["con"]
+            ), 3, 2)
+
+    # Row 3 Col 3: Burst
+    if thr and thr.get("peak_burst"):
+        b = thr["peak_burst"]
+        lat = b.get("latency", {})
+        kvs = [("p50", lat.get("median", 0)), ("p95", lat.get("p95", 0)), ("p99", lat.get("p99", 0))]
+        fig_html.add_trace(go.Bar(
+            x=[k for k, _ in kvs], y=[v for _, v in kvs],
+            name="Burst latency (ms)", marker_color=COLORS["burst"]
+        ), 3, 3)
+
+    fig_html.update_layout(
+        height=1000, width=1400,
+        title_text="<b>ICP Academic Credential Verification — Mainnet Research Benchmark Dashboard</b>",
+        title_font_size=16,
+        showlegend=False,
+        template="plotly_white",
+    )
+    dash_path = FIGURES_DIR / "dashboard.html"
+    fig_html.write_html(str(dash_path))
+    print(f"  Saved: figures/dashboard.html")
+else:
+    print("  (Plotly not installed — skipping HTML dashboard. Run: pip install plotly)")
+
+# ── Done ──────────────────────────────────────────────────────────────────────
+
+print(f"""
+==========================================
+  All figures saved to: benchmarks/visualize/figures/
+==========================================
+  PNG + PDF : 9 publication-ready figures
+  LaTeX     : figures/summary_table.tex
+  HTML      : figures/dashboard.html  (if Plotly installed)
+
+Include in your paper:
+  \\input{{benchmarks/visualize/figures/summary_table}}
+""")
