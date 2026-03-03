@@ -383,7 +383,8 @@ function UniversityPortal() {
                   <SectionLabel>Graduation Date *</SectionLabel>
                   <TextField fullWidth size="small" type="date" name="graduationDate"
                     value={certificateForm.graduationDate} onChange={handleInputChange}
-                    InputLabelProps={{ shrink: true }} required />
+                    InputLabelProps={{ shrink: true }} required
+                    sx={{ '& input::-webkit-calendar-picker-indicator': { filter: 'invert(1)' } }} />
                 </Box>
               </Grid>
               <Grid item xs={6} sm={3}>
@@ -391,7 +392,8 @@ function UniversityPortal() {
                   <SectionLabel>Issue Date *</SectionLabel>
                   <TextField fullWidth size="small" type="date" name="issueDate"
                     value={certificateForm.issueDate} onChange={handleInputChange}
-                    InputLabelProps={{ shrink: true }} required />
+                    InputLabelProps={{ shrink: true }} required
+                    sx={{ '& input::-webkit-calendar-picker-indicator': { filter: 'invert(1)' } }} />
                 </Box>
               </Grid>
               <Grid item xs={6} sm={3}>

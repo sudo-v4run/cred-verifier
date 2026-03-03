@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { credential_backend } from 'declarations/credential_backend';
+import { Actor, HttpAgent } from '@dfinity/agent';
+import { idlFactory, canisterId as backendCanisterId } from 'declarations/credential_backend';
 import {
   Box,
   TextField,
@@ -56,6 +57,23 @@ function VerificationPortal({ initialCertId = '' }) {
   const [certifiedData, setCertifiedData] = useState(null);
   const [certificateProof, setCertificateProof] = useState(null);
   const autoVerified = useRef(false);
+  const actorRef = useRef(null);
+
+  // Build (and cache) an actor whose agent has already fetched the local root key.
+  const getActor = async () => {
+    if (actorRef.current) return actorRef.current;
+    const isLocal = window.location.hostname === 'localhost' ||
+                    window.location.hostname === '127.0.0.1';
+    const agent = new HttpAgent({
+      host: isLocal ? 'http://127.0.0.1:4943' : 'https://ic0.app',
+    });
+    if (isLocal) await agent.fetchRootKey();
+    actorRef.current = Actor.createActor(idlFactory, {
+      agent,
+      canisterId: backendCanisterId,
+    });
+    return actorRef.current;
+  };
 
   // Auto-verify when opened from a shared link
   useEffect(() => {
@@ -73,8 +91,9 @@ function VerificationPortal({ initialCertId = '' }) {
     setCertifiedData(null);
     setCertificateProof(null);
     try {
-      const result = await credential_backend.verifyCertificate(idToVerify);
-      const certData = await credential_backend.getCertifiedData();
+      const backend = await getActor();
+      const result = await backend.verifyCertificate(idToVerify);
+      const certData = await backend.getCertifiedData();
       const isLocal = window.location.hostname.includes('localhost') ||
                       window.location.hostname.includes('127.0.0.1');
       setVerificationResult(result);
