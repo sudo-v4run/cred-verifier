@@ -1,4 +1,14 @@
 import { useState } from 'react';
+
+const _ORD = ['th','st','nd','rd'];
+const _MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const ordinal = (d) => { const v = d % 100; return d + (_ORD[(v - 20) % 10] || _ORD[v] || _ORD[0]); };
+/** "2026-03-05" → "5th March 2026" */
+const fmtDate = (iso) => {
+  if (!iso) return '—';
+  const [y, m, d] = iso.split('-').map(Number);
+  return `${ordinal(d)} ${_MON[m - 1]} ${y}`;
+};
 import { credential_backend } from 'declarations/credential_backend';
 import {
   Box,
@@ -226,14 +236,17 @@ function StudentPortal() {
                     <Grid item xs={12} sm={6}>
                       <DataField label="Student ID" value={cert.recipient.student_id} />
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid item xs={3}>
                       <DataField label="GPA" value={cert.credential.gpa.toFixed(2)} />
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid item xs={3}>
                       <DataField label="Honors" value={cert.credential.honors || '—'} />
                     </Grid>
-                    <Grid item xs={4}>
-                      <DataField label="Graduated" value={cert.credential.graduation_date} />
+                    <Grid item xs={3}>
+                      <DataField label="Start Date" value={fmtDate(cert.credential.issue_date)} />
+                    </Grid>
+                    <Grid item xs={3}>
+                      <DataField label="Completion Date" value={fmtDate(cert.credential.graduation_date)} />
                     </Grid>
                     <Grid item xs={12}>
                       <Divider />

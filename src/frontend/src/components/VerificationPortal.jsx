@@ -23,6 +23,24 @@ import VerifiedOutlinedIcon from '@mui/icons-material/VerifiedOutlined';
 
 // ─── tiny helpers ────────────────────────────────────────────────────────────
 
+const _ORD = ['th','st','nd','rd'];
+const _MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const ordinal = (d) => { const v = d % 100; return d + (_ORD[(v - 20) % 10] || _ORD[v] || _ORD[0]); };
+
+/** "2026-03-05" → "5th March 2026" */
+const fmtDate = (iso) => {
+  if (!iso) return '—';
+  const [y, m, d] = iso.split('-').map(Number);
+  return `${ordinal(d)} ${_MON[m - 1]} ${y}`;
+};
+
+/** nanoseconds bigint/number → "4th March 2026, 00:05 UTC" */
+const fmtTimestamp = (ns) => {
+  const dt = new Date(Number(ns) / 1_000_000);
+  const time = dt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false });
+  return `${ordinal(dt.getUTCDate())} ${_MON[dt.getUTCMonth()]} ${dt.getUTCFullYear()}, ${time} UTC`;
+};
+
 const SectionLabel = ({ children }) => (
   <Typography sx={{
     fontSize: '0.76rem', fontWeight: 700, letterSpacing: '0.08em',
@@ -230,7 +248,10 @@ function VerificationPortal({ initialCertId = '' }) {
                     <DataRow label="Honors" value={cert.credential.honors || '—'} />
                   </Grid>
                   <Grid item xs={4}>
-                    <DataRow label="Graduated" value={cert.credential.graduation_date} />
+                    <DataRow label="Start Date" value={fmtDate(cert.credential.issue_date)} />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <DataRow label="Completion Date" value={fmtDate(cert.credential.graduation_date)} />
                   </Grid>
                   <Grid item xs={12}>
                     <Divider />
@@ -241,9 +262,7 @@ function VerificationPortal({ initialCertId = '' }) {
                   <Grid item xs={12} sm={6}>
                     <DataRow
                       label="Issued On-Chain"
-                      value={new Date(Number(cert.block_timestamp) / 1_000_000).toLocaleString('en-US', {
-                        dateStyle: 'medium', timeStyle: 'short',
-                      })}
+                      value={fmtTimestamp(cert.block_timestamp)}
                     />
                   </Grid>
                   {verificationResult.verified_hash && (

@@ -60,7 +60,7 @@ function UniversityPortal() {
   const [certificateForm, setCertificateForm] = useState({
     certificateId: '', universityName: '',
     recipientName: '', studentId: '', recipientPrincipal: '',
-    degreeType: '', major: '', graduationDate: '', issueDate: '',
+    degreeType: '', major: '', startDate: '', completionDate: '',
     gpa: '', honors: '',
   });
 
@@ -124,10 +124,23 @@ function UniversityPortal() {
     setIssuedCertUrl('');
     try {
       // Auto-compute a canonical verification URL — no custom URL option
+      // Auto-generate issue timestamp
+      const now = new Date();
+      const day = now.getDate();
+      const ordinal = (d) => {
+        const s = ['th','st','nd','rd'];
+        const v = d % 100;
+        return d + (s[(v - 20) % 10] || s[v] || s[0]);
+      };
+      const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      const timeUTC = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false });
+      const issuedAtLabel = `${ordinal(now.getUTCDate())} ${monthNames[now.getUTCMonth()]} ${now.getUTCFullYear()}, ${timeUTC} UTC`;
+      const issueDateISO = now.toISOString().split('T')[0]; // YYYY-MM-DD for on-chain storage
+
       const univSlug = toSlug(certificateForm.universityName);
-      const batchYear = certificateForm.graduationDate
-        ? certificateForm.graduationDate.split('-')[0]
-        : new Date().getFullYear().toString();
+      const batchYear = certificateForm.completionDate
+        ? certificateForm.completionDate.split('-')[0]
+        : now.getFullYear().toString();
       const certId = certificateForm.certificateId;
       const verificationUrl =
         `${window.location.origin}/#/verify/${univSlug}/${batchYear}/${encodeURIComponent(certId)}`;
@@ -138,19 +151,19 @@ function UniversityPortal() {
         certificateForm.recipientName, certificateForm.studentId,
         certificateForm.recipientPrincipal || 'anonymous',
         certificateForm.degreeType, certificateForm.major,
-        certificateForm.graduationDate, certificateForm.issueDate,
+        certificateForm.completionDate, certificateForm.startDate,
         parseFloat(certificateForm.gpa) || 0.0, certificateForm.honors,
       );
       if (result.includes('Error')) {
         setMessage({ type: 'error', text: result });
       } else {
         setIssuedCertUrl(verificationUrl);
-        setMessage({ type: 'success', text: `Certificate issued on-chain — ID: ${result}` });
+        setMessage({ type: 'success', text: `Certificate issued on-chain — ID: ${result} · Issued: ${issuedAtLabel}` });
         setCertificateForm(prev => ({
           ...prev,
           certificateId: '', recipientName: '', studentId: '',
           recipientPrincipal: '', degreeType: '', major: '',
-          graduationDate: '', issueDate: '', gpa: '', honors: '',
+          startDate: '', completionDate: '', gpa: '', honors: '',
         }));
       }
     } catch (error) {
@@ -380,18 +393,18 @@ function UniversityPortal() {
               </Grid>
               <Grid item xs={6} sm={3}>
                 <Box>
-                  <SectionLabel>Graduation Date *</SectionLabel>
-                  <TextField fullWidth size="small" type="date" name="graduationDate"
-                    value={certificateForm.graduationDate} onChange={handleInputChange}
+                  <SectionLabel>Start Date *</SectionLabel>
+                  <TextField fullWidth size="small" type="date" name="startDate"
+                    value={certificateForm.startDate} onChange={handleInputChange}
                     InputLabelProps={{ shrink: true }} required
                     sx={{ '& input::-webkit-calendar-picker-indicator': { filter: 'invert(1)' } }} />
                 </Box>
               </Grid>
               <Grid item xs={6} sm={3}>
                 <Box>
-                  <SectionLabel>Issue Date *</SectionLabel>
-                  <TextField fullWidth size="small" type="date" name="issueDate"
-                    value={certificateForm.issueDate} onChange={handleInputChange}
+                  <SectionLabel>Completion Date *</SectionLabel>
+                  <TextField fullWidth size="small" type="date" name="completionDate"
+                    value={certificateForm.completionDate} onChange={handleInputChange}
                     InputLabelProps={{ shrink: true }} required
                     sx={{ '& input::-webkit-calendar-picker-indicator': { filter: 'invert(1)' } }} />
                 </Box>
