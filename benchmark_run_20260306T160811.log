@@ -1,0 +1,321 @@
+
+[1m[36m============================================================
+  ICP ACADEMIC CREDENTIAL VERIFICATION — MAINNET RESEARCH BENCHMARK
+============================================================[0m
+    [1mSuite                     [0mall
+    [1mNetwork                   [0mIC Mainnet
+    [1mHost                      [0mhttps://ic0.app
+    [1mCanister                  [0mpekzw-diaaa-aaaad-afh3q-cai
+
+
+[1m[34m── Connecting to IC mainnet canister …[0m
+[32m  ✓ Connected. Benchmark principal: xpdba-3hfvk-vfocv-eked2-do64e-qurlu-7xkgb-ns5sv-m4ue3-udca2-6qe[0m
+[32m  ✓ University identity confirmed.[0m
+
+
+[1m[36m============================================================
+  ISSUANCE BENCHMARK
+============================================================[0m
+[90m    Sequential N values : 1, 10, 100, 1000[0m
+[90m    Parallel N values   : 1, 10, 100, 1000, 10000[0m
+
+[1m[34m── Warm-up (priming IC routing caches) ...[0m
+[32m  ✓ Warm-up complete (3 calls)[0m
+
+[1m[34m── Sequential issuance -- one cert at a time[0m
+[90m      N = 1 (5 repeat(s)) ...[0m
+    rep 1/5, cert 1/1    rep 2/5, cert 1/1    rep 3/5, cert 1/1    rep 4/5, cert 1/1    rep 5/5, cert 1/1
+
+[1m[34m── Sequential N=1[0m
+    [1msamples                   [0m5
+    [1mmin (ms)                  [0m1631
+    [1mp50 (ms)                  [0m1990
+    [1mp75 (ms)                  [0m2691
+    [1mp95 (ms)                  [0m2703
+    [1mp99 (ms)                  [0m2705.4
+    [1mmean (ms)                 [0m2190.4
+    [1mstddev (ms)               [0m432.5
+[90m      N = 10 (5 repeat(s)) ...[0m
+    rep 1/5, cert 1/10    rep 1/5, cert 2/10    rep 1/5, cert 3/10    rep 1/5, cert 4/10    rep 1/5, cert 5/10    rep 1/5, cert 6/10    rep 1/5, cert 7/10    rep 1/5, cert 8/10    rep 1/5, cert 9/10    rep 1/5, cert 10/10    rep 2/5, cert 1/10    rep 2/5, cert 2/10    rep 2/5, cert 3/10    rep 2/5, cert 4/10    rep 2/5, cert 5/10    rep 2/5, cert 6/10    rep 2/5, cert 7/10    rep 2/5, cert 8/10    rep 2/5, cert 9/10    rep 2/5, cert 10/10    rep 3/5, cert 1/10    rep 3/5, cert 2/10    rep 3/5, cert 3/10    rep 3/5, cert 4/10    rep 3/5, cert 5/10    rep 3/5, cert 6/10    rep 3/5, cert 7/10    rep 3/5, cert 8/10    rep 3/5, cert 9/10    rep 3/5, cert 10/10    rep 4/5, cert 1/10    rep 4/5, cert 2/10    rep 4/5, cert 3/10    rep 4/5, cert 4/10    rep 4/5, cert 5/10    rep 4/5, cert 6/10    rep 4/5, cert 7/10    rep 4/5, cert 8/10    rep 4/5, cert 9/10    rep 4/5, cert 10/10    rep 5/5, cert 1/10    rep 5/5, cert 2/10    rep 5/5, cert 3/10    rep 5/5, cert 4/10    rep 5/5, cert 5/10    rep 5/5, cert 6/10    rep 5/5, cert 7/10    rep 5/5, cert 8/10    rep 5/5, cert 9/10    rep 5/5, cert 10/10
+
+[1m[34m── Sequential N=10[0m
+    [1msamples                   [0m50
+    [1mmin (ms)                  [0m810
+    [1mp50 (ms)                  [0m1994
+    [1mp75 (ms)                  [0m2139
+    [1mp95 (ms)                  [0m3176.1
+    [1mp99 (ms)                  [0m10025.23
+    [1mmean (ms)                 [0m2337.54
+    [1mstddev (ms)               [0m2071.34
+[90m      N = 100 (5 repeat(s)) ...[0m
+    rep 1/5, cert 1/100    rep 1/5, cert 2/100    rep 1/5, cert 3/100    rep 1/5, cert 4/100    rep 1/5, cert 5/100    rep 1/5, cert 6/100    rep 1/5, cert 7/100    rep 1/5, cert 8/100    rep 1/5, cert 9/100    rep 1/5, cert 10/100    rep 1/5, cert 11/100    rep 1/5, cert 12/100    rep 1/5, cert 13/100    rep 1/5, cert 14/100    rep 1/5, cert 15/100    rep 1/5, cert 16/100    rep 1/5, cert 17/100    rep 1/5, cert 18/100    rep 1/5, cert 19/100    rep 1/5, cert 20/100    rep 1/5, cert 21/100    rep 1/5, cert 22/100    rep 1/5, cert 23/100    rep 1/5, cert 24/100    rep 1/5, cert 25/100    rep 1/5, cert 26/100    rep 1/5, cert 27/100    rep 1/5, cert 28/100    rep 1/5, cert 29/100    rep 1/5, cert 30/100    rep 1/5, cert 31/100    rep 1/5, cert 32/100    rep 1/5, cert 33/100    rep 1/5, cert 34/100    rep 1/5, cert 35/100    rep 1/5, cert 36/100    rep 1/5, cert 37/100    rep 1/5, cert 38/100    rep 1/5, cert 39/100    rep 1/5, cert 40/100    rep 1/5, cert 41/100    rep 1/5, cert 42/100    rep 1/5, cert 43/100    rep 1/5, cert 44/100    rep 1/5, cert 45/100    rep 1/5, cert 46/100    rep 1/5, cert 47/100    rep 1/5, cert 48/100    rep 1/5, cert 49/100    rep 1/5, cert 50/100    rep 1/5, cert 51/100    rep 1/5, cert 52/100    rep 1/5, cert 53/100    rep 1/5, cert 54/100    rep 1/5, cert 55/100    rep 1/5, cert 56/100    rep 1/5, cert 57/100    rep 1/5, cert 58/100    rep 1/5, cert 59/100    rep 1/5, cert 60/100    rep 1/5, cert 61/100    rep 1/5, cert 62/100    rep 1/5, cert 63/100    rep 1/5, cert 64/100    rep 1/5, cert 65/100    rep 1/5, cert 66/100    rep 1/5, cert 67/100    rep 1/5, cert 68/100    rep 1/5, cert 69/100    rep 1/5, cert 70/100    rep 1/5, cert 71/100    rep 1/5, cert 72/100    rep 1/5, cert 73/100    rep 1/5, cert 74/100    rep 1/5, cert 75/100    rep 1/5, cert 76/100    rep 1/5, cert 77/100    rep 1/5, cert 78/100    rep 1/5, cert 79/100    rep 1/5, cert 80/100    rep 1/5, cert 81/100    rep 1/5, cert 82/100    rep 1/5, cert 83/100    rep 1/5, cert 84/100    rep 1/5, cert 85/100    rep 1/5, cert 86/100    rep 1/5, cert 87/100    rep 1/5, cert 88/100    rep 1/5, cert 89/100    rep 1/5, cert 90/100    rep 1/5, cert 91/100    rep 1/5, cert 92/100    rep 1/5, cert 93/100    rep 1/5, cert 94/100    rep 1/5, cert 95/100    rep 1/5, cert 96/100    rep 1/5, cert 97/100    rep 1/5, cert 98/100    rep 1/5, cert 99/100    rep 1/5, cert 100/100    rep 2/5, cert 1/100    rep 2/5, cert 2/100    rep 2/5, cert 3/100    rep 2/5, cert 4/100    rep 2/5, cert 5/100    rep 2/5, cert 6/100    rep 2/5, cert 7/100    rep 2/5, cert 8/100    rep 2/5, cert 9/100    rep 2/5, cert 10/100    rep 2/5, cert 11/100    rep 2/5, cert 12/100    rep 2/5, cert 13/100    rep 2/5, cert 14/100    rep 2/5, cert 15/100    rep 2/5, cert 16/100    rep 2/5, cert 17/100    rep 2/5, cert 18/100    rep 2/5, cert 19/100    rep 2/5, cert 20/100    rep 2/5, cert 21/100    rep 2/5, cert 22/100    rep 2/5, cert 23/100    rep 2/5, cert 24/100    rep 2/5, cert 25/100    rep 2/5, cert 26/100    rep 2/5, cert 27/100    rep 2/5, cert 28/100    rep 2/5, cert 29/100    rep 2/5, cert 30/100    rep 2/5, cert 31/100    rep 2/5, cert 32/100    rep 2/5, cert 33/100    rep 2/5, cert 34/100    rep 2/5, cert 35/100    rep 2/5, cert 36/100    rep 2/5, cert 37/100    rep 2/5, cert 38/100    rep 2/5, cert 39/100    rep 2/5, cert 40/100    rep 2/5, cert 41/100    rep 2/5, cert 42/100    rep 2/5, cert 43/100    rep 2/5, cert 44/100    rep 2/5, cert 45/100    rep 2/5, cert 46/100    rep 2/5, cert 47/100    rep 2/5, cert 48/100    rep 2/5, cert 49/100    rep 2/5, cert 50/100    rep 2/5, cert 51/100    rep 2/5, cert 52/100    rep 2/5, cert 53/100    rep 2/5, cert 54/100    rep 2/5, cert 55/100    rep 2/5, cert 56/100    rep 2/5, cert 57/100    rep 2/5, cert 58/100    rep 2/5, cert 59/100    rep 2/5, cert 60/100    rep 2/5, cert 61/100    rep 2/5, cert 62/100    rep 2/5, cert 63/100    rep 2/5, cert 64/100    rep 2/5, cert 65/100    rep 2/5, cert 66/100    rep 2/5, cert 67/100    rep 2/5, cert 68/100    rep 2/5, cert 69/100    rep 2/5, cert 70/100    rep 2/5, cert 71/100    rep 2/5, cert 72/100    rep 2/5, cert 73/100    rep 2/5, cert 74/100    rep 2/5, cert 75/100    rep 2/5, cert 76/100    rep 2/5, cert 77/100    rep 2/5, cert 78/100    rep 2/5, cert 79/100    rep 2/5, cert 80/100    rep 2/5, cert 81/100    rep 2/5, cert 82/100    rep 2/5, cert 83/100    rep 2/5, cert 84/100    rep 2/5, cert 85/100    rep 2/5, cert 86/100    rep 2/5, cert 87/100    rep 2/5, cert 88/100    rep 2/5, cert 89/100    rep 2/5, cert 90/100    rep 2/5, cert 91/100    rep 2/5, cert 92/100    rep 2/5, cert 93/100    rep 2/5, cert 94/100    rep 2/5, cert 95/100    rep 2/5, cert 96/100    rep 2/5, cert 97/100    rep 2/5, cert 98/100    rep 2/5, cert 99/100    rep 2/5, cert 100/100    rep 3/5, cert 1/100    rep 3/5, cert 2/100    rep 3/5, cert 3/100    rep 3/5, cert 4/100    rep 3/5, cert 5/100    rep 3/5, cert 6/100    rep 3/5, cert 7/100    rep 3/5, cert 8/100    rep 3/5, cert 9/100    rep 3/5, cert 10/100    rep 3/5, cert 11/100    rep 3/5, cert 12/100    rep 3/5, cert 13/100    rep 3/5, cert 14/100    rep 3/5, cert 15/100    rep 3/5, cert 16/100    rep 3/5, cert 17/100    rep 3/5, cert 18/100    rep 3/5, cert 19/100    rep 3/5, cert 20/100    rep 3/5, cert 21/100    rep 3/5, cert 22/100    rep 3/5, cert 23/100    rep 3/5, cert 24/100    rep 3/5, cert 25/100    rep 3/5, cert 26/100    rep 3/5, cert 27/100    rep 3/5, cert 28/100    rep 3/5, cert 29/100    rep 3/5, cert 30/100    rep 3/5, cert 31/100    rep 3/5, cert 32/100    rep 3/5, cert 33/100    rep 3/5, cert 34/100    rep 3/5, cert 35/100    rep 3/5, cert 36/100    rep 3/5, cert 37/100    rep 3/5, cert 38/100    rep 3/5, cert 39/100    rep 3/5, cert 40/100    rep 3/5, cert 41/100    rep 3/5, cert 42/100    rep 3/5, cert 43/100    rep 3/5, cert 44/100    rep 3/5, cert 45/100    rep 3/5, cert 46/100    rep 3/5, cert 47/100    rep 3/5, cert 48/100    rep 3/5, cert 49/100    rep 3/5, cert 50/100    rep 3/5, cert 51/100    rep 3/5, cert 52/100    rep 3/5, cert 53/100    rep 3/5, cert 54/100    rep 3/5, cert 55/100    rep 3/5, cert 56/100    rep 3/5, cert 57/100    rep 3/5, cert 58/100    rep 3/5, cert 59/100    rep 3/5, cert 60/100    rep 3/5, cert 61/100    rep 3/5, cert 62/100    rep 3/5, cert 63/100    rep 3/5, cert 64/100    rep 3/5, cert 65/100    rep 3/5, cert 66/100    rep 3/5, cert 67/100    rep 3/5, cert 68/100    rep 3/5, cert 69/100    rep 3/5, cert 70/100    rep 3/5, cert 71/100    rep 3/5, cert 72/100    rep 3/5, cert 73/100    rep 3/5, cert 74/100    rep 3/5, cert 75/100    rep 3/5, cert 76/100    rep 3/5, cert 77/100    rep 3/5, cert 78/100    rep 3/5, cert 79/100    rep 3/5, cert 80/100    rep 3/5, cert 81/100    rep 3/5, cert 82/100    rep 3/5, cert 83/100    rep 3/5, cert 84/100    rep 3/5, cert 85/100    rep 3/5, cert 86/100    rep 3/5, cert 87/100    rep 3/5, cert 88/100    rep 3/5, cert 89/100    rep 3/5, cert 90/100    rep 3/5, cert 91/100    rep 3/5, cert 92/100    rep 3/5, cert 93/100    rep 3/5, cert 94/100    rep 3/5, cert 95/100    rep 3/5, cert 96/100    rep 3/5, cert 97/100    rep 3/5, cert 98/100    rep 3/5, cert 99/100    rep 3/5, cert 100/100    rep 4/5, cert 1/100    rep 4/5, cert 2/100    rep 4/5, cert 3/100    rep 4/5, cert 4/100    rep 4/5, cert 5/100    rep 4/5, cert 6/100    rep 4/5, cert 7/100    rep 4/5, cert 8/100    rep 4/5, cert 9/100    rep 4/5, cert 10/100    rep 4/5, cert 11/100    rep 4/5, cert 12/100    rep 4/5, cert 13/100    rep 4/5, cert 14/100    rep 4/5, cert 15/100    rep 4/5, cert 16/100    rep 4/5, cert 17/100    rep 4/5, cert 18/100    rep 4/5, cert 19/100    rep 4/5, cert 20/100    rep 4/5, cert 21/100    rep 4/5, cert 22/100    rep 4/5, cert 23/100    rep 4/5, cert 24/100    rep 4/5, cert 25/100    rep 4/5, cert 26/100    rep 4/5, cert 27/100    rep 4/5, cert 28/100    rep 4/5, cert 29/100    rep 4/5, cert 30/100    rep 4/5, cert 31/100    rep 4/5, cert 32/100    rep 4/5, cert 33/100    rep 4/5, cert 34/100    rep 4/5, cert 35/100    rep 4/5, cert 36/100    rep 4/5, cert 37/100    rep 4/5, cert 38/100    rep 4/5, cert 39/100    rep 4/5, cert 40/100    rep 4/5, cert 41/100    rep 4/5, cert 42/100    rep 4/5, cert 43/100    rep 4/5, cert 44/100    rep 4/5, cert 45/100    rep 4/5, cert 46/100    rep 4/5, cert 47/100    rep 4/5, cert 48/100    rep 4/5, cert 49/100    rep 4/5, cert 50/100    rep 4/5, cert 51/100    rep 4/5, cert 52/100    rep 4/5, cert 53/100    rep 4/5, cert 54/100    rep 4/5, cert 55/100    rep 4/5, cert 56/100    rep 4/5, cert 57/100    rep 4/5, cert 58/100    rep 4/5, cert 59/100    rep 4/5, cert 60/100    rep 4/5, cert 61/100    rep 4/5, cert 62/100    rep 4/5, cert 63/100    rep 4/5, cert 64/100    rep 4/5, cert 65/100    rep 4/5, cert 66/100    rep 4/5, cert 67/100    rep 4/5, cert 68/100    rep 4/5, cert 69/100    rep 4/5, cert 70/100    rep 4/5, cert 71/100    rep 4/5, cert 72/100    rep 4/5, cert 73/100    rep 4/5, cert 74/100    rep 4/5, cert 75/100    rep 4/5, cert 76/100    rep 4/5, cert 77/100    rep 4/5, cert 78/100    rep 4/5, cert 79/100    rep 4/5, cert 80/100    rep 4/5, cert 81/100    rep 4/5, cert 82/100    rep 4/5, cert 83/100    rep 4/5, cert 84/100    rep 4/5, cert 85/100    rep 4/5, cert 86/100    rep 4/5, cert 87/100    rep 4/5, cert 88/100    rep 4/5, cert 89/100    rep 4/5, cert 90/100    rep 4/5, cert 91/100    rep 4/5, cert 92/100    rep 4/5, cert 93/100    rep 4/5, cert 94/100    rep 4/5, cert 95/100    rep 4/5, cert 96/100    rep 4/5, cert 97/100    rep 4/5, cert 98/100    rep 4/5, cert 99/100    rep 4/5, cert 100/100    rep 5/5, cert 1/100    rep 5/5, cert 2/100    rep 5/5, cert 3/100    rep 5/5, cert 4/100    rep 5/5, cert 5/100    rep 5/5, cert 6/100    rep 5/5, cert 7/100    rep 5/5, cert 8/100    rep 5/5, cert 9/100    rep 5/5, cert 10/100    rep 5/5, cert 11/100    rep 5/5, cert 12/100    rep 5/5, cert 13/100    rep 5/5, cert 14/100    rep 5/5, cert 15/100    rep 5/5, cert 16/100    rep 5/5, cert 17/100    rep 5/5, cert 18/100    rep 5/5, cert 19/100    rep 5/5, cert 20/100    rep 5/5, cert 21/100    rep 5/5, cert 22/100    rep 5/5, cert 23/100    rep 5/5, cert 24/100    rep 5/5, cert 25/100    rep 5/5, cert 26/100    rep 5/5, cert 27/100    rep 5/5, cert 28/100    rep 5/5, cert 29/100    rep 5/5, cert 30/100    rep 5/5, cert 31/100    rep 5/5, cert 32/100    rep 5/5, cert 33/100    rep 5/5, cert 34/100    rep 5/5, cert 35/100    rep 5/5, cert 36/100    rep 5/5, cert 37/100    rep 5/5, cert 38/100    rep 5/5, cert 39/100    rep 5/5, cert 40/100    rep 5/5, cert 41/100    rep 5/5, cert 42/100    rep 5/5, cert 43/100    rep 5/5, cert 44/100    rep 5/5, cert 45/100    rep 5/5, cert 46/100    rep 5/5, cert 47/100    rep 5/5, cert 48/100    rep 5/5, cert 49/100    rep 5/5, cert 50/100    rep 5/5, cert 51/100    rep 5/5, cert 52/100    rep 5/5, cert 53/100    rep 5/5, cert 54/100    rep 5/5, cert 55/100    rep 5/5, cert 56/100    rep 5/5, cert 57/100    rep 5/5, cert 58/100    rep 5/5, cert 59/100    rep 5/5, cert 60/100    rep 5/5, cert 61/100    rep 5/5, cert 62/100    rep 5/5, cert 63/100    rep 5/5, cert 64/100    rep 5/5, cert 65/100    rep 5/5, cert 66/100    rep 5/5, cert 67/100    rep 5/5, cert 68/100    rep 5/5, cert 69/100    rep 5/5, cert 70/100    rep 5/5, cert 71/100    rep 5/5, cert 72/100    rep 5/5, cert 73/100    rep 5/5, cert 74/100    rep 5/5, cert 75/100    rep 5/5, cert 76/100    rep 5/5, cert 77/100    rep 5/5, cert 78/100    rep 5/5, cert 79/100    rep 5/5, cert 80/100    rep 5/5, cert 81/100    rep 5/5, cert 82/100    rep 5/5, cert 83/100    rep 5/5, cert 84/100    rep 5/5, cert 85/100    rep 5/5, cert 86/100    rep 5/5, cert 87/100    rep 5/5, cert 88/100    rep 5/5, cert 89/100    rep 5/5, cert 90/100    rep 5/5, cert 91/100    rep 5/5, cert 92/100    rep 5/5, cert 93/100    rep 5/5, cert 94/100    rep 5/5, cert 95/100    rep 5/5, cert 96/100    rep 5/5, cert 97/100    rep 5/5, cert 98/100    rep 5/5, cert 99/100    rep 5/5, cert 100/100
+
+[1m[34m── Sequential N=100[0m
+    [1msamples                   [0m500
+    [1mmin (ms)                  [0m784
+    [1mp50 (ms)                  [0m2045
+    [1mp75 (ms)                  [0m2267.25
+    [1mp95 (ms)                  [0m3570.4
+    [1mp99 (ms)                  [0m11101.32
+    [1mmean (ms)                 [0m2320.12
+    [1mstddev (ms)               [0m1452.14
+[90m      N = 1,000 (5 repeat(s)) ...[0m
+    rep 1/5, cert 1/1000    rep 1/5, cert 2/1000    rep 1/5, cert 3/1000    rep 1/5, cert 4/1000    rep 1/5, cert 5/1000    rep 1/5, cert 6/1000    rep 1/5, cert 7/1000    rep 1/5, cert 8/1000    rep 1/5, cert 9/1000    rep 1/5, cert 10/1000    rep 1/5, cert 11/1000    rep 1/5, cert 12/1000    rep 1/5, cert 13/1000    rep 1/5, cert 14/1000    rep 1/5, cert 15/1000    rep 1/5, cert 16/1000    rep 1/5, cert 17/1000    rep 1/5, cert 18/1000    rep 1/5, cert 19/1000    rep 1/5, cert 20/1000    rep 1/5, cert 21/1000    rep 1/5, cert 22/1000    rep 1/5, cert 23/1000    rep 1/5, cert 24/1000    rep 1/5, cert 25/1000    rep 1/5, cert 26/1000    rep 1/5, cert 27/1000    rep 1/5, cert 28/1000    rep 1/5, cert 29/1000    rep 1/5, cert 30/1000    rep 1/5, cert 31/1000    rep 1/5, cert 32/1000    rep 1/5, cert 33/1000    rep 1/5, cert 34/1000    rep 1/5, cert 35/1000    rep 1/5, cert 36/1000    rep 1/5, cert 37/1000    rep 1/5, cert 38/1000    rep 1/5, cert 39/1000    rep 1/5, cert 40/1000    rep 1/5, cert 41/1000    rep 1/5, cert 42/1000    rep 1/5, cert 43/1000    rep 1/5, cert 44/1000    rep 1/5, cert 45/1000    rep 1/5, cert 46/1000    rep 1/5, cert 47/1000    rep 1/5, cert 48/1000    rep 1/5, cert 49/1000    rep 1/5, cert 50/1000    rep 1/5, cert 51/1000    rep 1/5, cert 52/1000    rep 1/5, cert 53/1000    rep 1/5, cert 54/1000    rep 1/5, cert 55/1000    rep 1/5, cert 56/1000    rep 1/5, cert 57/1000    rep 1/5, cert 58/1000    rep 1/5, cert 59/1000    rep 1/5, cert 60/1000    rep 1/5, cert 61/1000    rep 1/5, cert 62/1000    rep 1/5, cert 63/1000    rep 1/5, cert 64/1000    rep 1/5, cert 65/1000    rep 1/5, cert 66/1000    rep 1/5, cert 67/1000    rep 1/5, cert 68/1000    rep 1/5, cert 69/1000    rep 1/5, cert 70/1000    rep 1/5, cert 71/1000    rep 1/5, cert 72/1000    rep 1/5, cert 73/1000    rep 1/5, cert 74/1000    rep 1/5, cert 75/1000    rep 1/5, cert 76/1000    rep 1/5, cert 77/1000    rep 1/5, cert 78/1000    rep 1/5, cert 79/1000    rep 1/5, cert 80/1000    rep 1/5, cert 81/1000    rep 1/5, cert 82/1000    rep 1/5, cert 83/1000    rep 1/5, cert 84/1000    rep 1/5, cert 85/1000    rep 1/5, cert 86/1000    rep 1/5, cert 87/1000    rep 1/5, cert 88/1000    rep 1/5, cert 89/1000    rep 1/5, cert 90/1000    rep 1/5, cert 91/1000    rep 1/5, cert 92/1000    rep 1/5, cert 93/1000    rep 1/5, cert 94/1000    rep 1/5, cert 95/1000    rep 1/5, cert 96/1000    rep 1/5, cert 97/1000    rep 1/5, cert 98/1000    rep 1/5, cert 99/1000    rep 1/5, cert 100/1000    rep 1/5, cert 101/1000    rep 1/5, cert 102/1000    rep 1/5, cert 103/1000    rep 1/5, cert 104/1000    rep 1/5, cert 105/1000    rep 1/5, cert 106/1000    rep 1/5, cert 107/1000    rep 1/5, cert 108/1000    rep 1/5, cert 109/1000    rep 1/5, cert 110/1000    rep 1/5, cert 111/1000    rep 1/5, cert 112/1000    rep 1/5, cert 113/1000    rep 1/5, cert 114/1000    rep 1/5, cert 115/1000    rep 1/5, cert 116/1000    rep 1/5, cert 117/1000    rep 1/5, cert 118/1000    rep 1/5, cert 119/1000    rep 1/5, cert 120/1000    rep 1/5, cert 121/1000    rep 1/5, cert 122/1000    rep 1/5, cert 123/1000    rep 1/5, cert 124/1000    rep 1/5, cert 125/1000    rep 1/5, cert 126/1000    rep 1/5, cert 127/1000    rep 1/5, cert 128/1000    rep 1/5, cert 129/1000    rep 1/5, cert 130/1000    rep 1/5, cert 131/1000    rep 1/5, cert 132/1000    rep 1/5, cert 133/1000    rep 1/5, cert 134/1000    rep 1/5, cert 135/1000    rep 1/5, cert 136/1000    rep 1/5, cert 137/1000    rep 1/5, cert 138/1000    rep 1/5, cert 139/1000    rep 1/5, cert 140/1000    rep 1/5, cert 141/1000    rep 1/5, cert 142/1000    rep 1/5, cert 143/1000    rep 1/5, cert 144/1000    rep 1/5, cert 145/1000    rep 1/5, cert 146/1000    rep 1/5, cert 147/1000    rep 1/5, cert 148/1000    rep 1/5, cert 149/1000    rep 1/5, cert 150/1000    rep 1/5, cert 151/1000    rep 1/5, cert 152/1000    rep 1/5, cert 153/1000    rep 1/5, cert 154/1000    rep 1/5, cert 155/1000    rep 1/5, cert 156/1000    rep 1/5, cert 157/1000    rep 1/5, cert 158/1000    rep 1/5, cert 159/1000    rep 1/5, cert 160/1000    rep 1/5, cert 161/1000    rep 1/5, cert 162/1000    rep 1/5, cert 163/1000    rep 1/5, cert 164/1000    rep 1/5, cert 165/1000    rep 1/5, cert 166/1000    rep 1/5, cert 167/1000    rep 1/5, cert 168/1000    rep 1/5, cert 169/1000    rep 1/5, cert 170/1000    rep 1/5, cert 171/1000    rep 1/5, cert 172/1000    rep 1/5, cert 173/1000    rep 1/5, cert 174/1000    rep 1/5, cert 175/1000    rep 1/5, cert 176/1000    rep 1/5, cert 177/1000    rep 1/5, cert 178/1000    rep 1/5, cert 179/1000    rep 1/5, cert 180/1000    rep 1/5, cert 181/1000    rep 1/5, cert 182/1000    rep 1/5, cert 183/1000    rep 1/5, cert 184/1000    rep 1/5, cert 185/1000    rep 1/5, cert 186/1000    rep 1/5, cert 187/1000    rep 1/5, cert 188/1000    rep 1/5, cert 189/1000    rep 1/5, cert 190/1000    rep 1/5, cert 191/1000    rep 1/5, cert 192/1000    rep 1/5, cert 193/1000    rep 1/5, cert 194/1000    rep 1/5, cert 195/1000    rep 1/5, cert 196/1000    rep 1/5, cert 197/1000    rep 1/5, cert 198/1000    rep 1/5, cert 199/1000    rep 1/5, cert 200/1000    rep 1/5, cert 201/1000    rep 1/5, cert 202/1000    rep 1/5, cert 203/1000    rep 1/5, cert 204/1000    rep 1/5, cert 205/1000    rep 1/5, cert 206/1000    rep 1/5, cert 207/1000    rep 1/5, cert 208/1000    rep 1/5, cert 209/1000    rep 1/5, cert 210/1000    rep 1/5, cert 211/1000    rep 1/5, cert 212/1000    rep 1/5, cert 213/1000    rep 1/5, cert 214/1000    rep 1/5, cert 215/1000    rep 1/5, cert 216/1000    rep 1/5, cert 217/1000    rep 1/5, cert 218/1000    rep 1/5, cert 219/1000    rep 1/5, cert 220/1000    rep 1/5, cert 221/1000    rep 1/5, cert 222/1000    rep 1/5, cert 223/1000    rep 1/5, cert 224/1000    rep 1/5, cert 225/1000    rep 1/5, cert 226/1000    rep 1/5, cert 227/1000    rep 1/5, cert 228/1000    rep 1/5, cert 229/1000    rep 1/5, cert 230/1000    rep 1/5, cert 231/1000    rep 1/5, cert 232/1000    rep 1/5, cert 233/1000    rep 1/5, cert 234/1000    rep 1/5, cert 235/1000    rep 1/5, cert 236/1000    rep 1/5, cert 237/1000    rep 1/5, cert 238/1000    rep 1/5, cert 239/1000    rep 1/5, cert 240/1000    rep 1/5, cert 241/1000    rep 1/5, cert 242/1000    rep 1/5, cert 243/1000    rep 1/5, cert 244/1000    rep 1/5, cert 245/1000    rep 1/5, cert 246/1000    rep 1/5, cert 247/1000    rep 1/5, cert 248/1000    rep 1/5, cert 249/1000    rep 1/5, cert 250/1000    rep 1/5, cert 251/1000    rep 1/5, cert 252/1000    rep 1/5, cert 253/1000    rep 1/5, cert 254/1000    rep 1/5, cert 255/1000    rep 1/5, cert 256/1000    rep 1/5, cert 257/1000    rep 1/5, cert 258/1000    rep 1/5, cert 259/1000    rep 1/5, cert 260/1000    rep 1/5, cert 261/1000    rep 1/5, cert 262/1000    rep 1/5, cert 263/1000    rep 1/5, cert 264/1000    rep 1/5, cert 265/1000    rep 1/5, cert 266/1000    rep 1/5, cert 267/1000    rep 1/5, cert 268/1000    rep 1/5, cert 269/1000    rep 1/5, cert 270/1000    rep 1/5, cert 271/1000    rep 1/5, cert 272/1000    rep 1/5, cert 273/1000    rep 1/5, cert 274/1000    rep 1/5, cert 275/1000    rep 1/5, cert 276/1000    rep 1/5, cert 277/1000    rep 1/5, cert 278/1000    rep 1/5, cert 279/1000    rep 1/5, cert 280/1000    rep 1/5, cert 281/1000    rep 1/5, cert 282/1000    rep 1/5, cert 283/1000    rep 1/5, cert 284/1000    rep 1/5, cert 285/1000    rep 1/5, cert 286/1000    rep 1/5, cert 287/1000    rep 1/5, cert 288/1000    rep 1/5, cert 289/1000    rep 1/5, cert 290/1000    rep 1/5, cert 291/1000    rep 1/5, cert 292/1000    rep 1/5, cert 293/1000    rep 1/5, cert 294/1000    rep 1/5, cert 295/1000    rep 1/5, cert 296/1000    rep 1/5, cert 297/1000    rep 1/5, cert 298/1000    rep 1/5, cert 299/1000    rep 1/5, cert 300/1000    rep 1/5, cert 301/1000    rep 1/5, cert 302/1000    rep 1/5, cert 303/1000    rep 1/5, cert 304/1000    rep 1/5, cert 305/1000    rep 1/5, cert 306/1000    rep 1/5, cert 307/1000    rep 1/5, cert 308/1000    rep 1/5, cert 309/1000    rep 1/5, cert 310/1000    rep 1/5, cert 311/1000    rep 1/5, cert 312/1000    rep 1/5, cert 313/1000    rep 1/5, cert 314/1000    rep 1/5, cert 315/1000    rep 1/5, cert 316/1000    rep 1/5, cert 317/1000    rep 1/5, cert 318/1000    rep 1/5, cert 319/1000    rep 1/5, cert 320/1000    rep 1/5, cert 321/1000    rep 1/5, cert 322/1000    rep 1/5, cert 323/1000    rep 1/5, cert 324/1000    rep 1/5, cert 325/1000    rep 1/5, cert 326/1000    rep 1/5, cert 327/1000    rep 1/5, cert 328/1000    rep 1/5, cert 329/1000    rep 1/5, cert 330/1000    rep 1/5, cert 331/1000    rep 1/5, cert 332/1000    rep 1/5, cert 333/1000    rep 1/5, cert 334/1000    rep 1/5, cert 335/1000    rep 1/5, cert 336/1000    rep 1/5, cert 337/1000    rep 1/5, cert 338/1000    rep 1/5, cert 339/1000    rep 1/5, cert 340/1000    rep 1/5, cert 341/1000    rep 1/5, cert 342/1000    rep 1/5, cert 343/1000    rep 1/5, cert 344/1000    rep 1/5, cert 345/1000    rep 1/5, cert 346/1000    rep 1/5, cert 347/1000    rep 1/5, cert 348/1000    rep 1/5, cert 349/1000    rep 1/5, cert 350/1000    rep 1/5, cert 351/1000    rep 1/5, cert 352/1000    rep 1/5, cert 353/1000    rep 1/5, cert 354/1000    rep 1/5, cert 355/1000    rep 1/5, cert 356/1000    rep 1/5, cert 357/1000    rep 1/5, cert 358/1000    rep 1/5, cert 359/1000    rep 1/5, cert 360/1000    rep 1/5, cert 361/1000    rep 1/5, cert 362/1000    rep 1/5, cert 363/1000    rep 1/5, cert 364/1000    rep 1/5, cert 365/1000    rep 1/5, cert 366/1000    rep 1/5, cert 367/1000    rep 1/5, cert 368/1000    rep 1/5, cert 369/1000    rep 1/5, cert 370/1000    rep 1/5, cert 371/1000    rep 1/5, cert 372/1000    rep 1/5, cert 373/1000    rep 1/5, cert 374/1000    rep 1/5, cert 375/1000    rep 1/5, cert 376/1000    rep 1/5, cert 377/1000    rep 1/5, cert 378/1000    rep 1/5, cert 379/1000    rep 1/5, cert 380/1000    rep 1/5, cert 381/1000    rep 1/5, cert 382/1000    rep 1/5, cert 383/1000    rep 1/5, cert 384/1000    rep 1/5, cert 385/1000    rep 1/5, cert 386/1000    rep 1/5, cert 387/1000    rep 1/5, cert 388/1000    rep 1/5, cert 389/1000    rep 1/5, cert 390/1000    rep 1/5, cert 391/1000    rep 1/5, cert 392/1000    rep 1/5, cert 393/1000    rep 1/5, cert 394/1000    rep 1/5, cert 395/1000    rep 1/5, cert 396/1000    rep 1/5, cert 397/1000    rep 1/5, cert 398/1000    rep 1/5, cert 399/1000    rep 1/5, cert 400/1000    rep 1/5, cert 401/1000    rep 1/5, cert 402/1000    rep 1/5, cert 403/1000    rep 1/5, cert 404/1000    rep 1/5, cert 405/1000    rep 1/5, cert 406/1000    rep 1/5, cert 407/1000    rep 1/5, cert 408/1000    rep 1/5, cert 409/1000    rep 1/5, cert 410/1000    rep 1/5, cert 411/1000    rep 1/5, cert 412/1000    rep 1/5, cert 413/1000    rep 1/5, cert 414/1000    rep 1/5, cert 415/1000    rep 1/5, cert 416/1000    rep 1/5, cert 417/1000    rep 1/5, cert 418/1000    rep 1/5, cert 419/1000    rep 1/5, cert 420/1000    rep 1/5, cert 421/1000    rep 1/5, cert 422/1000    rep 1/5, cert 423/1000    rep 1/5, cert 424/1000    rep 1/5, cert 425/1000    rep 1/5, cert 426/1000    rep 1/5, cert 427/1000    rep 1/5, cert 428/1000    rep 1/5, cert 429/1000    rep 1/5, cert 430/1000    rep 1/5, cert 431/1000    rep 1/5, cert 432/1000    rep 1/5, cert 433/1000    rep 1/5, cert 434/1000    rep 1/5, cert 435/1000    rep 1/5, cert 436/1000    rep 1/5, cert 437/1000    rep 1/5, cert 438/1000    rep 1/5, cert 439/1000    rep 1/5, cert 440/1000    rep 1/5, cert 441/1000    rep 1/5, cert 442/1000    rep 1/5, cert 443/1000    rep 1/5, cert 444/1000    rep 1/5, cert 445/1000    rep 1/5, cert 446/1000    rep 1/5, cert 447/1000    rep 1/5, cert 448/1000    rep 1/5, cert 449/1000    rep 1/5, cert 450/1000    rep 1/5, cert 451/1000    rep 1/5, cert 452/1000    rep 1/5, cert 453/1000    rep 1/5, cert 454/1000    rep 1/5, cert 455/1000    rep 1/5, cert 456/1000    rep 1/5, cert 457/1000    rep 1/5, cert 458/1000    rep 1/5, cert 459/1000    rep 1/5, cert 460/1000    rep 1/5, cert 461/1000    rep 1/5, cert 462/1000    rep 1/5, cert 463/1000    rep 1/5, cert 464/1000    rep 1/5, cert 465/1000    rep 1/5, cert 466/1000    rep 1/5, cert 467/1000    rep 1/5, cert 468/1000    rep 1/5, cert 469/1000    rep 1/5, cert 470/1000    rep 1/5, cert 471/1000    rep 1/5, cert 472/1000    rep 1/5, cert 473/1000    rep 1/5, cert 474/1000    rep 1/5, cert 475/1000    rep 1/5, cert 476/1000    rep 1/5, cert 477/1000    rep 1/5, cert 478/1000    rep 1/5, cert 479/1000    rep 1/5, cert 480/1000    rep 1/5, cert 481/1000    rep 1/5, cert 482/1000    rep 1/5, cert 483/1000    rep 1/5, cert 484/1000    rep 1/5, cert 485/1000    rep 1/5, cert 486/1000    rep 1/5, cert 487/1000    rep 1/5, cert 488/1000    rep 1/5, cert 489/1000    rep 1/5, cert 490/1000    rep 1/5, cert 491/1000    rep 1/5, cert 492/1000    rep 1/5, cert 493/1000    rep 1/5, cert 494/1000    rep 1/5, cert 495/1000    rep 1/5, cert 496/1000    rep 1/5, cert 497/1000    rep 1/5, cert 498/1000    rep 1/5, cert 499/1000    rep 1/5, cert 500/1000    rep 1/5, cert 501/1000    rep 1/5, cert 502/1000    rep 1/5, cert 503/1000    rep 1/5, cert 504/1000    rep 1/5, cert 505/1000    rep 1/5, cert 506/1000    rep 1/5, cert 507/1000    rep 1/5, cert 508/1000    rep 1/5, cert 509/1000    rep 1/5, cert 510/1000    rep 1/5, cert 511/1000    rep 1/5, cert 512/1000    rep 1/5, cert 513/1000    rep 1/5, cert 514/1000    rep 1/5, cert 515/1000    rep 1/5, cert 516/1000    rep 1/5, cert 517/1000    rep 1/5, cert 518/1000    rep 1/5, cert 519/1000    rep 1/5, cert 520/1000    rep 1/5, cert 521/1000    rep 1/5, cert 522/1000    rep 1/5, cert 523/1000    rep 1/5, cert 524/1000    rep 1/5, cert 525/1000    rep 1/5, cert 526/1000    rep 1/5, cert 527/1000    rep 1/5, cert 528/1000    rep 1/5, cert 529/1000    rep 1/5, cert 530/1000    rep 1/5, cert 531/1000    rep 1/5, cert 532/1000    rep 1/5, cert 533/1000    rep 1/5, cert 534/1000    rep 1/5, cert 535/1000    rep 1/5, cert 536/1000    rep 1/5, cert 537/1000    rep 1/5, cert 538/1000    rep 1/5, cert 539/1000    rep 1/5, cert 540/1000    rep 1/5, cert 541/1000    rep 1/5, cert 542/1000    rep 1/5, cert 543/1000    rep 1/5, cert 544/1000    rep 1/5, cert 545/1000[31m  ✗ Suite "issuance" failed: Call failed:
+  Canister: pekzw-diaaa-aaaad-afh3q-cai
+  Method: issueCertificate (update)
+  "Request ID": "705f9f26331a22f0838363d0da4c753e9a52e4d114c63544ac9f8d57713eb08d"
+  "Error code": "IC0207"
+  "Reject code": "2"
+  "Reject message": "Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles"[0m
+AgentError: Call failed:
+  Canister: pekzw-diaaa-aaaad-afh3q-cai
+  Method: issueCertificate (update)
+  "Request ID": "705f9f26331a22f0838363d0da4c753e9a52e4d114c63544ac9f8d57713eb08d"
+  "Error code": "IC0207"
+  "Reject code": "2"
+  "Reject message": "Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles"
+    at caller (/home/varun/ic-projects/cred-verifier/benchmarks/node_modules/@dfinity/agent/lib/cjs/actor.js:278:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async issueOne (file:///home/varun/ic-projects/cred-verifier/benchmarks/suite/scalability.js:52:3)
+    at async runIssuance (file:///home/varun/ic-projects/cred-verifier/benchmarks/suite/scalability.js:88:20)
+    at async run (file:///home/varun/ic-projects/cred-verifier/benchmarks/run.js:113:7)
+    at async main (file:///home/varun/ic-projects/cred-verifier/benchmarks/run.js:120:52) {
+  canisterId: Principal {
+    _arr: Uint8Array(10) [
+       0,  0,   0, 0, 0,
+      96, 41, 247, 1, 1
+    ],
+    _isPrincipal: true
+  },
+  methodName: 'issueCertificate',
+  type: 'update',
+  props: {
+    'Request ID': '705f9f26331a22f0838363d0da4c753e9a52e4d114c63544ac9f8d57713eb08d',
+    'Error code': 'IC0207',
+    'Reject code': '2',
+    'Reject message': 'Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles'
+  },
+  requestId: ArrayBuffer {
+    [Uint8Contents]: <70 5f 9f 26 33 1a 22 f0 83 83 63 d0 da 4c 75 3e 9a 52 e4 d1 14 c6 35 44 ac 9f 8d 57 71 3e b0 8d>,
+    byteLength: 32
+  },
+  response: {
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+    body: { status: 'replied', certificate: [Uint8Array] },
+    headers: [
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array],
+      [Array]
+    ]
+  },
+  reject_code: 2,
+  reject_message: 'Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles',
+  error_code: 'IC0207'
+}
+
+[1m[36m============================================================
+  VERIFICATION BENCHMARK
+============================================================[0m
+[90m    N values: 1, 10, 100, 1000, 10000[0m
+
+[1m[34m── Pre-populating canister with 10,000 certificates ...[0m
+[31m  ✗ Suite "verification" failed: Call failed:
+  Canister: pekzw-diaaa-aaaad-afh3q-cai
+  Method: issueCertificate (update)
+  "Request ID": "854dcbdf06638e9ab225f781cfca1c5f676a073cf9c39ed076c613c47e913f9d"
+  "Error code": "IC0207"
+  "Reject code": "2"
+  "Reject message": "Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles"[0m
+AgentError: Call failed:
+  Canister: pekzw-diaaa-aaaad-afh3q-cai
+  Method: issueCertificate (update)
+  "Request ID": "854dcbdf06638e9ab225f781cfca1c5f676a073cf9c39ed076c613c47e913f9d"
+  "Error code": "IC0207"
+  "Reject code": "2"
+  "Reject message": "Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles"
+    at caller (/home/varun/ic-projects/cred-verifier/benchmarks/node_modules/@dfinity/agent/lib/cjs/actor.js:278:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Promise.all (index 0)
+    at async runVerification (file:///home/varun/ic-projects/cred-verifier/benchmarks/suite/concurrency.js:67:5)
+    at async run (file:///home/varun/ic-projects/cred-verifier/benchmarks/run.js:113:7)
+    at async main (file:///home/varun/ic-projects/cred-verifier/benchmarks/run.js:121:52) {
+  canisterId: Principal {
+    _arr: Uint8Array(10) [
+       0,  0,   0, 0, 0,
+      96, 41, 247, 1, 1
+    ],
+    _isPrincipal: true
+  },
+  methodName: 'issueCertificate',
+  type: 'update',
+  props: {
+    'Request ID': '854dcbdf06638e9ab225f781cfca1c5f676a073cf9c39ed076c613c47e913f9d',
+    'Error code': 'IC0207',
+    'Reject code': '2',
+    'Reject message': 'Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles'
+  },
+  requestId: ArrayBuffer {
+    [Uint8Contents]: <85 4d cb df 06 63 8e 9a b2 25 f7 81 cf ca 1c 5f 67 6a 07 3c f9 c3 9e d0 76 c6 13 c4 7e 91 3f 9d>,
+    byteLength: 32
+  },
+  response: {
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+    body: { status: 'replied', certificate: [Uint8Array] },
+    headers: [
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array],
+      [Array]
+    ]
+  },
+  reject_code: 2,
+  reject_message: 'Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles',
+  error_code: 'IC0207'
+}
+
+[1m[36m============================================================
+  CONCURRENT MIXED WORKLOAD BENCHMARK
+============================================================[0m
+[90m    Concurrency levels: 1, 5, 10, 25, 50, 100, 500[0m
+[90m    Mix: 30% isssuance (update) + 70% verification (query)[0m
+
+[1m[34m── Seeding 500 certificates for verifiers to query ...[0m
+[31m  ✗ Suite "concurrent" failed: Call failed:
+  Canister: pekzw-diaaa-aaaad-afh3q-cai
+  Method: issueCertificate (update)
+  "Request ID": "7e356d5068c9067a26a359ff5c83063f3f9c34dc82a54e7695939882bcc1bbf9"
+  "Error code": "IC0207"
+  "Reject code": "2"
+  "Reject message": "Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles"[0m
+AgentError: Call failed:
+  Canister: pekzw-diaaa-aaaad-afh3q-cai
+  Method: issueCertificate (update)
+  "Request ID": "7e356d5068c9067a26a359ff5c83063f3f9c34dc82a54e7695939882bcc1bbf9"
+  "Error code": "IC0207"
+  "Reject code": "2"
+  "Reject message": "Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles"
+    at caller (/home/varun/ic-projects/cred-verifier/benchmarks/node_modules/@dfinity/agent/lib/cjs/actor.js:278:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Promise.all (index 0)
+    at async runConcurrent (file:///home/varun/ic-projects/cred-verifier/benchmarks/suite/finality.js:65:5)
+    at async run (file:///home/varun/ic-projects/cred-verifier/benchmarks/run.js:113:7)
+    at async main (file:///home/varun/ic-projects/cred-verifier/benchmarks/run.js:122:52) {
+  canisterId: Principal {
+    _arr: Uint8Array(10) [
+       0,  0,   0, 0, 0,
+      96, 41, 247, 1, 1
+    ],
+    _isPrincipal: true
+  },
+  methodName: 'issueCertificate',
+  type: 'update',
+  props: {
+    'Request ID': '7e356d5068c9067a26a359ff5c83063f3f9c34dc82a54e7695939882bcc1bbf9',
+    'Error code': 'IC0207',
+    'Reject code': '2',
+    'Reject message': 'Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles'
+  },
+  requestId: ArrayBuffer {
+    [Uint8Contents]: <7e 35 6d 50 68 c9 06 7a 26 a3 59 ff 5c 83 06 3f 3f 9c 34 dc 82 a5 4e 76 95 93 98 82 bc c1 bb f9>,
+    byteLength: 32
+  },
+  response: {
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+    body: { status: 'replied', certificate: [Uint8Array] },
+    headers: [
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array],
+      [Array]
+    ]
+  },
+  reject_code: 2,
+  reject_message: 'Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles',
+  error_code: 'IC0207'
+}
+
+[1m[36m============================================================
+  SUSTAINED THROUGHPUT & MERKLE TREE GROWTH BENCHMARK
+============================================================[0m
+
+[1m[34m── Warm-up ...[0m
+[31m  ✗ Suite "throughput" failed: Call failed:
+  Canister: pekzw-diaaa-aaaad-afh3q-cai
+  Method: issueCertificate (update)
+  "Request ID": "bac277cca8af231a3b1cc84e501eaf722666640ea804ce5c93decca7bf49832e"
+  "Error code": "IC0207"
+  "Reject code": "2"
+  "Reject message": "Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles"[0m
+AgentError: Call failed:
+  Canister: pekzw-diaaa-aaaad-afh3q-cai
+  Method: issueCertificate (update)
+  "Request ID": "bac277cca8af231a3b1cc84e501eaf722666640ea804ce5c93decca7bf49832e"
+  "Error code": "IC0207"
+  "Reject code": "2"
+  "Reject message": "Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles"
+    at caller (/home/varun/ic-projects/cred-verifier/benchmarks/node_modules/@dfinity/agent/lib/cjs/actor.js:278:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async issueOne (file:///home/varun/ic-projects/cred-verifier/benchmarks/suite/stress.js:50:3)
+    at async runThroughput (file:///home/varun/ic-projects/cred-verifier/benchmarks/suite/stress.js:63:5)
+    at async run (file:///home/varun/ic-projects/cred-verifier/benchmarks/run.js:113:7)
+    at async main (file:///home/varun/ic-projects/cred-verifier/benchmarks/run.js:123:52) {
+  canisterId: Principal {
+    _arr: Uint8Array(10) [
+       0,  0,   0, 0, 0,
+      96, 41, 247, 1, 1
+    ],
+    _isPrincipal: true
+  },
+  methodName: 'issueCertificate',
+  type: 'update',
+  props: {
+    'Request ID': 'bac277cca8af231a3b1cc84e501eaf722666640ea804ce5c93decca7bf49832e',
+    'Error code': 'IC0207',
+    'Reject code': '2',
+    'Reject message': 'Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles'
+  },
+  requestId: ArrayBuffer {
+    [Uint8Contents]: <ba c2 77 cc a8 af 23 1a 3b 1c c8 4e 50 1e af 72 26 66 64 0e a8 04 ce 5c 93 de cc a7 bf 49 83 2e>,
+    byteLength: 32
+  },
+  response: {
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+    body: { status: 'replied', certificate: [Uint8Array] },
+    headers: [
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array],
+      [Array]
+    ]
+  },
+  reject_code: 2,
+  reject_message: 'Canister pekzw-diaaa-aaaad-afh3q-cai is out of cycles',
+  error_code: 'IC0207'
+}
+
+
+[1m[36m============================================================
+  ALL BENCHMARKS COMPLETE
+============================================================[0m
+[90m    Generate research paper graphs:[0m
+[90m      cd benchmarks/visualize[0m
+[90m      pip install -r requirements.txt[0m
+[90m      python3 generate_graphs.py[0m
+[90m    Output: benchmarks/visualize/figures/  (PNG + PDF + HTML dashboard)[0m

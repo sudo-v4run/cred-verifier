@@ -42,7 +42,7 @@ persistent actor class AcademicCredentialSystem() {
   private transient var universities = HashMap.HashMap<Principal, Text>(10, Principal.equal, Principal.hash);
   private transient var certifiedDataHash : Blob = Blob.fromArray([]);
   private transient var merkleRoot : Text = "";
-  private transient var merkleNodes = HashMap.HashMap<Text, MerkleNode>(10, Text.equal, Text.hash);
+  private transient var merkleState : MerkleTree.TreeState = MerkleTree.emptyState();
   private transient var performanceMetrics = Buffer.Buffer<MetricEntry>(100);
 
   // ============================================
@@ -74,24 +74,35 @@ persistent actor class AcademicCredentialSystem() {
     };
     metricsEntries := [];
     
-    updateCertifiedData();
+    rebuildCertifiedData();
   };
 
   // ============================================
   // PRIVATE HELPER FUNCTIONS
   // ============================================
   
-  // Update certified data with Merkle root
-  private func updateCertifiedData() {
-    // Discard the old tree and start fresh — avoids an O(n) delete loop.
-    merkleNodes := HashMap.HashMap<Text, MerkleNode>(certificates.size() * 2 + 1, Text.equal, Text.hash);
-    let root = MerkleTree.buildMerkleTree(certificates, merkleNodes);
+  // Full rebuild — O(n), used only at postupgrade
+  private func rebuildCertifiedData() {
+    merkleState := MerkleTree.emptyState();
+    let root = MerkleTree.buildFromCerts(certificates, merkleState);
     merkleRoot := root;
-    
-    // Convert root hash to blob (take first 32 bytes)
     let certBlob = Utils.textTo32ByteBlob(root);
     CertifiedData.set(certBlob);
     certifiedDataHash := certBlob;
+  };
+
+  // Incremental update — O(log n), used after each issueCertificate
+  private func insertCertLeaf(certHash : Text) {
+    let root = MerkleTree.insertLeaf(certHash, merkleState);
+    merkleRoot := root;
+    let certBlob = Utils.textTo32ByteBlob(root);
+    CertifiedData.set(certBlob);
+    certifiedDataHash := certBlob;
+  };
+
+  // Full rebuild for revocation (structure changes)
+  private func updateCertifiedData() {
+    rebuildCertifiedData();
   };
 
   // Check if caller is a registered university
@@ -213,11 +224,11 @@ persistent actor class AcademicCredentialSystem() {
     certificates.put(certificateId, finalCertificate);
     
     let merkleStartTime = Time.now();
-    updateCertifiedData();
+    insertCertLeaf(finalCertificate.certificate_hash);
     let merkleEndTime = Time.now();
     
-    // Record Merkle tree build time separately
-    recordMetric(#merkleTreeBuild, merkleStartTime, merkleEndTime, true, "Tree rebuilt after issuance");
+    // Record Merkle tree insert time separately
+    recordMetric(#merkleTreeBuild, merkleStartTime, merkleEndTime, true, "Leaf inserted (incremental)");
     
     success := true;
     resultId := certificateId;
@@ -249,8 +260,8 @@ persistent actor class AcademicCredentialSystem() {
         };
       };
       case (?cert) {
-        // O(log n): walks the pre-built tree upward via parent links
-        let proof = MerkleTree.getMerkleProof(cert.certificate_hash, merkleNodes);
+        // O(log n): walks the flat tree collecting siblings
+        let proof = MerkleTree.getProof(cert.certificate_hash, merkleState);
         CertManager.verifyCertificate(cert, proof, merkleRoot);
       };
     };
@@ -276,8 +287,8 @@ persistent actor class AcademicCredentialSystem() {
       };
       case (?cert) {
         let proofStartTime = Time.now();
-        // O(log n): walks the pre-built tree upward via parent links
-        let proof = MerkleTree.getMerkleProof(cert.certificate_hash, merkleNodes);
+        // O(log n): walks the flat tree collecting siblings
+        let proof = MerkleTree.getProof(cert.certificate_hash, merkleState);
         let proofEndTime = Time.now();
         
         recordMetric(#merkleProofGeneration, proofStartTime, proofEndTime, true, certificateId);
