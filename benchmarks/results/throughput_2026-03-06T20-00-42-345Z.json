@@ -1,0 +1,131 @@
+{
+  "project": "ICP Academic Credential Verification — Mainnet Research Benchmark",
+  "network": "ic",
+  "host": "https://ic0.app",
+  "canisterId": "pekzw-diaaa-aaaad-afh3q-cai",
+  "suite": "throughput",
+  "generatedAt": "2026-03-06T20:00:42.345Z",
+  "ts": "2026-03-06T20:00:42.344Z",
+  "meta": {
+    "project": "ICP Academic Credential Verification — Mainnet Research Benchmark",
+    "network": "ic",
+    "host": "https://ic0.app",
+    "canisterId": "pekzw-diaaa-aaaad-afh3q-cai"
+  },
+  "sustained": {
+    "duration_ms": 30000,
+    "total_issued": 17,
+    "throughput_cps": 0.57,
+    "latency": {
+      "samples": 17,
+      "min": 176,
+      "max": 2438,
+      "mean": 1775.24,
+      "stddev": 460.5,
+      "p50": 1847,
+      "p75": 1980,
+      "p95": 2317.2,
+      "p99": 2413.84
+    },
+    "times_ms": [
+      1689,
+      176,
+      2003,
+      2287,
+      1829,
+      2438,
+      1620,
+      1980,
+      1897,
+      1847,
+      1668,
+      1531,
+      1700,
+      2044,
+      1889,
+      1657,
+      1924
+    ],
+    "timestamps_ms": [
+      1689,
+      1865,
+      3869,
+      6157,
+      7986,
+      10424,
+      12045,
+      14025,
+      15922,
+      17769,
+      19437,
+      20968,
+      22668,
+      24712,
+      26601,
+      28259,
+      30184
+    ],
+    "throughput_windows": [
+      {
+        "window_start_s": 0,
+        "count": 5,
+        "throughput_cps": 0.5
+      },
+      {
+        "window_start_s": 10,
+        "count": 6,
+        "throughput_cps": 0.6
+      },
+      {
+        "window_start_s": 20,
+        "count": 5,
+        "throughput_cps": 0.5
+      }
+    ]
+  },
+  "merkle_growth": [
+    {
+      "batch_size": 1,
+      "db_size_after": 3280,
+      "batch_wall_ms": 2290,
+      "throughput_cps": 0.44
+    },
+    {
+      "batch_size": 10,
+      "db_size_after": 3291,
+      "batch_wall_ms": 1828,
+      "throughput_cps": 5.47
+    },
+    {
+      "batch_size": 50,
+      "db_size_after": 3345,
+      "batch_wall_ms": 8582,
+      "throughput_cps": 5.83
+    },
+    {
+      "batch_size": 100,
+      "db_size_after": 3461,
+      "batch_wall_ms": 15234,
+      "throughput_cps": 6.56
+    }
+  ],
+  "peak_burst": {
+    "total": 100,
+    "succeeded": 100,
+    "failed": 0,
+    "error_rate": 0,
+    "wall_ms": 14953,
+    "throughput_cps": 6.69,
+    "latency": {
+      "samples": 100,
+      "min": 1926,
+      "max": 14946,
+      "mean": 8261.27,
+      "stddev": 3760.18,
+      "p50": 8219,
+      "p75": 11445.5,
+      "p95": 14158.45,
+      "p99": 14801.46
+    }
+  }
+}

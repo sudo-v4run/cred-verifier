@@ -19,8 +19,8 @@
  *   }
  */
 
-import { summarise, round2 }           from "./stats.js";
-import { log, printStats, saveResult } from "./reporter.js";
+import { summarise, round2 }                     from "./stats.js";
+import { log, printStats, saveResult, saveLive } from "./reporter.js";
 import {
   ISSUANCE_SEQ_SCALES,
   PARALLEL_SCALES,
@@ -78,8 +78,46 @@ export async function runIssuance({ authedActor, anonActor }) {
   const seqResults = [];
   const parResults = [];
 
-  // ── Sequential issuance ──────────────────────────────────────────────────
-  log.sub("Sequential issuance -- one cert at a time");
+  // ── Parallel (burst) issuance — runs FIRST ──────────────────────────────
+  log.sub("Parallel (burst) issuance -- all N certs fired simultaneously");
+  for (const N of PARALLEL_SCALES) {
+    log.info(`  N = ${N.toLocaleString()} (${REPEAT_PER_N} repeat(s)) ...`);
+    const repWalls        = [];
+    const repThroughputs  = [];
+    let   lastIndividual  = [];
+
+    for (let rep = 0; rep < REPEAT_PER_N; rep++) {
+      const ids  = Array.from({ length: N }, () => nextId("PAR"));
+      const t0   = Date.now();
+      // Wrap each call: a rejected ingress returns -1 instead of crashing the suite
+      const times = await Promise.all(ids.map(async id => {
+        try { return await issueOne(authedActor, id); }
+        catch { return -1; }
+      }));
+      const wall     = Date.now() - t0;
+      const okTimes  = times.filter(t => t >= 0);
+      const errCount = times.length - okTimes.length;
+      if (errCount > 0) log.info(`    rep ${rep + 1}/${REPEAT_PER_N}: ${errCount} call(s) rejected by IC ingress`);
+      repWalls.push(wall);
+      repThroughputs.push(round2((okTimes.length / wall) * 1000));
+      lastIndividual = okTimes.length > 0 ? okTimes : [0];
+      log.info(`    rep ${rep + 1}/${REPEAT_PER_N}: wall=${wall}ms, ${round2((okTimes.length/wall)*1000)} certs/s (${okTimes.length}/${N} ok)`);
+    }
+
+    const wallStats = summarise(repWalls);
+    parResults.push({
+      n:              N,
+      wall_ms:        wallStats,
+      throughput_cps: summarise(repThroughputs),
+      individual_ms:  summarise(lastIndividual),
+    });
+    log.ok(`  N=${N.toLocaleString()}: mean wall=${wallStats.mean}ms, mean ${summarise(repThroughputs).mean} certs/s`);
+    // ── checkpoint: persist after every N so a crash doesn't lose data ──
+    saveLive("issuance", { parallel: parResults, sequential: seqResults });
+  }
+
+  // ── Sequential issuance — runs LAST ──────────────────────────────────────
+  log.sub("Sequential issuance -- one cert at a time (running last)");
   for (const N of ISSUANCE_SEQ_SCALES) {
     log.info(`  N = ${N.toLocaleString()} (${REPEAT_PER_N} repeat(s)) ...`);
     const allTimes = [];
@@ -94,43 +132,16 @@ export async function runIssuance({ authedActor, anonActor }) {
     const stats = summarise(allTimes);
     seqResults.push({ n: N, times_ms: allTimes, ...stats });
     printStats(`Sequential N=${N}`, stats);
-  }
-
-  // ── Parallel (burst) issuance ────────────────────────────────────────────
-  log.sub("Parallel (burst) issuance -- all N certs fired simultaneously");
-  for (const N of PARALLEL_SCALES) {
-    log.info(`  N = ${N.toLocaleString()} (${REPEAT_PER_N} repeat(s)) ...`);
-    const repWalls        = [];
-    const repThroughputs  = [];
-    let   lastIndividual  = [];
-
-    for (let rep = 0; rep < REPEAT_PER_N; rep++) {
-      const ids  = Array.from({ length: N }, () => nextId("PAR"));
-      const t0   = Date.now();
-      const times = await Promise.all(ids.map(id => issueOne(authedActor, id)));
-      const wall  = Date.now() - t0;
-      repWalls.push(wall);
-      repThroughputs.push(round2((N / wall) * 1000));
-      lastIndividual = times;
-      log.info(`    rep ${rep + 1}/${REPEAT_PER_N}: wall=${wall}ms, ${round2((N/wall)*1000)} certs/s`);
-    }
-
-    const wallStats = summarise(repWalls);
-    parResults.push({
-      n:              N,
-      wall_ms:        wallStats,
-      throughput_cps: summarise(repThroughputs),
-      individual_ms:  summarise(lastIndividual),
-    });
-    log.ok(`  N=${N.toLocaleString()}: mean wall=${wallStats.mean}ms, mean ${summarise(repThroughputs).mean} certs/s`);
+    // ── checkpoint ──
+    saveLive("issuance", { parallel: parResults, sequential: seqResults });
   }
 
   const payload = {
     suite:      "issuance",
     ts:         new Date().toISOString(),
     meta:       SUITE_META,
-    sequential: seqResults,
     parallel:   parResults,
+    sequential: seqResults,
   };
 
   const file = saveResult("issuance", payload);

@@ -53,9 +53,11 @@ module {
   };
 
   func rebuildInternal(state : TreeState) {
-    let sz = state.nodes.size();
-    if (sz <= 1) return;
-    var idx : Int = (sz : Int) - 3;
+    // Internal nodes occupy indices 0 .. cap-2 in a 0-based complete binary
+    // tree with `cap` leaves.  The old formula (sz - 3) equals 2*(cap-2) which
+    // accesses indices beyond the end of `nodes` for any cap > 2 → trap.
+    if (state.cap <= 1) return;
+    var idx : Int = (state.cap : Int) - 2;
     while (idx >= 0) {
       let j = Int.abs(idx);
       state.nodes[j] := parentHash(state.nodes[2 * j + 1], state.nodes[2 * j + 2]);

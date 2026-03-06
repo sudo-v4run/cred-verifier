@@ -67,6 +67,23 @@ export function saveResult(suite, data) {
 }
 
 /**
+ * Overwrite results/<suite>_live.json with the latest accumulated state.
+ * Called after every N-point / phase so progress survives a mid-run crash.
+ */
+export function saveLive(suite, data) {
+  mkdirSync(RESULTS_DIR, { recursive: true });
+  const file = resolve(RESULTS_DIR, `${suite}_live.json`);
+  const payload = {
+    ...SUITE_META,
+    suite,
+    status:      "in-progress",
+    updatedAt:   new Date().toISOString(),
+    ...data,
+  };
+  writeFileSync(file, JSON.stringify(payload, null, 2), "utf8");
+}
+
+/**
  * Load the most-recent result file for a given suite.
  * Returns null if none exists.
  */

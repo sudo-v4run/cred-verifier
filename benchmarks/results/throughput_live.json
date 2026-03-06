@@ -1,0 +1,51 @@
+{
+  "project": "ICP Academic Credential Verification — Mainnet Research Benchmark",
+  "network": "ic",
+  "host": "https://ic0.app",
+  "canisterId": "pekzw-diaaa-aaaad-afh3q-cai",
+  "suite": "throughput",
+  "status": "in-progress",
+  "updatedAt": "2026-03-06T20:01:51.952Z",
+  "sustained": {
+    "duration_ms": 30000,
+    "total_issued": 17,
+    "latency": {
+      "samples": 17,
+      "min": 967,
+      "max": 2168,
+      "mean": 1820.06,
+      "stddev": 266.36,
+      "p50": 1817,
+      "p75": 1942,
+      "p95": 2116.8,
+      "p99": 2157.76
+    }
+  },
+  "merkle_growth": [
+    {
+      "batch_size": 1,
+      "db_size_after": 3650,
+      "batch_wall_ms": 2077,
+      "throughput_cps": 0.48
+    },
+    {
+      "batch_size": 10,
+      "db_size_after": 3660,
+      "batch_wall_ms": 3330,
+      "throughput_cps": 3
+    },
+    {
+      "batch_size": 50,
+      "db_size_after": 3710,
+      "batch_wall_ms": 6253,
+      "throughput_cps": 8
+    },
+    {
+      "batch_size": 100,
+      "db_size_after": 3810,
+      "batch_wall_ms": 15013,
+      "throughput_cps": 6.66
+    }
+  ],
+  "peak_burst": null
+}

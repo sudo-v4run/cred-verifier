@@ -22,8 +22,8 @@
  * Result JSON: results/concurrent_<timestamp>.json
  */
 
-import { summarise, round2 }           from "./stats.js";
-import { log, printStats, saveResult } from "./reporter.js";
+import { summarise, round2 }                     from "./stats.js";
+import { log, printStats, saveResult, saveLive } from "./reporter.js";
 import {
   CONCURRENCY_LEVELS,
   WARMUP_CALLS,
@@ -56,18 +56,31 @@ export async function runConcurrent({ authedActor, anonActor }) {
   log.info(`Concurrency levels: ${CONCURRENCY_LEVELS.join(", ")}`);
   log.info("Mix: 30% isssuance (update) + 70% verification (query)");
 
-  // ── Seed some existing certs to verify ──────────────────────────────────
-  log.sub("Seeding 500 certificates for verifiers to query ...");
+  // ── Seed existing certs for verifiers to query ──────────────────────────
+  // 100 is sufficient to give verifiers in C=50 a diverse pool to query.
+  const SEED_COUNT = 100;
+  log.sub(`Seeding ${SEED_COUNT} certificates for verifiers to query ...`);
   const seedIds = [];
-  const seedBatch = 50;
-  for (let i = 0; i < 500; i += seedBatch) {
+  const seedBatch = 25;
+  for (let i = 0; i < SEED_COUNT; i += seedBatch) {
     const ids = Array.from({ length: seedBatch }, () => nextId("SEED"));
-    await Promise.all(ids.map(id => authedActor.issueCertificate(...makeCertArgs(id))));
-    seedIds.push(...ids);
-    process.stdout.write(`\r  Seeded ${seedIds.length}/500`);
+    const results = await Promise.all(ids.map(async id => {
+      try {
+        await authedActor.issueCertificate(...makeCertArgs(id));
+        return id;
+      } catch { return null; }
+    }));
+    seedIds.push(...results.filter(Boolean));
+    process.stdout.write(`\r  Seeded ${seedIds.length}/${SEED_COUNT}`);
   }
   console.log();
-  log.ok("Seed complete");
+  log.ok(`Seed complete (${seedIds.length} certs)`);
+
+  if (seedIds.length === 0) {
+    log.err("Seed produced 0 certificates — aborting concurrent suite.");
+    log.err("Most likely cause: canister is out of cycles. Top up and re-run.");
+    return;
+  }
 
   // ── Warm-up ─────────────────────────────────────────────────────────────
   log.sub("Warm-up ...");
@@ -80,15 +93,24 @@ export async function runConcurrent({ authedActor, anonActor }) {
   const finalityData = [];
 
   // ── ICP finality measurement ─────────────────────────────────────────────
-  log.sub("ICP finality measurement (50 samples) ...");
+  // 20 samples gives a solid mean ± stddev + p95 for a research paper table.
+  // At ~2 s/call on mainnet this takes ~40 s total.
+  const FINALITY_SAMPLES = 20;
+  log.sub(`ICP finality measurement (${FINALITY_SAMPLES} samples) ...`);
   log.info("  Measures: submit issueCertificate -> cert readable via verifyCertificate");
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < FINALITY_SAMPLES; i++) {
     const id = nextId("FIN");
     const t0 = Date.now();
-    await authedActor.issueCertificate(...makeCertArgs(id));
+    try {
+      await authedActor.issueCertificate(...makeCertArgs(id));
+    } catch (e) {
+      log.info(`  sample ${i + 1}: issuance rejected (${e.message ?? e}), skipping`);
+      continue;
+    }
     // Poll until the cert is verifiable (confirm finality)
     let readable = false;
-    while (!readable) {
+    const pollDeadline = Date.now() + 30_000; // 30 s max poll
+    while (!readable && Date.now() < pollDeadline) {
       const result = await anonActor.verifyCertificate(id);
       if (result.is_valid) {
         readable = true;
@@ -96,13 +118,15 @@ export async function runConcurrent({ authedActor, anonActor }) {
         await new Promise(r => setTimeout(r, 100));
       }
     }
+    if (!readable) { log.info(`  sample ${i + 1}: cert not readable within 30 s, skipping`); continue; }
     const finalityMs = Date.now() - t0;
     finalityData.push(finalityMs);
-    process.stdout.write(`\r  sample ${i + 1}/50: ${finalityMs}ms`);
+    process.stdout.write(`\r  sample ${i + 1}/${FINALITY_SAMPLES}: ${finalityMs}ms`);
   }
   console.log();
   const finalityStats = summarise(finalityData);
   printStats("ICP Finality (submit->readable)", finalityStats);
+  saveLive("concurrent", { finality_ms: { samples: finalityData, ...finalityStats }, concurrent: concResults });
 
   // ── Concurrent mixed workload ────────────────────────────────────────────
   for (const C of CONCURRENCY_LEVELS) {
@@ -160,6 +184,7 @@ export async function runConcurrent({ authedActor, anonActor }) {
       throughput_ops:  summarise(throughputs),
     });
     log.ok(`  C=${C}: mean wall=${summarise(walls).mean}ms, ${summarise(throughputs).mean} ops/s`);
+    saveLive("concurrent", { finality_ms: { samples: finalityData, ...finalityStats }, concurrent: concResults });
   }
 
   const payload = {

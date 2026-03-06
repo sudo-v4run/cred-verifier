@@ -18,8 +18,8 @@
  * Result JSON: results/verification_<timestamp>.json
  */
 
-import { summarise, round2 }           from "./stats.js";
-import { log, printStats, saveResult } from "./reporter.js";
+import { summarise, round2 }                     from "./stats.js";
+import { log, printStats, saveResult, saveLive } from "./reporter.js";
 import {
   VERIFY_SCALES,
   WARMUP_CALLS,
@@ -64,12 +64,26 @@ export async function runVerification({ authedActor, anonActor }) {
   const batchSz = 100;
   for (let i = 0; i < maxN; i += batchSz) {
     const batch = Array.from({ length: Math.min(batchSz, maxN - i) }, () => nextId("PRE"));
-    await Promise.all(batch.map(id => authedActor.issueCertificate(...makeCertArgs(id))));
-    allIds.push(...batch);
+    const results = await Promise.all(batch.map(async id => {
+      try {
+        await authedActor.issueCertificate(...makeCertArgs(id));
+        return id;
+      } catch {
+        return null;  // swallow rejected ingress; cert simply won't be in verify pool
+      }
+    }));
+    const issued = results.filter(Boolean);
+    allIds.push(...issued);
     process.stdout.write(`\r  Issued ${allIds.length}/${maxN}`);
   }
   console.log();
   log.ok(`Pre-population complete: ${allIds.length} certificates in canister`);
+
+  if (allIds.length === 0) {
+    log.err("Pre-population produced 0 certificates — aborting verification suite.");
+    log.err("Most likely cause: canister is out of cycles. Top up and re-run.");
+    return;
+  }
 
   // ── Warm-up ─────────────────────────────────────────────────────────────
   log.sub("Warm-up queries ...");
@@ -96,6 +110,7 @@ export async function runVerification({ authedActor, anonActor }) {
     const stats = summarise(allTimes);
     seqResults.push({ n: N, times_ms: allTimes, ...stats });
     printStats(`Sequential N=${N}`, stats);
+    saveLive("verification", { dbSize: allIds.length, sequential: seqResults, concurrent: concResults, lookup: lookupResults });
   }
 
   // ── Concurrent verification ──────────────────────────────────────────────
@@ -124,6 +139,7 @@ export async function runVerification({ authedActor, anonActor }) {
       individual_ms:  summarise(lastIndividual),
     });
     log.ok(`  N=${N.toLocaleString()}: mean wall=${wallStats.mean}ms, ${summarise(repThroughputs).mean} queries/s`);
+    saveLive("verification", { dbSize: allIds.length, sequential: seqResults, concurrent: concResults, lookup: lookupResults });
   }
 
   // ── Lookup by studentId / universityName (at max DB size) ───────────────
