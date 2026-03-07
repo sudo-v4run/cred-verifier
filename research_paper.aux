@@ -1,0 +1,98 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{chahal2021credential}
+\citation{buterin2014ethereum}
+\citation{hanke2018dfinity}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{I}{1}{Introduction}{section.1}{}}
+\citation{grech2017blockchain}
+\citation{turk2018eductx}
+\citation{hanke2018dfinity}
+\citation{dfinity2022geeks}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Background}{2}{section.2}\protected@file@percent }
+\newlabel{sec:background}{{II}{2}{Background}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Academic Credential Fraud}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Prior Blockchain Approaches}{2}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Internet Computer Protocol Architecture}{2}{subsection.2.3}\protected@file@percent }
+\newlabel{subsec:icp}{{\mbox  {II-C}}{2}{Internet Computer Protocol Architecture}{subsection.2.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-C}1}Subnets and Nodes}{2}{subsubsection.2.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-C}2}Consensus}{2}{subsubsection.2.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-C}3}Canisters}{2}{subsubsection.2.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-C}4}Chain-Key Cryptography and Certified Variables}{2}{subsubsection.2.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}System Architecture}{2}{section.3}\protected@file@percent }
+\newlabel{sec:architecture}{{III}{2}{System Architecture}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Design Goals}{2}{subsection.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Internet Computer Protocol layer stack. Chain-key cryptography provides the root of trust; certified variables allow canisters to produce verifiable responses.}}{3}{figure.1}\protected@file@percent }
+\newlabel{fig:icp_layers}{{1}{3}{Internet Computer Protocol layer stack. Chain-key cryptography provides the root of trust; certified variables allow canisters to produce verifiable responses}{figure.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Module Architecture}{3}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Data Model}{3}{subsection.3.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Certificate Schema}}{3}{table.1}\protected@file@percent }
+\newlabel{tab:schema}{{I}{3}{Certificate Schema}{table.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces TrustVault system architecture. Both the frontend and backend canisters run on ICP mainnet. The subnet collectively signs the Merkle root via threshold BLS, enabling trustless verification.}}{3}{figure.2}\protected@file@percent }
+\newlabel{fig:sysarch}{{2}{3}{TrustVault system architecture. Both the frontend and backend canisters run on ICP mainnet. The subnet collectively signs the Merkle root via threshold BLS, enabling trustless verification}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Access Control}{3}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Trustless Verification Mechanism}{3}{section.4}\protected@file@percent }
+\newlabel{sec:trustless}{{IV}{3}{Trustless Verification Mechanism}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Certificate Hashing}{3}{subsection.4.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Merkle tree over certificate hashes. Leaf $c_6$ (red border) has proof path $[\,l_7,\tmspace  +\thickmuskip {.2777em} h_2,\tmspace  +\thickmuskip {.2777em} h_{01}\,]$ — three sibling hashes sufficient to recompute root $R$. The subnet BLS-signs $R$ each consensus round.}}{4}{figure.3}\protected@file@percent }
+\newlabel{fig:merkle}{{3}{4}{Merkle tree over certificate hashes. Leaf $c_6$ (red border) has proof path $[\,l_7,\; h_2,\; h_{01}\,]$ — three sibling hashes sufficient to recompute root $R$. The subnet BLS-signs $R$ each consensus round}{figure.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Complete zero-trust verification pipeline. Steps 1–3 run client-side with no network call. Steps 4–6 require only one HTTP query to any ICP gateway. The verifier never contacts the issuing institution.}}{4}{figure.4}\protected@file@percent }
+\newlabel{fig:verflow}{{4}{4}{Complete zero-trust verification pipeline. Steps 1–3 run client-side with no network call. Steps 4–6 require only one HTTP query to any ICP gateway. The verifier never contacts the issuing institution}{figure.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Incremental Merkle Tree}{4}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Certified Data Integration}{4}{subsection.4.3}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}Incremental certified data update (Motoko)}{4}{lstlisting.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-D}}Full Verification Chain}{4}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-E}}Revocation}{4}{subsection.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {V}Implementation}{4}{section.5}\protected@file@percent }
+\newlabel{sec:impl}{{V}{4}{Implementation}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}Backend (Motoko Canisters)}{4}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Frontend (React + Vite, Served from ICP)}{4}{subsection.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Issuance Latency on ICP Mainnet (wall time in ms)}}{5}{table.2}\protected@file@percent }
+\newlabel{tab:issuance}{{II}{5}{Issuance Latency on ICP Mainnet (wall time in ms)}{table.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Candid Interface}{5}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-D}}Deployment}{5}{subsection.5.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Performance Evaluation}{5}{section.6}\protected@file@percent }
+\newlabel{sec:eval}{{VI}{5}{Performance Evaluation}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Issuance Latency}{5}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}Verification Latency}{5}{subsection.6.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Verification Latency on ICP Mainnet (database of 500 certs)}}{5}{table.3}\protected@file@percent }
+\newlabel{tab:verif}{{III}{5}{Verification Latency on ICP Mainnet (database of 500 certs)}{table.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Issuance throughput vs.\ parallel batch size. ICP scales to $\approx 8$ certs/s from a single canister; Ethereum is constrained by block gas limits.}}{5}{figure.5}\protected@file@percent }
+\newlabel{fig:throughput}{{5}{5}{Issuance throughput vs.\ parallel batch size. ICP scales to $\approx 8$ certs/s from a single canister; Ethereum is constrained by block gas limits}{figure.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Throughput Under Concurrent Load}{5}{subsection.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-D}}Finality Time}{5}{subsection.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-E}}Merkle Growth Cost}{5}{subsection.6.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Security Analysis}{5}{section.7}\protected@file@percent }
+\newlabel{sec:security}{{VII}{5}{Security Analysis}{section.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-A}}Data Integrity}{5}{subsection.7.1}\protected@file@percent }
+\citation{grech2017blockchain}
+\citation{turk2018eductx}
+\citation{lizcano2020blockchain}
+\bibcite{chahal2021credential}{1}
+\bibcite{hanke2018dfinity}{2}
+\bibcite{dfinity2022geeks}{3}
+\bibcite{nakamoto2008bitcoin}{4}
+\bibcite{buterin2014ethereum}{5}
+\bibcite{merkle1989certified}{6}
+\bibcite{boneh2001bls}{7}
+\bibcite{grech2017blockchain}{8}
+\bibcite{turk2018eductx}{9}
+\bibcite{lizcano2020blockchain}{10}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-B}}Tamper-Proof Certified Root}{6}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-C}}Replay Attacks}{6}{subsection.7.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-D}}Unauthorized Issuance}{6}{subsection.7.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-E}}Revocation Freshness}{6}{subsection.7.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-F}}Frontend Integrity}{6}{subsection.7.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VIII}Related Work}{6}{section.8}\protected@file@percent }
+\newlabel{sec:related}{{VIII}{6}{Related Work}{section.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IX}Conclusion}{6}{section.9}\protected@file@percent }
+\newlabel{sec:conclusion}{{IX}{6}{Conclusion}{section.9}{}}
+\@writefile{toc}{\contentsline {section}{References}{6}{section*.2}\protected@file@percent }
+\bibcite{swan2015blockchain}{11}
+\bibcite{w3c2022vc}{12}
+\bibcite{ic_interface_spec}{13}
+\bibcite{dfinity_certified}{14}
+\bibcite{wood2014ethereum}{15}
+\gdef \@abspage@last{7}

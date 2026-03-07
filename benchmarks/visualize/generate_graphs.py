@@ -635,11 +635,16 @@ if HAS_PLOTLY:
         ops = [r.get("throughput_ops", {}).get("mean", 0) for r in conc["concurrent"]]
         fig_html.add_trace(go.Scatter(x=cs, y=ops, mode="lines+markers", name="Mixed ops/s", line=dict(color=COLORS["mix"])), 2, 2)
 
-    # Row 2 Col 3: Finality histogram
+    # Row 2 Col 3: Finality percentile bar chart (raw samples not stored, use aggregate stats)
     if conc and conc.get("finality_ms"):
-        samples = conc["finality_ms"].get("samples", [])
-        if samples:
-            fig_html.add_trace(go.Histogram(x=samples, nbinsx=20, name="Finality (ms)", marker_color=COLORS["ver"]), 2, 3)
+        fm = conc["finality_ms"]
+        fin_keys = ["min", "p50", "mean", "p75", "p95", "p99", "max"]
+        fin_vals = [fm.get(k, 0) for k in fin_keys]
+        if any(fin_vals):
+            fig_html.add_trace(go.Bar(
+                x=fin_keys, y=fin_vals,
+                name="Finality (ms)", marker_color=COLORS["ver"]
+            ), 2, 3)
 
     # Row 3 Col 1: Merkle tree
     if thr and thr.get("merkle_growth"):
