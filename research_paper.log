@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.7)  7 MAR 2026 16:35
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.7)  9 MAR 2026 18:31
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1065,36 +1065,62 @@ Underfull \hbox (badness 2735) in paragraph at lines 476--477
 \T1/pcr/m/n/10 @dfinity/agent\T1/ptm/m/n/10 ) was run from a con-sumer lap-top
  []
 
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 5
-46.
-(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
-File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
-) [5]
-Underfull \hbox (badness 2111) in paragraph at lines 626--630
+
+Underfull \hbox (badness 6284) in paragraph at lines 504--510
+[]\T1/ptm/m/n/10 Fig. []5[] shows the per-certificate la-tency per-centiles
+ []
+
+Package pgfplots info on input line 528: Using 'lua backend=false' for axis: x 
+coord trafo unsupported.
+Package pgfplots info on input line 591: Using 'lua backend=false' for axis: x 
+coord trafo unsupported.
+
+Underfull \hbox (badness 4899) in paragraph at lines 658--664
+[]\T1/ptm/m/n/10 Over a con-tin-u-ous 30-second sustained-issuance run
+ []
+
+Package pgfplots info on input line 686: Using 'lua backend=false' for axis: x 
+coord trafo unsupported.
+[5]
+Package pgfplots info on input line 766: Using 'lua backend=false' for axis: x 
+coord trafo unsupported.
+
+Overfull \hbox (32.64284pt too wide) in paragraph at lines 836--849
+ [][] 
+ []
+
+[6]
+Underfull \hbox (badness 2285) in paragraph at lines 895--896
+[]\T1/ptm/m/n/10 Live main-net bench-marks (Figs. []5[]--[]10[], Ta-bles []II[]
+--[]IV[])
+ []
+
+[7]
+Underfull \hbox (badness 2111) in paragraph at lines 917--921
 \T1/ptm/m/n/8 ITY Foun-da-tion White Pa-per, 2022. [On-line]. Avail-able: []$ht
 tps : / /
  []
 
-[6]
-Underfull \hbox (badness 4353) in paragraph at lines 683--687
+
+Underfull \hbox (badness 4353) in paragraph at lines 974--978
 \T1/ptm/m/n/8 2023. [On-line]. Avail-able: []$https : / / internetcomputer . or
 g / docs / current /
  []
 
 
-Underfull \hbox (badness 4995) in paragraph at lines 689--693
+Underfull \hbox (badness 4995) in paragraph at lines 980--984
 []\T1/ptm/m/n/8 DFINITY Foun-da-tion, ``How cer-ti-fied vari-ables work,'' In-t
 er-net
  []
 
 
-Underfull \hbox (badness 6157) in paragraph at lines 689--693
+Underfull \hbox (badness 6157) in paragraph at lines 980--984
 \T1/ptm/m/n/8 Com-puter De-vel-oper Doc-u-men-ta-tion, 2023. [On-line]. Avail-a
 ble:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 689--693
+Underfull \hbox (badness 10000) in paragraph at lines 980--984
 []$\T1/ptm/m/n/8 https : / / internetcomputer . org / docs / current / develope
 r-[]docs / security /
  []
@@ -1110,24 +1136,22 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[7
-
-] (./research_paper.aux)
+[8] (./research_paper.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
 Package rerunfilecheck Info: File `research_paper.out' has not changed.
-(rerunfilecheck)             Checksum: 7DCAD2F446872B607F736BB4416A7480;6399.
+(rerunfilecheck)             Checksum: BABDC12EC99EC0C9BA69E86A5F23CE3B;6829.
  ) 
 Here is how much of TeX's memory you used:
- 35711 strings out of 476106
- 826754 string characters out of 5793934
+ 35873 strings out of 476106
+ 830097 string characters out of 5793934
  2000975 words of memory out of 5000000
- 57060 multiletter control sequences out of 15000+600000
- 684922 words of font info for 180 fonts, out of 8000000 for 9000
+ 57212 multiletter control sequences out of 15000+600000
+ 684608 words of font info for 179 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 84i,19n,93p,1698b,2257s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 84i,19n,93p,1698b,2301s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share
 /texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texliv
@@ -1151,10 +1175,10 @@ crr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr
 /share/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texlive
 /texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fon
 ts/type1/urw/times/utmri8a.pfb>
-Output written on research_paper.pdf (7 pages, 315314 bytes).
+Output written on research_paper.pdf (8 pages, 333860 bytes).
 PDF statistics:
- 440 PDF objects out of 1000 (max. 8388607)
- 377 compressed objects within 4 object streams
- 97 named destinations out of 1000 (max. 500000)
- 341 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 493 PDF objects out of 1000 (max. 8388607)
+ 428 compressed objects within 5 object streams
+ 111 named destinations out of 1000 (max. 500000)
+ 357 words of extra memory for PDF output out of 10000 (max. 10000000)
 

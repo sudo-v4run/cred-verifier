@@ -1,0 +1,36 @@
+This is LuaTeX, Version 1.17.0 (TeX Live 2023/Debian)  (format=dvilualatex 2026.3.7)  9 MAR 2026 18:17
+ restricted system commands enabled.
+**/home/varun/ic-projects/cred-verifier/benchmarks/visualize/figures/summary_ta
+ble.tex
+
+(/home/varun/ic-projects/cred-verifier/benchmarks/visualize/figures/summary_tab
+le.tex
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2024-01-22>
+[\directlua]:1: module 'luaotfload-main' not found:
+	no field package.preload['luaotfload-main']
+	[kpse lua searcher] file not found: 'luaotfload-main'
+Error in luaotfload: reverting to OT1
+Inserting `tracingstacklevels' in `input_level_string'.
+
+! LaTeX Error: Environment table undefined.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.1 \begin{table}
+               [htbp]
+
+Here is how much of LuaTeX's memory you used:
+ 21 strings out of 476548
+ 100000,1977958 words of node,token memory allocated
+ 275 words of node memory still in use:
+   1 hlist, 1 dir, 39 glue_spec nodes
+   avail lists: 2:12,3:3,4:1
+ 22127 multiletter control sequences out of 65536+600000
+ 14 fonts using 591679 bytes
+ 12i,0n,13p,130b,16s stack positions out of 10000i,1000n,20000p,200000b,200000s
+!  ==> Fatal error occurred, bad output DVI file produced!
+No pages of output.
+

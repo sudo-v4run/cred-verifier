@@ -49,27 +49,64 @@
 \newlabel{sec:impl}{{V}{4}{Implementation}{section.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}Backend (Motoko Canisters)}{4}{subsection.5.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Frontend (React + Vite, Served from ICP)}{4}{subsection.5.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Issuance Latency on ICP Mainnet (wall time in ms)}}{5}{table.2}\protected@file@percent }
-\newlabel{tab:issuance}{{II}{5}{Issuance Latency on ICP Mainnet (wall time in ms)}{table.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Parallel Issuance Benchmark --- ICP Mainnet (3 trials each)}}{5}{table.2}\protected@file@percent }
+\newlabel{tab:issuance}{{II}{5}{Parallel Issuance Benchmark --- ICP Mainnet (3 trials each)}{table.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Candid Interface}{5}{subsection.5.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-D}}Deployment}{5}{subsection.5.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {VI}Performance Evaluation}{5}{section.6}\protected@file@percent }
 \newlabel{sec:eval}{{VI}{5}{Performance Evaluation}{section.6}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Issuance Latency}{5}{subsection.6.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}Verification Latency}{5}{subsection.6.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Verification Latency on ICP Mainnet (database of 500 certs)}}{5}{table.3}\protected@file@percent }
-\newlabel{tab:verif}{{III}{5}{Verification Latency on ICP Mainnet (database of 500 certs)}{table.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Issuance throughput vs.\ parallel batch size. ICP scales to $\approx 8$ certs/s from a single canister; Ethereum is constrained by block gas limits.}}{5}{figure.5}\protected@file@percent }
-\newlabel{fig:throughput}{{5}{5}{Issuance throughput vs.\ parallel batch size. ICP scales to $\approx 8$ certs/s from a single canister; Ethereum is constrained by block gas limits}{figure.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Throughput Under Concurrent Load}{5}{subsection.6.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-D}}Finality Time}{5}{subsection.6.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-E}}Merkle Growth Cost}{5}{subsection.6.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {VII}Security Analysis}{5}{section.7}\protected@file@percent }
-\newlabel{sec:security}{{VII}{5}{Security Analysis}{section.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-A}}Data Integrity}{5}{subsection.7.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Individual-certificate latency percentiles (p50/p95/p99) for different parallel batch sizes. Tight distribution at $n{\le }10$ confirms ICP round-trip dominance; spread at $n{=}100$ reflects queue-depth growth inside a single consensus round.}}{5}{figure.5}\protected@file@percent }
+\newlabel{fig:issuance_perc}{{5}{5}{Individual-certificate latency percentiles (p50/p95/p99) for different parallel batch sizes. Tight distribution at $n{\le }10$ confirms ICP round-trip dominance; spread at $n{=}100$ reflects queue-depth growth inside a single consensus round}{figure.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Verification Latency --- ICP Mainnet, database of 500 certs}}{5}{table.3}\protected@file@percent }
+\newlabel{tab:verif}{{III}{5}{Verification Latency --- ICP Mainnet, database of 500 certs}{table.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Throughput Scaling}{5}{subsection.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-D}}Sustained Throughput and Peak Burst}{5}{subsection.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-E}}Concurrent Mixed-Load Performance}{5}{subsection.6.5}\protected@file@percent }
+\citation{buterin2020eth2}
+\citation{dinh2017blockbench}
+\citation{etherscan_tps}
+\citation{wood2014ethereum}
+\citation{androulaki2018fabric}
+\citation{dfinity2022geeks}
+\citation{buterin2020eth2}
+\citation{androulaki2018fabric}
+\citation{dinh2017blockbench}
+\citation{androulaki2018fabric}
+\citation{wood2014ethereum}
+\citation{wood2014ethereum}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Verification query latency distribution (min/p50/p95/p99) for 1, 10, and 100 simultaneous queries against a 500-cert database. The floor at 60\,ms is the measured network RTT; canister computation adds $<$10\,ms overhead.}}{6}{figure.6}\protected@file@percent }
+\newlabel{fig:verif_perc}{{6}{6}{Verification query latency distribution (min/p50/p95/p99) for 1, 10, and 100 simultaneous queries against a 500-cert database. The floor at 60\,ms is the measured network RTT; canister computation adds $<$10\,ms overhead}{figure.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Issuance throughput vs.\ batch size under two independent db-size conditions. The two curves nearly coincide, confirming O($\log n$) tree-insert scalability and independence from dataset size.}}{6}{figure.7}\protected@file@percent }
+\newlabel{fig:throughput}{{7}{6}{Issuance throughput vs.\ batch size under two independent db-size conditions. The two curves nearly coincide, confirming O($\log n$) tree-insert scalability and independence from dataset size}{figure.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-F}}Finality Time}{6}{subsection.6.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-G}}Cross-Platform Comparison}{6}{subsection.6.7}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Sustained issuance throughput across three consecutive 10-second windows (sequential single-threaded submission). Stable output with no memory pressure or degradation over 30\,s.}}{6}{figure.8}\protected@file@percent }
+\newlabel{fig:sustained}{{8}{6}{Sustained issuance throughput across three consecutive 10-second windows (sequential single-threaded submission). Stable output with no memory pressure or degradation over 30\,s}{figure.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Concurrent mixed-load throughput (issuance + verification ops/s) vs.\ concurrency level, all with 0\% error rate. The curve grows sub-linearly due to canister update-call serialisation per consensus round, but verification calls (queries) scale without contention.}}{6}{figure.9}\protected@file@percent }
+\newlabel{fig:conc_tput}{{9}{6}{Concurrent mixed-load throughput (issuance + verification ops/s) vs.\ concurrency level, all with 0\% error rate. The curve grows sub-linearly due to canister update-call serialisation per consensus round, but verification calls (queries) scale without contention}{figure.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Security Analysis}{6}{section.7}\protected@file@percent }
+\newlabel{sec:security}{{VII}{6}{Security Analysis}{section.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-A}}Data Integrity}{6}{subsection.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-B}}Tamper-Proof Certified Root}{6}{subsection.7.2}\protected@file@percent }
 \citation{grech2017blockchain}
 \citation{turk2018eductx}
 \citation{lizcano2020blockchain}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Mean issuance vs.\ verification latency at increasing concurrency. Verification latency (query, no consensus) remains flat at $\approx $570--640\,ms; issuance grows only 27\% from $c{=}5$ to $c{=}50$.}}{7}{figure.10}\protected@file@percent }
+\newlabel{fig:conc_lat}{{10}{7}{Mean issuance vs.\ verification latency at increasing concurrency. Verification latency (query, no consensus) remains flat at $\approx $570--640\,ms; issuance grows only 27\% from $c{=}5$ to $c{=}50$}{figure.10}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Block Finality Time --- ICP Mainnet (20 samples)}}{7}{table.4}\protected@file@percent }
+\newlabel{tab:finality}{{IV}{7}{Block Finality Time --- ICP Mainnet (20 samples)}{table.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-C}}Replay Attacks}{7}{subsection.7.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-D}}Unauthorized Issuance}{7}{subsection.7.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-E}}Revocation Freshness}{7}{subsection.7.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-F}}Frontend Integrity}{7}{subsection.7.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Cross-Platform Comparison (all non-ICP values from cited literature)}}{7}{table.5}\protected@file@percent }
+\newlabel{tab:comparison}{{V}{7}{Cross-Platform Comparison (all non-ICP values from cited literature)}{table.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VIII}Related Work}{7}{section.8}\protected@file@percent }
+\newlabel{sec:related}{{VIII}{7}{Related Work}{section.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IX}Conclusion}{7}{section.9}\protected@file@percent }
+\newlabel{sec:conclusion}{{IX}{7}{Conclusion}{section.9}{}}
 \bibcite{chahal2021credential}{1}
 \bibcite{hanke2018dfinity}{2}
 \bibcite{dfinity2022geeks}{3}
@@ -80,19 +117,14 @@
 \bibcite{grech2017blockchain}{8}
 \bibcite{turk2018eductx}{9}
 \bibcite{lizcano2020blockchain}{10}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-B}}Tamper-Proof Certified Root}{6}{subsection.7.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-C}}Replay Attacks}{6}{subsection.7.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-D}}Unauthorized Issuance}{6}{subsection.7.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-E}}Revocation Freshness}{6}{subsection.7.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-F}}Frontend Integrity}{6}{subsection.7.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {VIII}Related Work}{6}{section.8}\protected@file@percent }
-\newlabel{sec:related}{{VIII}{6}{Related Work}{section.8}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {IX}Conclusion}{6}{section.9}\protected@file@percent }
-\newlabel{sec:conclusion}{{IX}{6}{Conclusion}{section.9}{}}
-\@writefile{toc}{\contentsline {section}{References}{6}{section*.2}\protected@file@percent }
 \bibcite{swan2015blockchain}{11}
 \bibcite{w3c2022vc}{12}
 \bibcite{ic_interface_spec}{13}
 \bibcite{dfinity_certified}{14}
 \bibcite{wood2014ethereum}{15}
-\gdef \@abspage@last{7}
+\bibcite{buterin2020eth2}{16}
+\bibcite{dinh2017blockbench}{17}
+\bibcite{androulaki2018fabric}{18}
+\bibcite{etherscan_tps}{19}
+\@writefile{toc}{\contentsline {section}{References}{8}{section*.2}\protected@file@percent }
+\gdef \@abspage@last{8}
