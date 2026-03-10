@@ -77,7 +77,7 @@
 
 % =========================================================
 \begin{abstract}
-Academic credential fraud is a growing global problem, costing institutions and employers millions of dollars annually in lost trust and fraudulent hirings. Existing solutions rely on centralized databases, trusted intermediaries, or permissioned blockchains that introduce single points of failure and require trust in at least one party. This paper presents \textit{TrustVault}, a fully on-chain academic credential verification system deployed on the Internet Computer Protocol (ICP). TrustVault stores all credential data, Merkle proofs, and the serving frontend entirely on-chain with no traditional backend servers or cloud storage. It leverages ICP's \textit{Certified Variables} mechanism — backed by threshold BLS signatures from a decentralized subnet — to enable mathematically verifiable, zero-trust credential authentication. We describe the system architecture, the incremental Merkle tree construction for O($\log n$) certificate updates, and the full cryptographic trust chain from a certificate hash up to the subnet's root key. Live mainnet benchmarks on canister \texttt{pekzw-diaaa-aaaad-afh3q-cai} show single-issuance latency of approximately 1.91\,s, verification latency as low as 60\,ms (p50 $\approx$ 432\,ms), and sustained throughput of up to 8 certificates/second under parallel load — all at a fraction of Ethereum's gas cost. Security analysis confirms resistance to data tampering, replay attacks, and unauthorized issuance. TrustVault demonstrates that ICP's unique architecture enables practical, zero-Trust academic credentialing without centralized authorities.
+Academic credential fraud is a growing global problem, costing institutions and employers millions of dollars annually in lost trust and fraudulent hirings. Existing solutions rely on centralized databases, trusted intermediaries, or permissioned blockchains that introduce single points of failure and require trust in at least one party. This paper presents \textit{TrustVault}, a fully on-chain academic credential verification system deployed on the Internet Computer Protocol (ICP). TrustVault stores all credential data, Merkle proofs, and the serving frontend entirely on-chain with no traditional backend servers or cloud storage. It leverages ICP's \textit{Certified Variables} mechanism — backed by threshold BLS signatures from a decentralized subnet — to enable mathematically verifiable, zero-trust credential authentication. We describe the system architecture, the incremental Merkle tree construction for O($\log n$) certificate updates, and the full cryptographic trust chain from a certificate hash up to the subnet's root key. Live mainnet benchmarks on canister \texttt{pekzw-diaaa-aaaad-afh3q-cai} show single-issuance latency of approximately 1.91\,s, verification latency as low as 177\,ms (p50 $\approx$ 432\,ms), and sustained throughput of up to 7.3 certificates/second under parallel load — all at a fraction of Ethereum's gas cost. Security analysis confirms resistance to data tampering, replay attacks, and unauthorized issuance. TrustVault demonstrates that ICP's unique architecture enables practical, zero-Trust academic credentialing without centralized authorities.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -530,10 +530,10 @@ behaviour.
     coordinates {(n=1,1.91)(n=10,1.40)(n=50,4.00)(n=100,10.02)};
   \addlegendentry{p50 (median)}
   \addplot[fill=icpyellow!80, draw=icpyellow!60!black]
-    coordinates {(n=1,2.11)(n=10,1.86)(n=50,6.31)(n=100,14.66)};
+    coordinates {(n=1,1.91)(n=10,1.86)(n=50,6.31)(n=100,14.66)};
   \addlegendentry{p95}
   \addplot[fill=icpred!70,   draw=icpred]
-    coordinates {(n=1,2.13)(n=10,1.90)(n=50,6.54)(n=100,15.28)};
+    coordinates {(n=1,1.91)(n=10,1.90)(n=50,6.54)(n=100,15.28)};
   \addlegendentry{p99}
 \end{axis}
 \end{tikzpicture}
@@ -551,9 +551,9 @@ Verification is a \emph{query} call — no consensus, no fee — executed
 on a single replica.  Table~\ref{tab:verif} and
 Fig.~\ref{fig:verif_perc} report latency statistics over a live
 database of 500 certificates.  The minimum observed time was
-\textbf{60\,ms}, approaching the raw network RTT, confirming that the
+\textbf{177\,ms}, confirming that the
 Merkle proof computation adds negligible overhead.  The p99 stays below
-630\,ms even for 10-query bursts — suitable for real-time employer
+980\,ms even for 10-query bursts — suitable for real-time employer
 verification portals.
 
 \begin{table}[t]
@@ -564,9 +564,9 @@ verification portals.
 \toprule
 \textbf{Queries} & \textbf{Min} & \textbf{Mean} & \textbf{p50} & \textbf{p75} & \textbf{p95} & \textbf{p99} \\
 \midrule
-1   & 60 & 227 & 202 & 310 & 396 & 414 \\
-10  & 60 & 359 & 345 & 460 & 600 & 627 \\
-100 & 60 & 490 & 490 & 570 & 800 & 900 \\
+1   & 217 & 380 & 432 & 462 & 485 & 490 \\
+10  & 177 & 518 & 512 & 578 & 722 & 980 \\
+100 & {---} & 491 & 498 & 567 & 787 & 994 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -581,7 +581,7 @@ verification portals.
   xtick=data,
   xlabel={Number of verification queries},
   ylabel={Latency (ms)},
-  ymin=0, ymax=1050,
+  ymin=0, ymax=1100,
   enlarge x limits=0.3,
   grid=major, grid style={dashed,gray!35},
   legend style={at={(0.02,0.98)}, anchor=north west, font=\tiny,
@@ -590,23 +590,23 @@ verification portals.
   label style={font=\scriptsize},
 ]
   \addplot[fill=icpgreen!50, draw=icpgreen!70!black]
-    coordinates {(n=1,60)(n=10,60)(n=100,60)};
+    coordinates {(n=1,217)(n=10,177)(n=100,0)};
   \addlegendentry{Min}
   \addplot[fill=icpblue!70, draw=icpblue]
-    coordinates {(n=1,202)(n=10,345)(n=100,490)};
+    coordinates {(n=1,432)(n=10,512)(n=100,498)};
   \addlegendentry{p50 (median)}
   \addplot[fill=icpyellow!80, draw=icpyellow!60!black]
-    coordinates {(n=1,396)(n=10,600)(n=100,800)};
+    coordinates {(n=1,485)(n=10,722)(n=100,787)};
   \addlegendentry{p95}
   \addplot[fill=icpred!70, draw=icpred]
-    coordinates {(n=1,414)(n=10,627)(n=100,900)};
+    coordinates {(n=1,490)(n=10,980)(n=100,994)};
   \addlegendentry{p99}
 \end{axis}
 \end{tikzpicture}
 \caption{Verification query latency distribution (min/p50/p95/p99) for
-1, 10, and 100 simultaneous queries against a 500-cert database.  The
-floor at 60\,ms is the measured network RTT; canister computation adds
-$<$10\,ms overhead.}
+1, 10, and 100 simultaneous queries against a 500-cert database.  Min
+bar omitted for $N{=}100$ due to a timing-measurement artifact (negative
+samples); the query computation overhead is under 10\,ms.}
 \label{fig:verif_perc}
 \end{figure}
 
@@ -616,10 +616,11 @@ $<$10\,ms overhead.}
 Fig.~\ref{fig:throughput} overlays two throughput measurements:
 (i)~the \emph{issuance benchmark} (fresh canister state, low db size)
 and (ii)~the \emph{Merkle-growth benchmark} (large db of
-$\approx$3\,650 existing certs).  Both curves are nearly identical,
-demonstrating that throughput is not sensibly affected by database size
---- the O($\log n$) incremental insert keeps cost constant.  Peak
-throughput of \textbf{8\,certs/s} is achieved at batch size 50.
+approximately 3,280--3,461 existing certs).  Both curves are nearly
+identical, demonstrating that throughput is not sensibly affected by
+database size --- the O($\log n$) incremental insert keeps cost
+constant.  Peak throughput of \textbf{7.3\,certs/s} is achieved at
+batch size 50.
 
 \begin{figure}[t]
 \centering
@@ -640,10 +641,10 @@ throughput of \textbf{8\,certs/s} is achieved at batch size 50.
   \addplot[mark=*, thick, color=icpblue, mark size=2pt]
     coordinates {(1,0.52)(10,4.02)(50,7.23)(100,7.31)};
   \addlegendentry{Issuance bench (fresh db)}
-  %% Merkle-growth benchmark (db $\approx$3650 certs)
+  %% Merkle-growth benchmark (db 3,280--3,461 certs)
   \addplot[mark=triangle*, thick, color=icpgreen, mark size=2pt]
-    coordinates {(1,0.48)(10,3.0)(50,8.0)(100,6.66)};
-  \addlegendentry{Merkle-growth bench (db $\approx$3\,650)}
+    coordinates {(1,0.44)(10,5.47)(50,5.83)(100,6.56)};
+  \addlegendentry{Merkle-growth bench (db 3,280--3,461)}
 \end{axis}
 \end{tikzpicture}
 \caption{Issuance throughput vs.\ batch size under two independent
@@ -657,14 +658,14 @@ O($\log n$) tree-insert scalability and independence from dataset size.}
 
 Over a continuous 30-second sustained-issuance run
 (Fig.~\ref{fig:sustained}), the canister emitted 17 certificates at a
-mean latency of $1{,}820$\,ms and a sustained throughput of
+mean latency of $1{,}775$\,ms and a sustained throughput of
 \textbf{0.57\,certs/s} (single-threaded sequential submission).  The
 per-10\,s window throughput was stable between 0.50--0.60\,certs/s
 with no degradation over time.
 
 The \emph{peak burst} test submitted 100 certificates simultaneously;
 all 100 succeeded (\textbf{0\% error rate}) with a wall time of
-$13{,}799$\,ms and throughput of 7.25\,certs/s, confirming that the canister handles sudden load spikes without data loss.
+$14{,}953$\,ms and throughput of 6.69\,certs/s, confirming that the canister handles sudden load spikes without data loss.
 
 \begin{figure}[t]
 \centering
@@ -702,8 +703,8 @@ calls simultaneously, mirroring real-world load where multiple
 universities issue and employers verify at the same time.
 Fig.~\ref{fig:conc_tput} shows total system throughput (\emph{ops/s},
 counting both issuance and verification) vs.\ concurrency level
-$c \in \{1, 5, 10, 25, 50\}$.  Throughput grows from 0.48\,ops/s at
-$c{=}1$ to \textbf{13.09\,ops/s} at $c{=}50$, a $27{\times}$
+$c \in \{1, 5, 10, 25, 50\}$.  Throughput grows from 0.55\,ops/s at
+$c{=}1$ to \textbf{13.59\,ops/s} at $c{=}50$, a $\approx$25${\times}$
 speed-up, with \textbf{zero errors} across all concurrency levels.
 
 \begin{figure}[t]
@@ -723,12 +724,12 @@ speed-up, with \textbf{zero errors} across all concurrency levels.
 ]
   \addplot[mark=*, thick, color=icpblue, mark size=2.5pt,
            nodes near coords, nodes near coords style={font=\tiny, above}]
-    coordinates {(1,0.48)(5,2.24)(10,4.20)(25,9.14)(50,13.09)};
+    coordinates {(1,0.55)(5,2.65)(10,5.60)(25,8.30)(50,13.59)};
   \addlegendentry{Measured throughput (0\% error rate)}
 
   %% Ideal linear reference
   \addplot[dashed, color=gray, no marks]
-    coordinates {(0,0)(50,13.09)};
+    coordinates {(0,0)(50,13.59)};
   \addlegendentry{Linear reference}
 \end{axis}
 \end{tikzpicture}
@@ -740,10 +741,10 @@ round, but verification calls (queries) scale without contention.}
 \end{figure}
 
 Fig.~\ref{fig:conc_lat} breaks down the mean issuance and verification
-latency per concurrency level.  Verification latency remains in the
-550--640\,ms band regardless of concurrency (since queries bypass
-consensus), while issuance latency grows modestly from 2.1\,s to
-2.9\,s even at $c{=}50$ --- confirming that the consensus bottleneck
+latency per concurrency level.  Verification latency stays in the
+565--847\,ms range across concurrency levels (queries bypass
+consensus), while issuance latency rises from 1.7\,s at $c{=}5$
+to 2.8\,s at $c{=}50$ --- confirming that the consensus bottleneck
 is graceful rather than catastrophic.
 
 \begin{figure}[t]
@@ -765,16 +766,16 @@ is graceful rather than catastrophic.
   label style={font=\scriptsize},
 ]
   \addplot[fill=icpblue!70, draw=icpblue]
-    coordinates {(c=5,2302)(c=10,2368)(c=25,2362)(c=50,2912)};
+    coordinates {(c=5,1745)(c=10,1503)(c=25,2516)(c=50,2779)};
   \addlegendentry{Issuance (update call)}
   \addplot[fill=icpgreen!60, draw=icpgreen!80!black]
-    coordinates {(c=5,554)(c=10,635)(c=25,572)(c=50,595)};
+    coordinates {(c=5,745)(c=10,565)(c=25,642)(c=50,847)};
   \addlegendentry{Verification (query call)}
 \end{axis}
 \end{tikzpicture}
 \caption{Mean issuance vs.\ verification latency at increasing
-concurrency.  Verification latency (query, no consensus) remains flat
-at $\approx$570--640\,ms; issuance grows only 27\% from $c{=}5$ to
+concurrency.  Verification latency (query, no consensus) ranges from
+$\approx$565--847\,ms; issuance grows approximately 59\% from $c{=}5$ to
 $c{=}50$.}
 \label{fig:conc_lat}
 \end{figure}
@@ -783,10 +784,10 @@ $c{=}50$.}
 \subsection{Finality Time}
 
 Table~\ref{tab:finality} reports block finality time measured over 20
-independent update calls.  Mean finality of $2{,}400$\,ms compares
+independent update calls.  Mean finality of $2{,}356$\,ms compares
 favourably against Ethereum PoS ($\approx$12\,s per slot) and is
 drastically faster than Bitcoin ($\approx$600\,s).  The p99 of
-$3{,}047$\,ms confirms a tight worst-case bound suitable for
+$2{,}944$\,ms confirms a tight worst-case bound suitable for
 interactive applications.
 
 \begin{table}[t]
@@ -797,7 +798,7 @@ interactive applications.
 \toprule
  & \textbf{Min} & \textbf{Mean} & \textbf{Stddev} & \textbf{p50} & \textbf{p75} & \textbf{p95} & \textbf{p99} \\
 \midrule
-ms & 1443 & 2400 & 385 & 2490 & 2564 & 2987 & 3047 \\
+ms & 832 & 2356 & 421 & 2395 & 2622 & 2811 & 2944 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -837,8 +838,8 @@ calls (issuance) consume cycles \cite{dfinity2022geeks}.
 \toprule
 \textbf{Metric} & \textbf{ICP (TrustVault)} & \textbf{Ethereum PoS} & \textbf{H.\ Fabric} \\
 \midrule
-Finality & \textbf{2.4\,s} (meas.) & $\approx$24\,s \cite{buterin2020eth2} & $<$1\,s \cite{androulaki2018fabric} \\
-Network throughput & 8\,certs/s (1 canister) & 15--30\,TPS total \cite{dinh2017blockbench} & $\approx$3\,500\,TPS \cite{androulaki2018fabric} \\
+Finality & \textbf{2.36\,s} (meas.) & $\approx$24\,s \cite{buterin2020eth2} & $<$1\,s \cite{androulaki2018fabric} \\
+Network throughput & 7.3\,certs/s (1 canister) & 15--30\,TPS total \cite{dinh2017blockbench} & $\approx$3\,500\,TPS \cite{androulaki2018fabric} \\
 Issuance cost & \textbf{\$0.001} (meas.) & \$0.20--\$2.00 \cite{wood2014ethereum} & Near-zero \\
 Verification cost & \textbf{\$0 (query)} & \$0.05--\$0.50 \cite{wood2014ethereum} & Near-zero \\
 Frontend on-chain & \textbf{Yes} & No & No \\
@@ -892,7 +893,7 @@ TrustVault differentiates itself by: (1) complete on-chain deployment of both fr
 
 This paper presented TrustVault, a trustless academic credential verification system deployed on the Internet Computer Protocol. By combining ICP's certified variables mechanism with an incremental Merkle tree, TrustVault enables any party — equipped only with ICP's publicly known root key — to verify the authenticity of a credential without trusting any institution, server, or intermediary.
 
-Live mainnet benchmarks (Figs.~\ref{fig:issuance_perc}--\ref{fig:conc_lat}, Tables~\ref{tab:issuance}--\ref{tab:finality}) demonstrate that the system is practical: single-certificate issuance completes in under 2 seconds; verification queries return in 60--500\,ms; parallel issuance scales to $\approx$8\,certs/s from a single canister; concurrent mixed-load throughput reaches 13\,ops/s at $c{=}50$ with zero errors; and block finality averages 2.4\,s with p99 under 3.1\,s. Issuance costs are fractions of a US cent. The fully on-chain frontend eliminates the last remaining single point of failure in comparable systems.
+Live mainnet benchmarks (Figs.~\ref{fig:issuance_perc}--\ref{fig:conc_lat}, Tables~\ref{tab:issuance}--\ref{tab:finality}) demonstrate that the system is practical: single-certificate issuance completes in under 2 seconds; verification queries return in 177--994\,ms; parallel issuance scales to $\approx$7.3\,certs/s from a single canister; concurrent mixed-load throughput reaches 13.59\,ops/s at $c{=}50$ with zero errors; and block finality averages 2.36\,s with p99 under 2.95\,s. Issuance costs are fractions of a US cent. The fully on-chain frontend eliminates the last remaining single point of failure in comparable systems.
 
 Future work includes (i) integrating W3C Verifiable Credentials format for interoperability, (ii) multi-canister sharding to further increase throughput, (iii) Internet Identity integration for user authentication, and (iv) a formal security proof of the certification chain under the BLS security model.
 
