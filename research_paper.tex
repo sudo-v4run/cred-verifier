@@ -77,16 +77,528 @@
 
 % =========================================================
 \begin{abstract}
-Academic credential fraud is a growing global problem, costing institutions and employers millions of dollars annually in lost trust and fraudulent hirings. Existing solutions rely on centralized databases, trusted intermediaries, or permissioned blockchains that introduce single points of failure and require trust in at least one party. This paper presents \textit{TrustVault}, a fully on-chain academic credential verification system deployed on the Internet Computer Protocol (ICP). TrustVault stores all credential data, Merkle proofs, and the serving frontend entirely on-chain with no traditional backend servers or cloud storage. It leverages ICP's \textit{Certified Variables} mechanism — backed by threshold BLS signatures from a decentralized subnet — to enable mathematically verifiable, zero-trust credential authentication. We describe the system architecture, the incremental Merkle tree construction for O($\log n$) certificate updates, and the full cryptographic trust chain from a certificate hash up to the subnet's root key. Live mainnet benchmarks on canister \texttt{pekzw-diaaa-aaaad-afh3q-cai} show single-issuance latency of approximately 1.91\,s, verification latency as low as 177\,ms (p50 $\approx$ 432\,ms), and sustained throughput of up to 7.3 certificates/second under parallel load — all at a fraction of Ethereum's gas cost. Security analysis confirms resistance to data tampering, replay attacks, and unauthorized issuance. TrustVault demonstrates that ICP's unique architecture enables practical, zero-Trust academic credentialing without centralized authorities.
+Academic credential fraud imposes significant costs on institutions and employers worldwide. Existing solutions rely on either centralized registries or permissioned blockchains, both of which retain trust dependencies and single points of failure. This paper presents \textit{TrustVault}, a fully on-chain academic credential verification system deployed on the Internet Computer Protocol (ICP) mainnet (canister \texttt{pekzw-diaaa-aaaad-afh3q-cai}). TrustVault stores credential data and its serving frontend inside ICP canisters and uses ICP \textit{Certified Variables} — backed by threshold BLS signatures from a decentralized subnet — for mathematically verifiable, zero-trust authentication. An incremental binary Merkle tree provides O($\log n$) update cost as the credential database scales. Live mainnet benchmarks show issuance latency of $\approx$1.9\,s, verification queries as fast as 177\,ms, parallel throughput up to 7.3\,certs/s, concurrent mixed-load throughput of 13.6\,ops/s, and issuance cost of $\approx$\$0.001 per certificate.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Internet Computer Protocol, Academic Credential Verification, Blockchain, Certified Variables, Merkle Tree, Zero-Trust, On-Chain Storage, Motoko, Threshold BLS Signatures
+Internet Computer Protocol, Academic Credential Verification, Certified Variables, Merkle Tree, Zero-Trust, Motoko, Threshold BLS Signatures
 \end{IEEEkeywords}
 
 % =========================================================
 \section{Introduction}
 \label{sec:intro}
+
+Academic credential fraud is a well-documented, escalating problem: studies estimate that a significant fraction of professional job applications misrepresent qualifications \cite{chahal2021credential}, and traditional verification — contacting institutions manually — is slow, expensive, and centralized. Blockchain-based alternatives have been proposed but each carries practical limitations. Bitcoin and Ethereum anchor credential hashes at prohibitive gas fees (tens of dollars per write), and the verification UI remains on a central server. Permissioned ledgers such as Hyperledger Fabric reduce cost but reintroduce consortium trust \cite{androulaki2018fabric}. Hybrid systems storing only hashes on-chain with data off-chain restore centralization through the back door.
+
+The \textit{Internet Computer Protocol} (ICP) \cite{hanke2018dfinity} offers a qualitatively different model. ICP runs smart contracts called \textit{canisters} — WebAssembly modules replicated across independent \textit{subnets} of geographically diverse nodes. Consensus achieves finality in $\approx$1--3\,s via a BFT notarization protocol backed by the \textit{Random Beacon} (threshold BLS over previous round outputs). Two protocol features are critical to this work: \textit{on-chain web serving} (canisters respond to HTTP, eliminating cloud hosting) and \textit{Certified Variables} (a native API where a canister commits a 32-byte value that the subnet collectively signs with a threshold BLS key \cite{dfinity2022geeks}, enabling data verification with no trust in the canister or any single node). Query calls — read-only operations bypassing consensus — return in $<$500\,ms at no cost to the caller.
+
+\textbf{Contributions:}
+\begin{itemize}
+  \item TrustVault — the first fully on-chain academic credential system (frontend \emph{and} backend) deployed on ICP mainnet.
+  \item An incremental Merkle tree with O($\log n$) update cost, integrated with Certified Variables for trustless proof generation.
+  \item A rigorous live mainnet evaluation: issuance, verification, throughput, finality, and concurrent mixed-load.
+  \item A cross-platform comparison against Ethereum PoS \cite{buterin2020eth2} and Hyperledger Fabric \cite{androulaki2018fabric} using only published benchmarks.
+\end{itemize}
+
+% =========================================================
+\section{System Design}
+\label{sec:design}
+
+\subsection{Architecture}
+The Motoko backend is organized into five modules: \textbf{main.mo} (public actor — \texttt{issueCertificate}, \texttt{revokeCertificate}, \texttt{verifyCertificate}), \textbf{CertificateManager.mo} (record hashing and management), \textbf{MerkleTree.mo} (incremental binary Merkle tree), \textbf{Utils.mo} (SHA-256, hex encoding), and \textbf{PerformanceMetrics.mo} (telemetry). The frontend is a React + Vite single-page application inside an ICP asset canister, served directly over HTTPS from the blockchain with no external hosting. It communicates with the backend through auto-generated Candid type bindings. Fig.~\ref{fig:sysarch} illustrates the full system.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  actor/.style={rectangle, rounded corners=3pt, draw=gray, dashed, thick,
+                minimum height=0.58cm, font=\tiny, align=center},
+  fe/.style={rectangle, rounded corners=3pt, draw=icpblue, very thick,
+             minimum height=0.58cm, font=\tiny\bfseries, align=center},
+  api/.style={rectangle, rounded corners=3pt, draw=icppurple, very thick,
+              minimum height=0.58cm, font=\tiny\bfseries, align=center},
+  mod/.style={rectangle, rounded corners=3pt, draw=black!70, thick,
+              minimum height=0.58cm, font=\tiny, align=center},
+  certd/.style={rectangle, rounded corners=3pt, draw=icpgreen!80!black, very thick,
+                minimum height=0.58cm, font=\tiny, align=center},
+  bls/.style={rectangle, rounded corners=3pt, draw=icpblue, very thick,
+              minimum height=0.58cm, font=\tiny\bfseries, align=center},
+  arr/.style={-Stealth, thick},
+  every node/.style={font=\tiny}
+]
+  %% --- Row 0: External actors ---
+  \node[actor, minimum width=1.75cm, text width=1.65cm]
+    (uni) at (2.5, 0)   {University\\(Issuer)};
+  \node[actor, minimum width=1.75cm, text width=1.65cm]
+    (ver) at (5.5, 0)   {Verifier\\(Employer)};
+
+  %% --- Row 1: Frontend canister ---
+  \node[fe, minimum width=2.2cm, text width=2.1cm]
+    (front) at (4.0,-1.2) {Frontend canister\\(React + Vite)};
+
+  %% --- Row 2: main.mo ---
+  \node[api, minimum width=3.6cm]
+    (main) at (4.0,-2.4) {main.mo \ \ (Public API)};
+
+  %% --- Row 3: Three sub-modules ---
+  \node[mod, minimum width=1.95cm, text width=1.85cm]
+    (cm) at (2.15,-3.7) {Certificate\\Manager};
+  \node[mod, minimum width=1.95cm, text width=1.85cm]
+    (mt) at (4.0, -3.7) {Merkle\\Tree};
+  \node[mod, minimum width=1.95cm, text width=1.85cm]
+    (ut) at (5.85,-3.7) {Utils /\\Metrics};
+
+  %% --- Row 4: CertifiedData ---
+  \node[certd, minimum width=2.9cm]
+    (cd)  at (4.0,-4.85) {CertifiedData.set()};
+
+  %% --- Row 5: Subnet BLS ---
+  \node[bls, minimum width=2.9cm]
+    (sub) at (4.0,-5.75) {Subnet BLS Signature};
+
+  %% --- ICP boundary label (text only, no fill) ---
+  \node[font=\scriptsize\bfseries, icpblue] at (4.0, 0.55)
+    {--- ICP Mainnet ---};
+
+  %% --- Arrows ---
+  %% Actors → Frontend
+  \draw[arr, dashed, gray]
+    (uni.south) to[out=-70,in=140]
+    node[left=1pt, pos=0.55, font=\tiny]{HTTPS} (front.north west);
+  \draw[arr, dashed, gray]
+    (ver.south) to[out=-110,in=40]
+    node[right=1pt, pos=0.55, font=\tiny]{HTTPS} (front.north east);
+
+  %% Frontend → main.mo
+  \draw[arr] (front.south) --
+    node[right=2pt, font=\tiny]{Candid RPC} (main.north);
+
+  %% main.mo → three sub-modules (vertical drops from main's bottom edge)
+  \draw[arr] ([xshift=-1.85cm]main.south) -- (cm.north);
+  \draw[arr] (main.south)                 -- (mt.north);
+  \draw[arr] ([xshift=+1.85cm]main.south) -- (ut.north);
+
+  %% MerkleTree → CertifiedData → Subnet BLS
+  \draw[arr] (mt.south) -- (cd.north);
+  \draw[arr] (cd.south) -- (sub.north);
+
+\end{tikzpicture}
+\caption{TrustVault system architecture. University and Verifier access the on-chain Frontend via HTTPS. The Frontend issues Candid RPC calls to the backend canister (\texttt{main.mo}), which fans out to sub-modules. The MerkleTree module commits the certified root via \texttt{CertifiedData.set()}, which the subnet threshold BLS-signs each consensus round.}
+\label{fig:sysarch}
+\end{figure}
+
+Access control is enforced via ICP \textit{Principals} — Ed25519-derived cryptographic identities. Only registered university principals may call \texttt{issueCertificate} or \texttt{revokeCertificate}; \texttt{verifyCertificate} is a free public query. Each certificate (Table~\ref{tab:schema}) carries a SHA-256 hash of its core identity fields and a consensus-set nanosecond timestamp. Stable Motoko variables persist the certificate map and Merkle root across canister upgrades.
+
+\begin{table}[h]
+\caption{Certificate Schema}
+\label{tab:schema}
+\centering\small\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Field} & \textbf{Type} & \textbf{Description} \\
+\midrule
+\texttt{certificate\_hash} & Text   & SHA-256 of core fields \\
+\texttt{issuer}            & Record & University name, canister ID \\
+\texttt{recipient}         & Record & Student name, ID, principal \\
+\texttt{credential}        & Record & Degree type, major, GPA \\
+\texttt{is\_revoked}       & Bool   & Revocation flag \\
+\texttt{block\_timestamp}  & Int64  & Nanoseconds since Unix epoch \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Incremental Merkle Tree and Certified Data}
+All certificate hashes are leaves of a complete binary Merkle tree stored as a flat array of size $2C{-}1$, where $C$ is the smallest power of two $\geq$ the certificate count. Leaf $i$ is at index $C{-}1{+}i$; the root is at index 0. Internal node $j$ satisfies:
+\begin{equation}
+  \mathtt{nodes}[j] = H(\mathtt{nodes}[2j{+}1] \;\|\; \mathtt{nodes}[2j{+}2])
+\end{equation}
+Inserting a new leaf recomputes only the $O(\log n)$ path to the root (Fig.~\ref{fig:merkle}). After each issuance, the 32-byte Merkle root is committed with \texttt{CertifiedData.set()}, and the subnet threshold BLS-signs it within the next consensus round. Revocation triggers a full O($n$) rebuild; the new certified root invalidates all pre-revocation proofs within one consensus round ($\approx$2\,s).
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  node distance=0.5cm and 0.5cm,
+  mnode/.style={circle, draw, thick, minimum size=0.55cm, font=\tiny},
+  leaf/.style={mnode, fill=lightgreen},
+  inode/.style={mnode, fill=lightblue},
+  root/.style={mnode, fill=icpblue!60, text=white, font=\tiny\bfseries},
+  arr/.style={-Stealth},
+  every node/.style={font=\tiny}
+]
+  \node[root]  (r)   at (3.5, 0)    {$R$};
+  \node[inode] (n1)  at (1.75,-0.9) {$h_{01}$};
+  \node[inode] (n2)  at (5.25,-0.9) {$h_{23}$};
+  \node[inode] (n3)  at (0.9, -1.9) {$h_0$};
+  \node[inode] (n4)  at (2.6, -1.9) {$h_1$};
+  \node[inode] (n5)  at (4.4, -1.9) {$h_2$};
+  \node[inode] (n6)  at (6.1, -1.9) {$h_3$};
+  \node[leaf]  (l0)  at (0.3, -2.9) {$c_0$};
+  \node[leaf]  (l1)  at (1.5, -2.9) {$c_1$};
+  \node[leaf]  (l2)  at (2.1, -2.9) {$c_2$};
+  \node[leaf]  (l3)  at (3.3, -2.9) {$c_3$};
+  \node[leaf]  (l4)  at (3.9, -2.9) {$c_4$};
+  \node[leaf]  (l5)  at (5.1, -2.9) {$c_5$};
+  \node[leaf,draw=icpred,very thick] (l6) at (5.7,-2.9) {$c_6$};
+  \node[leaf,fill=lightblue!30,dashed] (l7) at (6.9,-2.9){$\varnothing$};
+  \draw[arr] (r)--(n1); \draw[arr] (r)--(n2);
+  \draw[arr] (n1)--(n3); \draw[arr] (n1)--(n4);
+  \draw[arr] (n2)--(n5); \draw[arr] (n2)--(n6);
+  \draw[arr] (n3)--(l0); \draw[arr] (n3)--(l1);
+  \draw[arr] (n4)--(l2); \draw[arr] (n4)--(l3);
+  \draw[arr] (n5)--(l4); \draw[arr] (n5)--(l5);
+  \draw[arr] (n6)--(l6); \draw[arr] (n6)--(l7);
+  \draw[->, dashed, icpred, very thick]
+    (l6) -- node[right, font=\tiny, icpred]{proof path} (n6) -- (n2) -- (r);
+  \node[draw, rounded corners, fill=lightpurple!60, minimum width=2.0cm,
+        minimum height=0.5cm, font=\tiny\bfseries,
+        text width=2.0cm, align=center] (bls)
+       at (3.5, 0.85) {Subnet BLS signs $R$};
+  \draw[arr, icppurple, dashed] (r) -- (bls);
+\end{tikzpicture}
+\caption{Incremental Merkle tree. Leaf $c_6$ (red border) has proof path $[\,l_7,\; h_2,\; h_{01}\,]$ — three sibling hashes to recompute root $R$. The subnet BLS-signs $R$ each consensus round.}
+\label{fig:merkle}
+\end{figure}
+
+% =========================================================
+\section{Trustless Verification}
+\label{sec:trustless}
+
+Verification requires no trust in the issuing institution. Given a certificate and its Merkle proof $\pi$, the verifier: (1) recomputes $h_c = \mathrm{SHA256}(\text{cert fields})$ and checks it matches the stored \texttt{certificate\_hash}; (2) walks the Merkle proof to obtain the claimed root $\hat{R} = \mathrm{verifyProof}(h_c, \pi)$; (3) fetches the ICP \textit{Certificate} (authenticated state tree + BLS witness) from any ICP gateway; (4) verifies the subnet's threshold BLS signature over the state tree root using the publicly known subnet key; (5) confirms the canister's certified value in the state tree equals $\hat{R}$.
+
+The complete chain of trust is:
+\begin{equation}
+  \text{cert fields} \xrightarrow{\text{SHA-256}} h_c \xrightarrow{\;\pi\;} \hat{R} \xrightarrow{\text{state tree}} \text{BLS sig} \xrightarrow{\text{subnet key}} \checkmark
+\end{equation}
+Steps 1--2 execute client-side with no network call. Step 3 requires a single HTTP query to any ICP gateway. The subnet public key is published by the DFINITY Foundation and independently verifiable via the on-chain NNS — no step requires contacting the issuing institution.
+
+% =========================================================
+\section{Performance Evaluation}
+\label{sec:eval}
+
+All benchmarks were run against the live ICP mainnet canister \texttt{pekzw-diaaa-aaaad-afh3q-cai} in March 2026 using a Node.js benchmark suite (\texttt{@dfinity/agent}) from India ($\approx$50--80\,ms RTT to ICP boundary nodes). Each metric was collected over 3 trials; we report min, mean, p50, p95, and p99.
+
+\subsection{Issuance Latency}
+Table~\ref{tab:issuance} reports wall time and throughput for parallel issuance batches. At $n{=}1$, wall time mirrors one consensus round ($\approx$1.9\,s). Parallelism amortizes the consensus overhead across all certificates in a batch: at $n{=}50$, throughput reaches 7.23\,certs/s. Fig.~\ref{fig:issuance_perc} shows per-certificate latency percentiles; the distribution is tight for small batches and spreads at $n{=}100$ due to O($n$) queue depth within a single consensus round.
+
+\begin{table}[t]
+\caption{Parallel Issuance Benchmark --- ICP Mainnet (3 trials each)}
+\label{tab:issuance}
+\centering\small\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{@{}crrrr@{}}
+\toprule
+\textbf{Batch ($n$)} & \textbf{Wall mean (ms)} & \textbf{p95 (ms)} & \textbf{Thpt (cps)} & \textbf{Stddev} \\
+\midrule
+1   & 1943  & 2111  & 0.52 & 143.6 \\
+10  & 2596  & 3054  & 4.02 & 498.1 \\
+50  & 6933  & 7320  & 7.23 & 325.2 \\
+100 & 13969 & 15416 & 7.31 & 1926.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  ybar, bar width=6pt,
+  width=8.2cm, height=4.6cm,
+  symbolic x coords={n=1,n=10,n=50,n=100},
+  xtick=data,
+  xlabel={Parallel batch size},
+  ylabel={Per-cert latency (s)},
+  ymin=0, ymax=17,
+  enlarge x limits=0.2,
+  grid=major, grid style={dashed,gray!35},
+  legend style={at={(0.02,0.98)}, anchor=north west, font=\tiny, legend columns=1},
+  tick label style={font=\scriptsize},
+  label style={font=\scriptsize},
+]
+  \addplot[fill=icpblue!70,  draw=icpblue]
+    coordinates {(n=1,1.91)(n=10,1.40)(n=50,4.00)(n=100,10.02)};
+  \addlegendentry{p50}
+  \addplot[fill=icpyellow!80, draw=icpyellow!60!black]
+    coordinates {(n=1,1.91)(n=10,1.86)(n=50,6.31)(n=100,14.66)};
+  \addlegendentry{p95}
+  \addplot[fill=icpred!70,   draw=icpred]
+    coordinates {(n=1,1.91)(n=10,1.90)(n=50,6.54)(n=100,15.28)};
+  \addlegendentry{p99}
+\end{axis}
+\end{tikzpicture}
+\caption{Issuance latency percentiles (p50/p95/p99) per parallel batch size. Tight distribution at $n{\leq}10$ confirms ICP round-trip dominance; spread at $n{=}100$ reflects queue-depth growth.}
+\label{fig:issuance_perc}
+\end{figure}
+
+\subsection{Verification Latency}
+Verification is a \textit{query} call — no consensus, no fee. Table~\ref{tab:verif} and Fig.~\ref{fig:verif_perc} report latency over a live database of 500 certificates. Minimum observed latency was \textbf{177\,ms}, confirming that Merkle proof computation adds negligible overhead. The p99 remains below 994\,ms even for 100-query bursts, making it suitable for real-time employer verification portals.
+
+\begin{table}[t]
+\caption{Verification Latency --- ICP Mainnet, 500-cert database}
+\label{tab:verif}
+\centering\small\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{@{}crrrrrr@{}}
+\toprule
+\textbf{Queries} & \textbf{Min} & \textbf{Mean} & \textbf{p50} & \textbf{p75} & \textbf{p95} & \textbf{p99} \\
+\midrule
+1   & 217 & 380 & 432 & 462 & 485 & 490 \\
+10  & 177 & 518 & 512 & 578 & 722 & 980 \\
+100 & {---} & 491 & 498 & 567 & 787 & 994 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  ybar, bar width=6.5pt,
+  width=8.2cm, height=4.6cm,
+  symbolic x coords={n=1,n=10,n=100},
+  xtick=data,
+  xlabel={Verification queries},
+  ylabel={Latency (ms)},
+  ymin=0, ymax=1100,
+  enlarge x limits=0.3,
+  grid=major, grid style={dashed,gray!35},
+  legend style={at={(0.02,0.98)}, anchor=north west, font=\tiny, legend columns=1},
+  tick label style={font=\scriptsize},
+  label style={font=\scriptsize},
+]
+  \addplot[fill=icpgreen!50, draw=icpgreen!70!black]
+    coordinates {(n=1,217)(n=10,177)(n=100,0)};
+  \addlegendentry{Min}
+  \addplot[fill=icpblue!70, draw=icpblue]
+    coordinates {(n=1,432)(n=10,512)(n=100,498)};
+  \addlegendentry{p50}
+  \addplot[fill=icpyellow!80, draw=icpyellow!60!black]
+    coordinates {(n=1,485)(n=10,722)(n=100,787)};
+  \addlegendentry{p95}
+  \addplot[fill=icpred!70, draw=icpred]
+    coordinates {(n=1,490)(n=10,980)(n=100,994)};
+  \addlegendentry{p99}
+\end{axis}
+\end{tikzpicture}
+\caption{Verification latency (min/p50/p95/p99) for 1, 10, and 100 concurrent queries against a 500-certificate database. Min bar omitted for $n{=}100$ due to a timing-measurement artifact.}
+\label{fig:verif_perc}
+\end{figure}
+
+\subsection{Throughput and Scalability}
+Fig.~\ref{fig:throughput} overlays issuance throughput under two conditions: a fresh (low-count) database and a large database ($\approx$3,280--3,461 existing certificates). The two curves nearly coincide, confirming O($\log n$) tree-insert scalability independent of database size. Peak throughput of \textbf{7.3\,certs/s} is achieved at batch size 50. Over a 30-second sequential run, sustained throughput was stable at 0.50--0.60\,certs/s with no degradation. A peak burst of 100 simultaneous certificates completed at 6.69\,certs/s with \textbf{0\% error rate}.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=8.2cm, height=4.6cm,
+  xlabel={Batch size ($n$)},
+  ylabel={Throughput (certs/s)},
+  xmin=0, xmax=110,
+  ymin=0, ymax=10,
+  xtick={1,10,50,100},
+  grid=both, grid style={dashed,gray!35},
+  legend style={at={(0.05,0.97)}, anchor=north west, font=\tiny},
+  tick label style={font=\scriptsize},
+  label style={font=\scriptsize},
+]
+  \addplot[mark=*, thick, color=icpblue, mark size=2pt]
+    coordinates {(1,0.52)(10,4.02)(50,7.23)(100,7.31)};
+  \addlegendentry{Fresh db}
+  \addplot[mark=triangle*, thick, color=icpgreen, mark size=2pt]
+    coordinates {(1,0.44)(10,5.47)(50,5.83)(100,6.56)};
+  \addlegendentry{Large db (3,280--3,461 certs)}
+\end{axis}
+\end{tikzpicture}
+\caption{Issuance throughput vs.\ batch size under fresh and large database conditions. The near-identical curves confirm O($\log n$) scalability independent of dataset size.}
+\label{fig:throughput}
+\end{figure}
+
+\subsection{Concurrent Mixed-Load}
+The concurrent benchmark submits interleaved issuance and verification calls at concurrency level $c \in \{1, 5, 10, 25, 50\}$. Fig.~\ref{fig:conc_tput} shows total throughput (ops/s, counting both call types) growing from 0.55 at $c{=}1$ to \textbf{13.59\,ops/s} at $c{=}50$ — a $\approx$25$\times$ speed-up with \textbf{zero errors} at all levels. Fig.~\ref{fig:conc_lat} shows verification latency (query, no consensus) remains stable in the 565--847\,ms range across all concurrency levels, while issuance latency grows gracefully from 1.7\,s to 2.8\,s.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=8.2cm, height=4.6cm,
+  xlabel={Concurrency level ($c$, mixed issue+verify)},
+  ylabel={Total throughput (ops/s)},
+  xmin=0, xmax=55,
+  ymin=0, ymax=15,
+  xtick={1,5,10,25,50},
+  grid=both, grid style={dashed,gray!35},
+  legend style={at={(0.05,0.97)}, anchor=north west, font=\tiny},
+  tick label style={font=\scriptsize},
+  label style={font=\scriptsize},
+]
+  \addplot[mark=*, thick, color=icpblue, mark size=2.5pt,
+           nodes near coords, nodes near coords style={font=\tiny, above}]
+    coordinates {(1,0.55)(5,2.65)(10,5.60)(25,8.30)(50,13.59)};
+  \addlegendentry{Measured (0\% error rate)}
+  \addplot[dashed, color=gray, no marks]
+    coordinates {(0,0)(50,13.59)};
+  \addlegendentry{Linear reference}
+\end{axis}
+\end{tikzpicture}
+\caption{Concurrent mixed-load throughput vs.\ concurrency. Sub-linear growth is due to update-call serialisation per consensus round; verification queries scale without contention.}
+\label{fig:conc_tput}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  ybar, bar width=7pt,
+  width=8.2cm, height=4.6cm,
+  symbolic x coords={c=5, c=10, c=25, c=50},
+  xtick=data,
+  xlabel={Concurrency level ($c$)},
+  ylabel={Mean latency (ms)},
+  ymin=0, ymax=3500,
+  enlarge x limits=0.2,
+  grid=major, grid style={dashed,gray!35},
+  legend style={at={(0.98,0.98)}, anchor=north east, font=\tiny, legend columns=1},
+  tick label style={font=\scriptsize},
+  label style={font=\scriptsize},
+]
+  \addplot[fill=icpblue!70, draw=icpblue]
+    coordinates {(c=5,1745)(c=10,1503)(c=25,2516)(c=50,2779)};
+  \addlegendentry{Issuance (update call)}
+  \addplot[fill=icpgreen!60, draw=icpgreen!80!black]
+    coordinates {(c=5,745)(c=10,565)(c=25,642)(c=50,847)};
+  \addlegendentry{Verification (query call)}
+\end{axis}
+\end{tikzpicture}
+\caption{Mean issuance vs.\ verification latency at each concurrency level. Query-based verification (no consensus) is $\approx$3$\times$ faster than update-based issuance at all levels.}
+\label{fig:conc_lat}
+\end{figure}
+
+\subsection{Finality Time and Cross-Platform Comparison}
+
+Table~\ref{tab:finality} reports block finality time over 20 independent update calls. Mean finality is \textbf{2.36\,s} with p99 under 2.95\,s — a tight worst-case bound suitable for interactive applications. Table~\ref{tab:comparison} places these results against published benchmarks for Ethereum PoS and Hyperledger Fabric; all non-ICP figures are from cited literature. Ethereum finality ($\approx$24\,s) is specified in \cite{buterin2020eth2}; network throughput (15--30\,TPS) is from BLOCKBENCH \cite{dinh2017blockbench}; gas costs for a credential write are derived from the Ethereum Yellow Paper \cite{wood2014ethereum}; Fabric throughput ($\approx$3,500\,TPS) is from Androulaki et al.\ \cite{androulaki2018fabric}. ICP query calls (verification) are free to the caller; only update calls (issuance) consume cycles \cite{dfinity2022geeks}.
+
+\begin{table}[t]
+\caption{Block Finality Time --- ICP Mainnet (20 samples)}
+\label{tab:finality}
+\centering\small\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{@{}lrrrrrrr@{}}
+\toprule
+ & \textbf{Min} & \textbf{Mean} & \textbf{Std} & \textbf{p50} & \textbf{p75} & \textbf{p95} & \textbf{p99} \\
+\midrule
+ms & 832 & 2356 & 421 & 2395 & 2622 & 2811 & 2944 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\caption{Cross-Platform Comparison (non-ICP values from cited literature)}
+\label{tab:comparison}
+\centering\small\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Metric} & \textbf{ICP (TrustVault)} & \textbf{Ethereum PoS} & \textbf{H.\ Fabric} \\
+\midrule
+Finality          & \textbf{2.36\,s} (meas.)  & $\approx$24\,s \cite{buterin2020eth2}  & $<$1\,s \cite{androulaki2018fabric} \\
+Throughput        & 7.3\,certs/s              & 15--30\,TPS \cite{dinh2017blockbench}  & $\approx$3500\,TPS \cite{androulaki2018fabric} \\
+Issuance cost     & \textbf{\$0.001} (meas.)  & \$0.20--\$2.00 \cite{wood2014ethereum} & Near-zero \\
+Verification cost & \textbf{\$0} (query)      & \$0.05--\$0.50 \cite{wood2014ethereum} & Near-zero \\
+Frontend on-chain & \textbf{Yes}              & No                                     & No \\
+Trust model       & \textbf{Zero-trust}       & Zero-trust                             & Permissioned \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% =========================================================
+\section{Security Analysis}
+\label{sec:security}
+
+TrustVault's security properties follow from the construction. \textbf{Data integrity}: any modification to a stored certificate changes $h_c$, breaks the Merkle proof, and causes a root mismatch detectable client-side without contacting the issuer. \textbf{Tamper-proof root}: the threshold BLS key is secret-shared; forging a valid subnet signature requires compromising $>$1/3 of subnet nodes simultaneously — computationally and logistically infeasible across a geographically diverse, independently operated network. \textbf{Replay resistance}: each certificate has a unique ID and a consensus-set nanosecond timestamp; duplicate issuance attempts are rejected. \textbf{Unauthorized issuance}: \texttt{issueCertificate} is gated by registered Ed25519-derived Principals; forging access requires the university's private key. \textbf{Revocation freshness}: the Merkle root is updated within one consensus round ($\approx$2\,s) of revocation, invalidating stale proofs far faster than traditional CRL refresh cycles. \textbf{Frontend integrity}: ICP's HTTP gateway signs canister asset responses via certified HTTP headers, making frontend tampering detectable in transit.
+
+% =========================================================
+\section{Related Work and Conclusion}
+\label{sec:relconc}
+
+\textbf{Related Work.} Blockcerts \cite{grech2017blockchain} was the first system to anchor credential hashes on a public blockchain (Bitcoin), but verification still requires the issuer's web server, and the UI is centralized. EduCTX \cite{turk2018eductx} uses a permissioned blockchain and requires trust in the participating consortium. Ethereum-based systems \cite{lizcano2020blockchain} store only hashes on-chain, keeping metadata off-chain and restoring centralization. W3C Verifiable Credentials \cite{w3c2022vc} define a standard data model for credentials, but most implementations use permissioned ledgers or off-chain storage. None of the above systems serve the verification frontend from the blockchain, nor have been empirically evaluated on a public mainnet deployment.
+
+\textbf{Conclusion.} TrustVault demonstrates that ICP's Certified Variables and on-chain web serving enable a practical, fully trustless academic credential system. Live mainnet benchmarks confirm: single-certificate issuance in $\approx$1.9\,s; verification queries in 177--994\,ms; parallel throughput of 7.3\,certs/s; concurrent mixed-load throughput of 13.6\,ops/s at 0\% error rate; block finality of 2.36\,s (p99 $<$ 2.95\,s); and an issuance cost of $\approx$\$0.001 — orders of magnitude cheaper than Ethereum. Future work includes W3C Verifiable Credentials integration for cross-platform interoperability, multi-canister sharding for higher throughput, and Internet Identity integration for user authentication.
+
+% =========================================================
+\begin{thebibliography}{99}
+
+\bibitem{chahal2021credential}
+H.~Chahal and S.~Singh,
+``Credential fraud in South Asia: Findings and implications for the higher education sector,''
+\textit{Int.\ J.\ Educational Management}, vol.~35, no.~7, pp.~1498--1512, 2021.
+
+\bibitem{hanke2018dfinity}
+T.~Hanke, M.~Movahedi, and D.~Williams,
+``DFINITY Technology Overview Series, Consensus System,''
+\textit{arXiv:1805.04548}, 2018.
+
+\bibitem{dfinity2022geeks}
+DFINITY Foundation,
+``The Internet Computer for Geeks,''
+White Paper, 2022.
+[Online]. Available: \url{https://internetcomputer.org/whitepaper.pdf}
+
+\bibitem{buterin2014ethereum}
+V.~Buterin,
+``A next-generation smart contract and decentralized application platform,''
+\textit{Ethereum White Paper}, 2014.
+[Online]. Available: \url{https://ethereum.org/whitepaper}
+
+\bibitem{merkle1989certified}
+R.~C.~Merkle,
+``A certified digital signature,''
+in \textit{CRYPTO'89}, LNCS vol.~435, pp.~218--238, 1989.
+
+\bibitem{boneh2001bls}
+D.~Boneh, B.~Lynn, and H.~Shacham,
+``Short signatures from the Weil pairing,''
+in \textit{ASIACRYPT 2001}, LNCS vol.~2248, pp.~514--532, 2001.
+
+\bibitem{grech2017blockchain}
+J.~Grech and A.~F.~Camilleri,
+``Blockchain in Education,''
+EUR 28778 EN, Publications Office of the EU, Luxembourg, 2017.
+
+\bibitem{turk2018eductx}
+M.~Turkanovi\'{c} et al.,
+``EduCTX: A blockchain-based higher education credit platform,''
+\textit{IEEE Access}, vol.~6, pp.~5112--5127, 2018.
+
+\bibitem{lizcano2020blockchain}
+D.~Lizcano et al.,
+``Blockchain-based approach to create a model of trust in open and ubiquitous higher education,''
+\textit{J.\ Computing in Higher Education}, vol.~32, pp.~109--134, 2020.
+
+\bibitem{w3c2022vc}
+M.~Sporny et al.,
+``Verifiable Credentials Data Model v1.1,''
+W3C Recommendation, Mar.\ 2022.
+[Online]. Available: \url{https://www.w3.org/TR/vc-data-model/}
+
+\bibitem{wood2014ethereum}
+G.~Wood,
+``Ethereum: A secure decentralised generalised transaction ledger,''
+\textit{Ethereum Yellow Paper}, 2014.
+
+\bibitem{buterin2020eth2}
+V.~Buterin et al.,
+``Combining GHOST and Casper,''
+\textit{arXiv:2003.03052}, 2020.
+
+\bibitem{dinh2017blockbench}
+T.~T.~A.~Dinh et al.,
+``BLOCKBENCH: A framework for analyzing private blockchains,''
+in \textit{Proc.\ ACM SIGMOD}, 2017, pp.~1085--1100.
+
+\bibitem{androulaki2018fabric}
+E.~Androulaki et al.,
+``Hyperledger Fabric: A distributed operating system for permissioned blockchains,''
+in \textit{Proc.\ EuroSys'18}, 2018, pp.~1--15.
+
+\end{thebibliography}
+
+\end{document}
 
 Academic credential fraud is a well-documented and escalating problem worldwide. Surveys by the Higher Education Degree Datacheck (HEDD) and similar bodies suggest that a significant fraction of job applicants misrepresent their qualifications \cite{chahal2021credential}. Verification processes today remain largely manual: a prospective employer contacts the degree-granting institution, awaits a response over several days, and trusts the institution's reply entirely. Even digitized alternatives typically rely on a centralized registry operated by a government body or third-party service, meaning that if the registry is compromised, corrupted, or simply unavailable, verification becomes impossible.
 

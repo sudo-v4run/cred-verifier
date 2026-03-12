@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.7)  9 MAR 2026 18:31
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.7)  12 MAR 2026 19:05
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -942,7 +942,13 @@ Package pgfplots notification 'compat/show suggested version=true': document ha
 s been generated with the most recent feature set (\pgfplotsset{compat=1.18}).
 
 \c@lstlisting=\count340
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 80
+.
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
+File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
+)
 LaTeX Font Info:    Trying to load font information for U+msa on input line 80.
+
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
@@ -953,178 +959,60 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 80.
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Trying to load font information for T1+pcr on input line 80
-.
+Underfull \hbox (badness 3503) in paragraph at lines 79--81
+[]\T1/ptm/b/it/9 Abstract\T1/ptm/b/n/9 ---Academic cre-den-tial fraud im-poses 
+sig-nif-i-cant
+ []
 
-(/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
-File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
-) [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texlive/texm
-f-dist/fonts/enc/dvips/base/8r.enc}
+
+Underfull \hbox (badness 5533) in paragraph at lines 108--109
+[]\T1/ptm/m/n/10 The Mo-toko back-end is or-ga-nized into five mod-
+ []
+
+
+Underfull \hbox (badness 2285) in paragraph at lines 108--109
+\T1/ptm/m/n/10 ules: \T1/ptm/b/n/10 main.mo \T1/ptm/m/n/10 (pub-lic ac-tor ^^V 
+\T1/pcr/m/n/10 issueCertificate\T1/ptm/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 5417) in paragraph at lines 189--190
+[]\T1/ptm/m/n/10 Access con-trol is en-forced via ICP \T1/ptm/m/it/10 Prin-ci-p
+als \T1/ptm/m/n/10 ^^V
+ []
+
+
+Underfull \hbox (badness 1552) in paragraph at lines 189--190
+\T1/ptm/m/n/10 Ed25519-derived cryp-to-graphic iden-ti-ties. Only reg-is-tered
+ []
+
+
+Underfull \hbox (badness 1748) in paragraph at lines 189--190
+\T1/ptm/m/n/10 uni-ver-sity prin-ci-pals may call \T1/pcr/m/n/10 issueCertifica
+te \T1/ptm/m/n/10 or
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texlive/texmf-
+dist/fonts/enc/dvips/base/8r.enc}
 
 
 ]
-Underfull \hbox (badness 1852) in paragraph at lines 157--158
- \T1/ptm/m/it/10 4) Chain-Key Cryp-tog-ra-phy and Cer-ti-fied Vari-ables: [][][
-]
- []
+Package pgfplots info on input line 314: Using 'lua backend=false' for axis: x 
+coord trafo unsupported.
+ [2]
+Package pgfplots info on input line 364: Using 'lua backend=false' for axis: x 
+coord trafo unsupported.
+Package pgfplots info on input line 460: Using 'lua backend=false' for axis: x 
+coord trafo unsupported.
 
-
-Underfull \hbox (badness 1776) in paragraph at lines 159--160
-[]\T1/ptm/b/n/10 Certified Vari-ables \T1/ptm/m/n/10 ex-ploit this. A can-is-te
-r can call
- []
-
-
-Underfull \hbox (badness 1460) in paragraph at lines 159--160
-\T1/pcr/m/n/10 CertifiedData.set(blob32) \T1/ptm/m/n/10 to com-mit a 32-byte
- []
-
-
-Overfull \hbox (110.58304pt too wide) in paragraph at lines 197--198
+Overfull \hbox (23.00343pt too wide) in paragraph at lines 495--507
  [][] 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 213--214
-[]\T1/ptm/b/n/10 Standards-ready\T1/ptm/m/n/10 : cer-tifi-cate schema should ma
-p
- []
-
-[2]
-Underfull \hbox (badness 3623) in paragraph at lines 220--221
-[]\T1/ptm/b/n/10 main.mo\T1/ptm/m/n/10 : The pub-lic ac-tor. Ex-poses up-date c
-alls
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 220--221
-\T1/ptm/m/n/10 (\T1/pcr/m/n/10 issueCertificate\T1/ptm/m/n/10 , \T1/pcr/m/n/10 
-revokeCertificate\T1/ptm/m/n/10 ,
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 220--221
-\T1/pcr/m/n/10 registerUniversity\T1/ptm/m/n/10 ) and query calls
- []
-
-
-Underfull \hbox (badness 6510) in paragraph at lines 222--223
-[]\T1/ptm/b/n/10 MerkleTree.mo\T1/ptm/m/n/10 : Main-tains the in-cre-men-tal bi
--nary
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 256--257
-[]\T1/ptm/m/n/10 Only a \T1/ptm/m/it/10 reg-is-tered uni-ver-sity prin-ci-pal \
-T1/ptm/m/n/10 may call
- []
-
-
-Overfull \hbox (12.47583pt too wide) in paragraph at lines 313--314
- [][] 
- []
-
-
-Underfull \hbox (badness 4940) in paragraph at lines 325--326
-[]\T1/ptm/m/n/10 When a uni-ver-sity calls \T1/pcr/m/n/10 issueCertificate\T1/p
-tm/m/n/10 , the
- []
-
-
-Overfull \hbox (74.49977pt too wide) detected at line 328
-[][][]\OML/cmm/m/it/10 h[] \OT1/cmr/m/n/10 = []([] \OMS/cmsy/m/n/10 k [] k [] k
- [] k [] k [] k []\OT1/cmr/m/n/10 )
  []
 
 [3]
-Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
-nput line 427.
-
-Overfull \hbox (50.26508pt too wide) detected at line 441
-[] [] \OML/cmm/m/it/10 h[] [] [] [] [] [] []
- []
-
-[4]
-Underfull \hbox (badness 1383) in paragraph at lines 476--477
-[]\T1/ptm/m/n/10 All bench-marks were con-ducted against the live ICP
- []
-
-
-Underfull \hbox (badness 8170) in paragraph at lines 476--477
-\T1/ptm/m/n/10 main-net can-is-ter (\T1/pcr/m/n/10 pekzw-diaaa-aaaad-afh3q-cai\
-T1/ptm/m/n/10 )
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 476--477
-\T1/ptm/m/n/10 in March 2026. The bench-mark suite (Node.js,
- []
-
-
-Underfull \hbox (badness 2735) in paragraph at lines 476--477
-\T1/pcr/m/n/10 @dfinity/agent\T1/ptm/m/n/10 ) was run from a con-sumer lap-top
- []
-
-
-Underfull \hbox (badness 6284) in paragraph at lines 504--510
-[]\T1/ptm/m/n/10 Fig. []5[] shows the per-certificate la-tency per-centiles
- []
-
-Package pgfplots info on input line 528: Using 'lua backend=false' for axis: x 
-coord trafo unsupported.
-Package pgfplots info on input line 591: Using 'lua backend=false' for axis: x 
-coord trafo unsupported.
-
-Underfull \hbox (badness 4899) in paragraph at lines 658--664
-[]\T1/ptm/m/n/10 Over a con-tin-u-ous 30-second sustained-issuance run
- []
-
-Package pgfplots info on input line 686: Using 'lua backend=false' for axis: x 
-coord trafo unsupported.
-[5]
-Package pgfplots info on input line 766: Using 'lua backend=false' for axis: x 
-coord trafo unsupported.
-
-Overfull \hbox (32.64284pt too wide) in paragraph at lines 836--849
- [][] 
- []
-
-[6]
-Underfull \hbox (badness 2285) in paragraph at lines 895--896
-[]\T1/ptm/m/n/10 Live main-net bench-marks (Figs. []5[]--[]10[], Ta-bles []II[]
---[]IV[])
- []
-
-[7]
-Underfull \hbox (badness 2111) in paragraph at lines 917--921
-\T1/ptm/m/n/8 ITY Foun-da-tion White Pa-per, 2022. [On-line]. Avail-able: []$ht
-tps : / /
- []
-
-
-Underfull \hbox (badness 4353) in paragraph at lines 974--978
-\T1/ptm/m/n/8 2023. [On-line]. Avail-able: []$https : / / internetcomputer . or
-g / docs / current /
- []
-
-
-Underfull \hbox (badness 4995) in paragraph at lines 980--984
-[]\T1/ptm/m/n/8 DFINITY Foun-da-tion, ``How cer-ti-fied vari-ables work,'' In-t
-er-net
- []
-
-
-Underfull \hbox (badness 6157) in paragraph at lines 980--984
-\T1/ptm/m/n/8 Com-puter De-vel-oper Doc-u-men-ta-tion, 2023. [On-line]. Avail-a
-ble:
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 980--984
-[]$\T1/ptm/m/n/8 https : / / internetcomputer . org / docs / current / develope
-r-[]docs / security /
- []
-
 
 ** Conference Paper **
 Before submitting the final camera ready copy, remember to:
@@ -1136,22 +1024,22 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[8] (./research_paper.aux)
+[4] (./research_paper.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
 Package rerunfilecheck Info: File `research_paper.out' has not changed.
-(rerunfilecheck)             Checksum: BABDC12EC99EC0C9BA69E86A5F23CE3B;6829.
+(rerunfilecheck)             Checksum: 1621FD29218EAFBE7C262CDFAA2B54CE;2284.
  ) 
 Here is how much of TeX's memory you used:
- 35873 strings out of 476106
- 830097 string characters out of 5793934
- 2000975 words of memory out of 5000000
- 57212 multiletter control sequences out of 15000+600000
- 684608 words of font info for 179 fonts, out of 8000000 for 9000
+ 35384 strings out of 476106
+ 824684 string characters out of 5793934
+ 1978975 words of memory out of 5000000
+ 56789 multiletter control sequences out of 15000+600000
+ 682046 words of font info for 174 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 84i,19n,93p,1698b,2301s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 84i,19n,93p,1226b,2301s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share
 /texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texliv
@@ -1163,22 +1051,21 @@ ic/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
 nts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
 mr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb>
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/
-share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/t
-exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-d
-ist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/fon
-ts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/typ
-e1/public/amsfonts/symbols/msam10.pfb></usr/share/texlive/texmf-dist/fonts/type
-1/public/amsfonts/symbols/msbm5.pfb></usr/share/texlive/texmf-dist/fonts/type1/
-urw/courier/ucrb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/u
-crr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr
-/share/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texlive
-/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fon
-ts/type1/urw/times/utmri8a.pfb>
-Output written on research_paper.pdf (8 pages, 333860 bytes).
+share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/t
+exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fo
+nts/type1/public/amsfonts/symbols/msam10.pfb></usr/share/texlive/texmf-dist/fon
+ts/type1/public/amsfonts/symbols/msbm5.pfb></usr/share/texlive/texmf-dist/fonts
+/type1/urw/courier/ucrb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/co
+urier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pf
+b></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/
+texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-d
+ist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on research_paper.pdf (4 pages, 285171 bytes).
 PDF statistics:
- 493 PDF objects out of 1000 (max. 8388607)
- 428 compressed objects within 5 object streams
- 111 named destinations out of 1000 (max. 500000)
- 357 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 283 PDF objects out of 1000 (max. 8388607)
+ 226 compressed objects within 3 object streams
+ 47 named destinations out of 1000 (max. 500000)
+ 125 words of extra memory for PDF output out of 10000 (max. 10000000)
 
