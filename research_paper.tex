@@ -176,7 +176,7 @@ The Motoko backend is organized into five modules: \textbf{main.mo} (public acto
   \draw[arr] (cd.south) -- (sub.north);
 
 \end{tikzpicture}
-\caption{TrustVault system architecture. University and Verifier access the on-chain Frontend canister via HTTPS. The Frontend dispatches Candid RPC calls to \texttt{main.mo}, which fans out to sub-modules via a shared dispatch bus. The MerkleTree module commits the certified root via \texttt{CertifiedData.set()}, BLS-signed by the subnet each consensus round.}
+\caption{TrustVault system architecture. Universities and verifiers connect via HTTPS. The frontend routes requests to the backend canister, which issues and verifies certificates using a Merkle tree whose root is BLS-signed by the ICP subnet.}
 \label{fig:sysarch}
 \end{figure}
 
@@ -248,7 +248,7 @@ Inserting a new leaf recomputes only the $O(\log n)$ path to the root (Fig.~\ref
        at (3.5, 0.85) {Subnet BLS signs $R$};
   \draw[arr, icppurple, dashed] (r) -- (bls);
 \end{tikzpicture}
-\caption{Incremental Merkle tree. Leaf $c_6$ (red border) has proof path $[\,l_7,\; h_2,\; h_{01}\,]$ — three sibling hashes to recompute root $R$. The subnet BLS-signs $R$ each consensus round.}
+\caption{Merkle tree used for certificate verification. Adding leaf $c_6$ (red) requires updating only three hashes to reach root $R$, which the ICP subnet BLS-signs each consensus round.}
 \label{fig:merkle}
 \end{figure}
 
@@ -271,7 +271,7 @@ Steps 1--2 execute client-side with no network call. Step 3 requires a single HT
 All benchmarks were run against the live ICP mainnet canister \texttt{pekzw-diaaa-aaaad-afh3q-cai} in March 2026 using a Node.js benchmark suite (\texttt{@dfinity/agent}) from India ($\approx$50--80\,ms RTT to ICP boundary nodes). Each metric was collected over 3 trials; we report min, mean, p50, p95, and p99.
 
 \subsection{Issuance Latency}
-Table~\ref{tab:issuance} reports wall time and throughput for parallel issuance batches. At $n{=}1$, wall time mirrors one consensus round ($\approx$1.9\,s). Parallelism amortizes the consensus overhead across all certificates in a batch: at $n{=}50$, throughput reaches 7.23\,certs/s. Fig.~\ref{fig:issuance_perc} shows per-certificate latency percentiles; the distribution is tight for small batches and spreads at $n{=}100$ due to O($n$) queue depth within a single consensus round.
+Table~\ref{tab:issuance} reports wall time and throughput for parallel issuance batches. At $n{=}1$, wall time mirrors one consensus round ($\approx$1.9\,s). Parallelism amortizes the consensus overhead: at $n{=}50$, throughput reaches 7.23\,certs/s. Fig.~\ref{fig:issuance_perc} shows \textit{completion time by queue position}. Each individual certificate takes $\approx$1.9\,s to process regardless of batch size — the rising bars at $n{=}100$ do not mean a single certificate takes 15\,s. Rather, since all $n$ certs are submitted simultaneously but the canister serialises update calls one-per-consensus-round, the $k$-th cert in line finishes only after the $k{-}1$ ahead of it complete. At $n{=}100$, the 50th cert is done at $\approx$10\,s and the 99th at $\approx$15\,s from submission — matching the overall wall-time of 13{,}969\,ms in Table~\ref{tab:issuance}.
 
 \begin{table}[t]
 \caption{Parallel Issuance Benchmark --- ICP Mainnet (3 trials each)}
@@ -298,7 +298,7 @@ Table~\ref{tab:issuance} reports wall time and throughput for parallel issuance 
   symbolic x coords={n=1,n=10,n=50,n=100},
   xtick=data,
   xlabel={Parallel batch size},
-  ylabel={Per-cert latency (s)},
+  ylabel={Completion time (s)},
   ymin=0, ymax=17,
   enlarge x limits=0.2,
   grid=major, grid style={dashed,gray!35},
@@ -317,7 +317,7 @@ Table~\ref{tab:issuance} reports wall time and throughput for parallel issuance 
   \addlegendentry{p99}
 \end{axis}
 \end{tikzpicture}
-\caption{Issuance latency percentiles (p50/p95/p99) per parallel batch size. Tight distribution at $n{\leq}10$ confirms ICP round-trip dominance; spread at $n{=}100$ reflects queue-depth growth.}
+\caption{Parallel issuance completion time (p50/p95/p99) by batch size. Each certificate takes $\approx$1.9\,s; the rising bars at $n{=}100$ reflect the last certificate waiting behind 99 others in the queue, not a slower per-cert rate. Peak throughput: 7.31\,certs/s.}
 \label{fig:issuance_perc}
 \end{figure}
 
@@ -370,7 +370,7 @@ Verification is a \textit{query} call — no consensus, no fee. Table~\ref{tab:v
   \addlegendentry{p99}
 \end{axis}
 \end{tikzpicture}
-\caption{Verification latency (min/p50/p95/p99) for 1, 10, and 100 concurrent queries against a 500-certificate database. Min bar omitted for $n{=}100$ due to a timing-measurement artifact.}
+\caption{Verification latency for 1, 10, and 100 queries against a 500-cert database. p99 stays below 1\,s. Min bar is omitted for $n{=}100$ due to a measurement artifact.}
 \label{fig:verif_perc}
 \end{figure}
 
@@ -400,7 +400,7 @@ Fig.~\ref{fig:throughput} overlays issuance throughput under two conditions: a f
   \addlegendentry{Large db (3,280--3,461 certs)}
 \end{axis}
 \end{tikzpicture}
-\caption{Issuance throughput vs.\ batch size under fresh and large database conditions. The near-identical curves confirm O($\log n$) scalability independent of dataset size.}
+\caption{Issuance throughput vs.\ batch size for a fresh and a large database. Near-identical curves confirm O($\log n$) Merkle insert cost regardless of database size.}
 \label{fig:throughput}
 \end{figure}
 
@@ -412,7 +412,7 @@ The concurrent benchmark submits interleaved issuance and verification calls at 
 \begin{tikzpicture}
 \begin{axis}[
   width=8.2cm, height=4.6cm,
-  xlabel={Concurrency level ($c$, mixed issue+verify)},
+  xlabel={Concurrency level ($c$)},
   ylabel={Total throughput (ops/s)},
   xmin=0, xmax=55,
   ymin=0, ymax=15,
@@ -431,7 +431,7 @@ The concurrent benchmark submits interleaved issuance and verification calls at 
   \addlegendentry{Linear reference}
 \end{axis}
 \end{tikzpicture}
-\caption{Concurrent mixed-load throughput vs.\ concurrency. Sub-linear growth is due to update-call serialisation per consensus round; verification queries scale without contention.}
+\caption{Mixed-load throughput (30\% issue, 70\% verify) at increasing concurrency levels. Sub-linear growth is because issuance calls are serialised per consensus round.}
 \label{fig:conc_tput}
 \end{figure}
 
@@ -460,26 +460,13 @@ The concurrent benchmark submits interleaved issuance and verification calls at 
   \addlegendentry{Verification (query call)}
 \end{axis}
 \end{tikzpicture}
-\caption{Mean issuance vs.\ verification latency at each concurrency level. Query-based verification (no consensus) is $\approx$3$\times$ faster than update-based issuance at all levels.}
+\caption{Mean latency for issuance and verification at each concurrency level. Verification is $\approx$3$\times$ faster than issuance since it requires no consensus.}
 \label{fig:conc_lat}
 \end{figure}
 
 \subsection{Finality Time and Cross-Platform Comparison}
 
-Table~\ref{tab:finality} reports block finality time over 20 independent update calls. Mean finality is \textbf{2.36\,s} with p99 under 2.95\,s — a tight worst-case bound suitable for interactive applications. Table~\ref{tab:comparison} places these results against published benchmarks for Ethereum PoS and Hyperledger Fabric; all non-ICP figures are from cited literature. Ethereum finality ($\approx$24\,s) is specified in \cite{buterin2020eth2}; network throughput (15--30\,TPS) is from BLOCKBENCH \cite{dinh2017blockbench}; gas costs for a credential write are derived from the Ethereum Yellow Paper \cite{wood2014ethereum}; Fabric throughput ($\approx$3,500\,TPS) is from Androulaki et al.\ \cite{androulaki2018fabric}. ICP query calls (verification) are free to the caller; only update calls (issuance) consume cycles \cite{dfinity2022geeks}.
-
-\begin{table}[t]
-\caption{Block Finality Time --- ICP Mainnet (20 samples)}
-\label{tab:finality}
-\centering\small\renewcommand{\arraystretch}{1.1}
-\begin{tabular}{@{}lrrrrrrr@{}}
-\toprule
- & \textbf{Min} & \textbf{Mean} & \textbf{Std} & \textbf{p50} & \textbf{p75} & \textbf{p95} & \textbf{p99} \\
-\midrule
-ms & 832 & 2356 & 421 & 2395 & 2622 & 2811 & 2944 \\
-\bottomrule
-\end{tabular}
-\end{table}
+Block finality was measured over 20 independent update calls: min 832\,ms, mean \textbf{2{,}356\,ms}, stddev 421\,ms, p50 2{,}395\,ms, p75 2{,}622\,ms, p95 2{,}811\,ms, p99 \textbf{2{,}944\,ms} — a tight worst-case bound suitable for interactive applications. Table~\ref{tab:comparison} places these results against published benchmarks for Ethereum PoS and Hyperledger Fabric; all non-ICP figures are from cited literature. Ethereum finality ($\approx$24\,s) is specified in \cite{buterin2020eth2}; network throughput (15--30\,TPS) is from BLOCKBENCH \cite{dinh2017blockbench}; gas costs for a credential write are derived from the Ethereum Yellow Paper \cite{wood2014ethereum}; Fabric throughput ($\approx$3,500\,TPS) is from Androulaki et al.\ \cite{androulaki2018fabric}. ICP query calls (verification) are free to the caller; only update calls (issuance) consume cycles \cite{dfinity2022geeks}.
 
 \begin{table}[t]
 \caption{Cross-Platform Comparison (non-ICP values from cited literature)}

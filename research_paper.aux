@@ -13,20 +13,19 @@
 \@writefile{toc}{\contentsline {section}{\numberline {II}System Design}{1}{section.2}\protected@file@percent }
 \newlabel{sec:design}{{II}{1}{System Design}{section.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Architecture}{1}{subsection.2.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces TrustVault system architecture. University and Verifier access the on-chain Frontend canister via HTTPS. The Frontend dispatches Candid RPC calls to \texttt  {main.mo}, which fans out to sub-modules via a shared dispatch bus. The MerkleTree module commits the certified root via \texttt  {CertifiedData.set()}, BLS-signed by the subnet each consensus round.}}{2}{figure.1}\protected@file@percent }
-\newlabel{fig:sysarch}{{1}{2}{TrustVault system architecture. University and Verifier access the on-chain Frontend canister via HTTPS. The Frontend dispatches Candid RPC calls to \texttt {main.mo}, which fans out to sub-modules via a shared dispatch bus. The MerkleTree module commits the certified root via \texttt {CertifiedData.set()}, BLS-signed by the subnet each consensus round}{figure.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces TrustVault system architecture. Universities and verifiers connect via HTTPS. The frontend routes requests to the backend canister, which issues and verifies certificates using a Merkle tree whose root is BLS-signed by the ICP subnet.}}{2}{figure.1}\protected@file@percent }
+\newlabel{fig:sysarch}{{1}{2}{TrustVault system architecture. Universities and verifiers connect via HTTPS. The frontend routes requests to the backend canister, which issues and verifies certificates using a Merkle tree whose root is BLS-signed by the ICP subnet}{figure.1}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Certificate Schema}}{2}{table.1}\protected@file@percent }
 \newlabel{tab:schema}{{I}{2}{Certificate Schema}{table.1}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Incremental Merkle Tree and Certified Data}{2}{subsection.2.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {III}Trustless Verification}{2}{section.3}\protected@file@percent }
 \newlabel{sec:trustless}{{III}{2}{Trustless Verification}{section.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Incremental Merkle tree. Leaf $c_6$ (red border) has proof path $[\,l_7,\tmspace  +\thickmuskip {.2777em} h_2,\tmspace  +\thickmuskip {.2777em} h_{01}\,]$ — three sibling hashes to recompute root $R$. The subnet BLS-signs $R$ each consensus round.}}{2}{figure.2}\protected@file@percent }
-\newlabel{fig:merkle}{{2}{2}{Incremental Merkle tree. Leaf $c_6$ (red border) has proof path $[\,l_7,\; h_2,\; h_{01}\,]$ — three sibling hashes to recompute root $R$. The subnet BLS-signs $R$ each consensus round}{figure.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Parallel Issuance Benchmark --- ICP Mainnet (3 trials each)}}{2}{table.2}\protected@file@percent }
-\newlabel{tab:issuance}{{II}{2}{Parallel Issuance Benchmark --- ICP Mainnet (3 trials each)}{table.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Merkle tree used for certificate verification. Adding leaf $c_6$ (red) requires updating only three hashes to reach root $R$, which the ICP subnet BLS-signs each consensus round.}}{2}{figure.2}\protected@file@percent }
+\newlabel{fig:merkle}{{2}{2}{Merkle tree used for certificate verification. Adding leaf $c_6$ (red) requires updating only three hashes to reach root $R$, which the ICP subnet BLS-signs each consensus round}{figure.2}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {IV}Performance Evaluation}{2}{section.4}\protected@file@percent }
 \newlabel{sec:eval}{{IV}{2}{Performance Evaluation}{section.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Issuance Latency}{2}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Verification Latency}{2}{subsection.4.2}\protected@file@percent }
 \citation{buterin2020eth2}
 \citation{dinh2017blockbench}
 \citation{wood2014ethereum}
@@ -38,24 +37,25 @@
 \citation{androulaki2018fabric}
 \citation{wood2014ethereum}
 \citation{wood2014ethereum}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Issuance latency percentiles (p50/p95/p99) per parallel batch size. Tight distribution at $n{\leq }10$ confirms ICP round-trip dominance; spread at $n{=}100$ reflects queue-depth growth.}}{3}{figure.3}\protected@file@percent }
-\newlabel{fig:issuance_perc}{{3}{3}{Issuance latency percentiles (p50/p95/p99) per parallel batch size. Tight distribution at $n{\leq }10$ confirms ICP round-trip dominance; spread at $n{=}100$ reflects queue-depth growth}{figure.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Verification Latency --- ICP Mainnet, 500-cert database}}{3}{table.3}\protected@file@percent }
-\newlabel{tab:verif}{{III}{3}{Verification Latency --- ICP Mainnet, 500-cert database}{table.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Verification Latency}{3}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Throughput and Scalability}{3}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-D}}Concurrent Mixed-Load}{3}{subsection.4.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-E}}Finality Time and Cross-Platform Comparison}{3}{subsection.4.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Verification latency (min/p50/p95/p99) for 1, 10, and 100 concurrent queries against a 500-certificate database. Min bar omitted for $n{=}100$ due to a timing-measurement artifact.}}{3}{figure.4}\protected@file@percent }
-\newlabel{fig:verif_perc}{{4}{3}{Verification latency (min/p50/p95/p99) for 1, 10, and 100 concurrent queries against a 500-certificate database. Min bar omitted for $n{=}100$ due to a timing-measurement artifact}{figure.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Issuance throughput vs.\ batch size under fresh and large database conditions. The near-identical curves confirm O($\log n$) scalability independent of dataset size.}}{3}{figure.5}\protected@file@percent }
-\newlabel{fig:throughput}{{5}{3}{Issuance throughput vs.\ batch size under fresh and large database conditions. The near-identical curves confirm O($\log n$) scalability independent of dataset size}{figure.5}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {V}Security Analysis}{3}{section.5}\protected@file@percent }
-\newlabel{sec:security}{{V}{3}{Security Analysis}{section.5}{}}
 \citation{grech2017blockchain}
 \citation{turk2018eductx}
 \citation{lizcano2020blockchain}
 \citation{w3c2022vc}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Parallel Issuance Benchmark --- ICP Mainnet (3 trials each)}}{3}{table.2}\protected@file@percent }
+\newlabel{tab:issuance}{{II}{3}{Parallel Issuance Benchmark --- ICP Mainnet (3 trials each)}{table.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Parallel issuance completion time (p50/p95/p99) by batch size. Each certificate takes $\approx $1.9\,s; the rising bars at $n{=}100$ reflect the last certificate waiting behind 99 others in the queue, not a slower per-cert rate. Peak throughput: 7.31\,certs/s.}}{3}{figure.3}\protected@file@percent }
+\newlabel{fig:issuance_perc}{{3}{3}{Parallel issuance completion time (p50/p95/p99) by batch size. Each certificate takes $\approx $1.9\,s; the rising bars at $n{=}100$ reflect the last certificate waiting behind 99 others in the queue, not a slower per-cert rate. Peak throughput: 7.31\,certs/s}{figure.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Throughput and Scalability}{3}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-D}}Concurrent Mixed-Load}{3}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-E}}Finality Time and Cross-Platform Comparison}{3}{subsection.4.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Verification Latency --- ICP Mainnet, 500-cert database}}{3}{table.3}\protected@file@percent }
+\newlabel{tab:verif}{{III}{3}{Verification Latency --- ICP Mainnet, 500-cert database}{table.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Verification latency for 1, 10, and 100 queries against a 500-cert database. p99 stays below 1\,s. Min bar is omitted for $n{=}100$ due to a measurement artifact.}}{3}{figure.4}\protected@file@percent }
+\newlabel{fig:verif_perc}{{4}{3}{Verification latency for 1, 10, and 100 queries against a 500-cert database. p99 stays below 1\,s. Min bar is omitted for $n{=}100$ due to a measurement artifact}{figure.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Security Analysis}{3}{section.5}\protected@file@percent }
+\newlabel{sec:security}{{V}{3}{Security Analysis}{section.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Related Work and Conclusion}{3}{section.6}\protected@file@percent }
+\newlabel{sec:relconc}{{VI}{3}{Related Work and Conclusion}{section.6}{}}
 \bibcite{chahal2021credential}{1}
 \bibcite{hanke2018dfinity}{2}
 \bibcite{dfinity2022geeks}{3}
@@ -70,15 +70,13 @@
 \bibcite{buterin2020eth2}{12}
 \bibcite{dinh2017blockbench}{13}
 \bibcite{androulaki2018fabric}{14}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Concurrent mixed-load throughput vs.\ concurrency. Sub-linear growth is due to update-call serialisation per consensus round; verification queries scale without contention.}}{4}{figure.6}\protected@file@percent }
-\newlabel{fig:conc_tput}{{6}{4}{Concurrent mixed-load throughput vs.\ concurrency. Sub-linear growth is due to update-call serialisation per consensus round; verification queries scale without contention}{figure.6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Mean issuance vs.\ verification latency at each concurrency level. Query-based verification (no consensus) is $\approx $3$\times $ faster than update-based issuance at all levels.}}{4}{figure.7}\protected@file@percent }
-\newlabel{fig:conc_lat}{{7}{4}{Mean issuance vs.\ verification latency at each concurrency level. Query-based verification (no consensus) is $\approx $3$\times $ faster than update-based issuance at all levels}{figure.7}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {VI}Related Work and Conclusion}{4}{section.6}\protected@file@percent }
-\newlabel{sec:relconc}{{VI}{4}{Related Work and Conclusion}{section.6}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Block Finality Time --- ICP Mainnet (20 samples)}}{4}{table.4}\protected@file@percent }
-\newlabel{tab:finality}{{IV}{4}{Block Finality Time --- ICP Mainnet (20 samples)}{table.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Cross-Platform Comparison (non-ICP values from cited literature)}}{4}{table.5}\protected@file@percent }
-\newlabel{tab:comparison}{{V}{4}{Cross-Platform Comparison (non-ICP values from cited literature)}{table.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Issuance throughput vs.\ batch size for a fresh and a large database. Near-identical curves confirm O($\log n$) Merkle insert cost regardless of database size.}}{4}{figure.5}\protected@file@percent }
+\newlabel{fig:throughput}{{5}{4}{Issuance throughput vs.\ batch size for a fresh and a large database. Near-identical curves confirm O($\log n$) Merkle insert cost regardless of database size}{figure.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Mixed-load throughput (30\% issue, 70\% verify) at increasing concurrency levels. Sub-linear growth is because issuance calls are serialised per consensus round.}}{4}{figure.6}\protected@file@percent }
+\newlabel{fig:conc_tput}{{6}{4}{Mixed-load throughput (30\% issue, 70\% verify) at increasing concurrency levels. Sub-linear growth is because issuance calls are serialised per consensus round}{figure.6}{}}
 \@writefile{toc}{\contentsline {section}{References}{4}{section*.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Mean latency for issuance and verification at each concurrency level. Verification is $\approx $3$\times $ faster than issuance since it requires no consensus.}}{4}{figure.7}\protected@file@percent }
+\newlabel{fig:conc_lat}{{7}{4}{Mean latency for issuance and verification at each concurrency level. Verification is $\approx $3$\times $ faster than issuance since it requires no consensus}{figure.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Cross-Platform Comparison (non-ICP values from cited literature)}}{4}{table.4}\protected@file@percent }
+\newlabel{tab:comparison}{{IV}{4}{Cross-Platform Comparison (non-ICP values from cited literature)}{table.4}{}}
 \gdef \@abspage@last{4}
