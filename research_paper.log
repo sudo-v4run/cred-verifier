@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.7)  12 MAR 2026 19:05
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.7)  12 MAR 2026 19:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -976,18 +976,24 @@ Underfull \hbox (badness 2285) in paragraph at lines 108--109
  []
 
 
-Underfull \hbox (badness 5417) in paragraph at lines 189--190
+Underfull \hbox (badness 1565) in paragraph at lines 179--179
+\T1/ptm/m/n/8 dis-patch bus. The Merkle-Tree mod-ule com-mits the cer-ti-fied r
+oot via
+ []
+
+
+Underfull \hbox (badness 5417) in paragraph at lines 183--184
 []\T1/ptm/m/n/10 Access con-trol is en-forced via ICP \T1/ptm/m/it/10 Prin-ci-p
 als \T1/ptm/m/n/10 ^^V
  []
 
 
-Underfull \hbox (badness 1552) in paragraph at lines 189--190
+Underfull \hbox (badness 1552) in paragraph at lines 183--184
 \T1/ptm/m/n/10 Ed25519-derived cryp-to-graphic iden-ti-ties. Only reg-is-tered
  []
 
 
-Underfull \hbox (badness 1748) in paragraph at lines 189--190
+Underfull \hbox (badness 1748) in paragraph at lines 183--184
 \T1/ptm/m/n/10 uni-ver-sity prin-ci-pals may call \T1/pcr/m/n/10 issueCertifica
 te \T1/ptm/m/n/10 or
  []
@@ -1000,15 +1006,15 @@ dist/fonts/enc/dvips/base/8r.enc}
 
 
 ]
-Package pgfplots info on input line 314: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 308: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
  [2]
-Package pgfplots info on input line 364: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 358: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
-Package pgfplots info on input line 460: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 454: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
 
-Overfull \hbox (23.00343pt too wide) in paragraph at lines 495--507
+Overfull \hbox (23.00343pt too wide) in paragraph at lines 489--501
  [][] 
  []
 
@@ -1033,10 +1039,10 @@ Package rerunfilecheck Info: File `research_paper.out' has not changed.
 (rerunfilecheck)             Checksum: 1621FD29218EAFBE7C262CDFAA2B54CE;2284.
  ) 
 Here is how much of TeX's memory you used:
- 35384 strings out of 476106
- 824684 string characters out of 5793934
+ 35371 strings out of 476106
+ 824402 string characters out of 5793934
  1978975 words of memory out of 5000000
- 56789 multiletter control sequences out of 15000+600000
+ 56776 multiletter control sequences out of 15000+600000
  682046 words of font info for 174 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  84i,19n,93p,1226b,2301s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1062,7 +1068,7 @@ urier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pf
 b></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/
 texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-d
 ist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on research_paper.pdf (4 pages, 285171 bytes).
+Output written on research_paper.pdf (4 pages, 285039 bytes).
 PDF statistics:
  283 PDF objects out of 1000 (max. 8388607)
  226 compressed objects within 3 object streams

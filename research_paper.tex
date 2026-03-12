@@ -111,78 +111,72 @@ The Motoko backend is organized into five modules: \textbf{main.mo} (public acto
 \centering
 \begin{tikzpicture}[
   actor/.style={rectangle, rounded corners=3pt, draw=gray, dashed, thick,
-                minimum height=0.58cm, font=\tiny, align=center},
+                minimum height=0.62cm, minimum width=1.65cm, text width=1.55cm,
+                font=\tiny, align=center},
   fe/.style={rectangle, rounded corners=3pt, draw=icpblue, very thick,
-             minimum height=0.58cm, font=\tiny\bfseries, align=center},
+             minimum height=0.62cm, minimum width=2.8cm, text width=2.7cm,
+             font=\tiny\bfseries, align=center},
   api/.style={rectangle, rounded corners=3pt, draw=icppurple, very thick,
-              minimum height=0.58cm, font=\tiny\bfseries, align=center},
+              minimum height=0.62cm, minimum width=4.4cm,
+              font=\tiny\bfseries, align=center},
   mod/.style={rectangle, rounded corners=3pt, draw=black!70, thick,
-              minimum height=0.58cm, font=\tiny, align=center},
+              minimum height=0.72cm, minimum width=1.6cm, text width=1.5cm,
+              font=\tiny, align=center},
   certd/.style={rectangle, rounded corners=3pt, draw=icpgreen!80!black, very thick,
-                minimum height=0.58cm, font=\tiny, align=center},
+                minimum height=0.62cm, minimum width=3.0cm,
+                font=\tiny, align=center},
   bls/.style={rectangle, rounded corners=3pt, draw=icpblue, very thick,
-              minimum height=0.58cm, font=\tiny\bfseries, align=center},
+              minimum height=0.62cm, minimum width=3.0cm,
+              font=\tiny\bfseries, align=center},
   arr/.style={-Stealth, thick},
   every node/.style={font=\tiny}
 ]
-  %% --- Row 0: External actors ---
-  \node[actor, minimum width=1.75cm, text width=1.65cm]
-    (uni) at (2.5, 0)   {University\\(Issuer)};
-  \node[actor, minimum width=1.75cm, text width=1.65cm]
-    (ver) at (5.5, 0)   {Verifier\\(Employer)};
+  %% Sub-modules: centers at x=0, 2.0, 4.0 (gap = 0.4cm between each box)
+  \node[mod] (cm) at (0.0, 0.0) {Certificate\\Manager};
+  \node[mod] (mt) at (2.0, 0.0) {Merkle\\Tree};
+  \node[mod] (ut) at (4.0, 0.0) {Utils /\\Metrics};
 
-  %% --- Row 1: Frontend canister ---
-  \node[fe, minimum width=2.2cm, text width=2.1cm]
-    (front) at (4.0,-1.2) {Frontend canister\\(React + Vite)};
+  %% main.mo centered at x=2.0
+  \node[api] (main) at (2.0, 1.75) {\textbf{main.mo} \quad (Public API)};
 
-  %% --- Row 2: main.mo ---
-  \node[api, minimum width=3.6cm]
-    (main) at (4.0,-2.4) {main.mo \ \ (Public API)};
+  %% Frontend centered at x=2.0
+  \node[fe] (front) at (2.0, 2.85) {Frontend canister (React\,+\,Vite)};
 
-  %% --- Row 3: Three sub-modules ---
-  \node[mod, minimum width=1.95cm, text width=1.85cm]
-    (cm) at (2.15,-3.7) {Certificate\\Manager};
-  \node[mod, minimum width=1.95cm, text width=1.85cm]
-    (mt) at (4.0, -3.7) {Merkle\\Tree};
-  \node[mod, minimum width=1.95cm, text width=1.85cm]
-    (ut) at (5.85,-3.7) {Utils /\\Metrics};
+  %% External actors symmetric about x=2.0
+  \node[actor] (uni) at (0.7, 4.05) {University\\(Issuer)};
+  \node[actor] (ver) at (3.3, 4.05) {Verifier\\(Employer)};
 
-  %% --- Row 4: CertifiedData ---
-  \node[certd, minimum width=2.9cm]
-    (cd)  at (4.0,-4.85) {CertifiedData.set()};
-
-  %% --- Row 5: Subnet BLS ---
-  \node[bls, minimum width=2.9cm]
-    (sub) at (4.0,-5.75) {Subnet BLS Signature};
-
-  %% --- ICP boundary label (text only, no fill) ---
-  \node[font=\scriptsize\bfseries, icpblue] at (4.0, 0.55)
+  %% ICP Mainnet label (text only)
+  \node[font=\scriptsize\bfseries, icpblue] at (2.0, 4.55)
     {--- ICP Mainnet ---};
 
-  %% --- Arrows ---
-  %% Actors → Frontend
-  \draw[arr, dashed, gray]
-    (uni.south) to[out=-70,in=140]
-    node[left=1pt, pos=0.55, font=\tiny]{HTTPS} (front.north west);
-  \draw[arr, dashed, gray]
-    (ver.south) to[out=-110,in=40]
-    node[right=1pt, pos=0.55, font=\tiny]{HTTPS} (front.north east);
+  %% CertifiedData and Subnet BLS below MerkleTree
+  \node[certd] (cd)  at (2.0, -1.10) {CertifiedData.set()};
+  \node[bls]   (sub) at (2.0, -2.00) {Subnet BLS Signature};
+
+  %% Actors → Frontend (nearly straight vertical, just slightly inward)
+  \draw[arr, dashed, gray] (uni.south) --
+    node[left=2pt, font=\tiny, pos=0.5]{HTTPS} (front.north west);
+  \draw[arr, dashed, gray] (ver.south) --
+    node[right=2pt, font=\tiny, pos=0.5]{HTTPS} (front.north east);
 
   %% Frontend → main.mo
   \draw[arr] (front.south) --
     node[right=2pt, font=\tiny]{Candid RPC} (main.north);
 
-  %% main.mo → three sub-modules (vertical drops from main's bottom edge)
-  \draw[arr] ([xshift=-1.85cm]main.south) -- (cm.north);
-  \draw[arr] (main.south)                 -- (mt.north);
-  \draw[arr] ([xshift=+1.85cm]main.south) -- (ut.north);
+  %% main.mo → sub-modules via horizontal bus (no diagonal crossing)
+  \draw[thick] (main.south) -- (2.0, 0.85);      %% trunk
+  \draw[thick] (0.0, 0.85)  -- (4.0, 0.85);      %% horizontal bus
+  \draw[arr]   (0.0, 0.85)  -- (cm.north);        %% drop to CertMgr
+  \draw[arr]   (2.0, 0.85)  -- (mt.north);        %% drop to MerkleTree
+  \draw[arr]   (4.0, 0.85)  -- (ut.north);        %% drop to Utils
 
   %% MerkleTree → CertifiedData → Subnet BLS
   \draw[arr] (mt.south) -- (cd.north);
   \draw[arr] (cd.south) -- (sub.north);
 
 \end{tikzpicture}
-\caption{TrustVault system architecture. University and Verifier access the on-chain Frontend via HTTPS. The Frontend issues Candid RPC calls to the backend canister (\texttt{main.mo}), which fans out to sub-modules. The MerkleTree module commits the certified root via \texttt{CertifiedData.set()}, which the subnet threshold BLS-signs each consensus round.}
+\caption{TrustVault system architecture. University and Verifier access the on-chain Frontend canister via HTTPS. The Frontend dispatches Candid RPC calls to \texttt{main.mo}, which fans out to sub-modules via a shared dispatch bus. The MerkleTree module commits the certified root via \texttt{CertifiedData.set()}, BLS-signed by the subnet each consensus round.}
 \label{fig:sysarch}
 \end{figure}
 
