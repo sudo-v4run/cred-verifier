@@ -402,21 +402,22 @@ Fig.~\ref{fig:merkle} illustrates the tree structure and a sample proof path.
   arr/.style={-Stealth},
   every node/.style={font=\tiny}
 ]
-  \node[root]  (r)   at (3.5, 0)    {$R$};
-  \node[inode] (n1)  at (1.75,-0.9) {$h_{01}$};
-  \node[inode] (n2)  at (5.25,-0.9) {$h_{23}$};
-  \node[inode] (n3)  at (0.9, -1.9) {$h_0$};
-  \node[inode] (n4)  at (2.6, -1.9) {$h_1$};
-  \node[inode] (n5)  at (4.4, -1.9) {$h_2$};
-  \node[inode] (n6)  at (6.1, -1.9) {$h_3$};
-  \node[leaf]  (l0)  at (0.3, -2.9) {$c_0$};
-  \node[leaf]  (l1)  at (1.5, -2.9) {$c_1$};
-  \node[leaf]  (l2)  at (2.1, -2.9) {$c_2$};
-  \node[leaf]  (l3)  at (3.3, -2.9) {$c_3$};
-  \node[leaf]  (l4)  at (3.9, -2.9) {$c_4$};
-  \node[leaf]  (l5)  at (5.1, -2.9) {$c_5$};
-  \node[leaf,draw=icpred,very thick] (l6) at (5.7,-2.9) {$c_6$};
-  \node[leaf,fill=lightblue!30,dashed] (l7) at (6.9,-2.9){$\varnothing$};
+  %% Leaf spacing 0.9; every parent centered over its children
+  \node[root]  (r)   at (3.15, 0)    {$R$};
+  \node[inode] (n1)  at (1.35,-0.9)  {$h_{01}$};
+  \node[inode] (n2)  at (4.95,-0.9)  {$h_{23}$};
+  \node[inode] (n3)  at (0.45, -1.9) {$h_0$};
+  \node[inode] (n4)  at (2.25, -1.9) {$h_1$};
+  \node[inode] (n5)  at (4.05, -1.9) {$h_2$};
+  \node[inode] (n6)  at (5.85, -1.9) {$h_3$};
+  \node[leaf]  (l0)  at (0.0,  -2.9) {$c_0$};
+  \node[leaf]  (l1)  at (0.9,  -2.9) {$c_1$};
+  \node[leaf]  (l2)  at (1.8,  -2.9) {$c_2$};
+  \node[leaf]  (l3)  at (2.7,  -2.9) {$c_3$};
+  \node[leaf]  (l4)  at (3.6,  -2.9) {$c_4$};
+  \node[leaf]  (l5)  at (4.5,  -2.9) {$c_5$};
+  \node[leaf,draw=icpred,very thick] (l6) at (5.4,-2.9) {$c_6$};
+  \node[leaf,fill=lightblue!30,dashed] (l7) at (6.3,-2.9){$\varnothing$};
   \draw[arr] (r)--(n1); \draw[arr] (r)--(n2);
   \draw[arr] (n1)--(n3); \draw[arr] (n1)--(n4);
   \draw[arr] (n2)--(n5); \draw[arr] (n2)--(n6);
@@ -429,7 +430,7 @@ Fig.~\ref{fig:merkle} illustrates the tree structure and a sample proof path.
   \node[draw, rounded corners, fill=lightpurple!60, minimum width=2.0cm,
         minimum height=0.5cm, font=\tiny\bfseries,
         text width=2.0cm, align=center] (bls)
-       at (3.5, 0.85) {Subnet BLS signs $R$};
+       at (3.15, 0.85) {Subnet BLS signs $R$};
   \draw[arr, icppurple, dashed] (r) -- (bls);
 \end{tikzpicture}
 \caption{Merkle tree with 7 certificates. Adding leaf $c_6$ (red border) requires recomputing only 3 hashes (the dashed red path). Root $R$ is BLS-signed by the subnet.}
