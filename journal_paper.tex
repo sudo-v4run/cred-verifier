@@ -111,7 +111,7 @@ This paper makes the following contributions:
 
 \subsection{Paper Organization}
 
-The rest of this paper is organized as follows. Section~\ref{sec:background} covers background on credential fraud and blockchain approaches. Section~\ref{sec:related} discusses related work in detail. Section~\ref{sec:architecture} presents the system architecture and design decisions. Section~\ref{sec:merkle} explains the Merkle tree and trustless verification mechanism. Section~\ref{sec:impl} describes the implementation. Section~\ref{sec:eval} presents the experimental evaluation. Section~\ref{sec:discussion} discusses limitations and practical considerations. Section~\ref{sec:conclusion} concludes and outlines future work.
+The rest of this paper is organized as follows. Section~\ref{sec:background} covers background on credential fraud and blockchain approaches. Section~\ref{sec:related} discusses related work in detail. Section~\ref{sec:architecture} presents the system architecture and design decisions. Section~\ref{sec:merkle} explains the Merkle tree and trustless verification mechanism. Section~\ref{sec:security} provides a formal security analysis. Section~\ref{sec:impl} describes the implementation. Section~\ref{sec:eval} presents the experimental evaluation. Section~\ref{sec:discussion} discusses limitations and practical considerations. Section~\ref{sec:conclusion} concludes and outlines future work.
 
 % =========================================================
 \section{Background}
@@ -452,17 +452,70 @@ Verification requires \emph{no trust in the issuing institution}. Given a certif
 Steps 1--2 run entirely on the client side with no network call. Step 3 requires a single HTTP query to any ICP gateway (there is no need to contact the issuing university). The subnet public key is published by the DFINITY Foundation and can be independently verified via the on-chain Network Nervous System (NNS). No step requires trusting any single entity.
 
 \subsection{Security Properties}
+\label{subsec:secprop}
 
-The following security properties follow directly from the construction:
+The security properties of the Merkle tree and verification protocol are analyzed in detail in Section~\ref{sec:security}.
+
+% =========================================================
+\section{Security Analysis}
+\label{sec:security}
+
+TrustVault's central claim is \emph{trustless verification}: a verifier does not need to trust any single server, institution, or even the canister code to confirm that a credential is authentic. This section analyzes why specific attack vectors fail against TrustVault's design.
+
+\subsection{Credential Forgery}
+
+An attacker who wants to forge a credential (create a fake degree that passes verification) must produce a valid Merkle proof that links the forged certificate's hash to the BLS-signed root. This requires one of the following:
+
+\begin{enumerate}
+  \item \textbf{Find a SHA-256 collision}: Produce a fake certificate whose SHA-256 hash matches an existing leaf in the Merkle tree. SHA-256 has $2^{256}$ possible outputs; finding a collision requires approximately $2^{128}$ operations (birthday bound), which is computationally infeasible with current or foreseeable hardware.
+  \item \textbf{Forge the Merkle proof}: Construct a set of sibling hashes that, together with the fake certificate's hash, produce the correct certified root. Since each level of the tree applies SHA-256, this reduces to finding a preimage for SHA-256 at every level — a chain of $\lceil\log_2 n\rceil$ preimage attacks, each requiring $2^{256}$ operations.
+  \item \textbf{Forge the BLS signature}: Produce a valid BLS signature over a state tree containing a fake root, without holding the subnet's private key. Breaking BLS-381 requires solving the Computational Diffie--Hellman (CDH) problem on a pairing-friendly curve, which is computationally infeasible at the 128-bit security level~\cite{boneh2001bls}.
+\end{enumerate}
+
+All three paths are cryptographically infeasible. There is no shortcut: the attacker must break at least one of these primitives.
+
+\subsection{Credential Tampering}
+
+An attacker who modifies even a single byte of a stored certificate (e.g., changing a grade or graduation date) changes its SHA-256 hash. The Merkle proof computed from the original hash no longer matches the modified certificate. The verifier detects this mismatch in Step~1 of the verification protocol (Section~\ref{sec:merkle}): recomputing $h_c$ from the certificate fields produces a different hash than the stored \texttt{certificate\_hash}. No network call is needed — the check is purely local.
+
+\subsection{Unauthorized Issuance}
+
+The \texttt{issueCertificate} function checks that the caller's ICP Principal is in the registered university registry. An attacker who is not a registered university receives an ``Unauthorized'' error before any state change occurs.
+
+To bypass this, the attacker would need to either:
+\begin{itemize}[leftmargin=*]
+  \item Steal a registered university's Ed25519 private key (requires compromising the university's key management).
+  \item Compromise the canister code to remove the access check (requires controlling the canister's controller Principal, which in a production deployment can be set to the NNS DAO or blackholed entirely).
+\end{itemize}
+
+Neither is a vulnerability in TrustVault's design — they are operational security requirements that apply to any system.
+
+\subsection{Man-in-the-Middle Attacks}
+
+A traditional MITM attack intercepts traffic between the user and the server and modifies it. In TrustVault, this attack fails at two levels:
 
 \begin{itemize}[leftmargin=*]
-  \item \textbf{Data integrity}: Any modification to a stored certificate changes its hash $h_c$, which breaks the Merkle proof and causes a root mismatch. This is detectable on the client side without contacting anyone.
-  \item \textbf{Tamper-proof root}: The threshold BLS key is secret-shared across all subnet nodes. Forging a valid subnet signature requires compromising more than one-third of subnet nodes simultaneously — computationally and logistically infeasible across a geographically diverse, independently operated network.
-  \item \textbf{Replay resistance}: Each certificate has a unique ID and a consensus-set nanosecond timestamp. Duplicate issuance attempts are rejected by the canister.
-  \item \textbf{Unauthorized issuance prevention}: The \texttt{issueCertificate} function is gated by registered Ed25519 Principals. Forging access requires the university's private key.
-  \item \textbf{Revocation freshness}: After a revocation, the Merkle root is updated within one consensus round (approximately 2 seconds), invalidating stale proofs far faster than traditional Certificate Revocation Lists.
-  \item \textbf{Frontend integrity}: ICP's HTTP gateway signs canister asset responses via certified HTTP headers, making frontend tampering detectable in transit.
+  \item \textbf{Credential data}: The Merkle proof and BLS signature are verified client-side. Even if a MITM modifies the response, the mathematical verification fails because the modified data does not match the BLS-signed root.
+  \item \textbf{Frontend code}: ICP's HTTP gateway includes \emph{certified HTTP headers} — cryptographic signatures over the response body. A MITM who injects malicious JavaScript into the frontend would produce a response whose body does not match the certified header signature, and the tampering is detectable~\cite{dfinity2023httpgateway}.
 \end{itemize}
+
+\subsection{Subnet Compromise}
+
+The most powerful attack against TrustVault would be to compromise the ICP subnet itself. ICP uses a threshold BLS scheme with Byzantine fault tolerance: the subnet tolerates up to $f < n/3$ malicious nodes (where $n$ is the number of subnet replicas). For a typical 13-node subnet, an attacker must control at least 5 nodes simultaneously.
+
+These nodes are operated by independent entities in different countries, selected and verified through the NNS governance system. Compromising 5 independent organizations across multiple jurisdictions, without any of them detecting or reporting the breach, is logistically infeasible. Even if achieved, the NNS governance system can detect anomalous behavior and reassign the subnet's nodes.
+
+This is not a theoretical guarantee of impossibility — no distributed system provides that. But it is a level of security comparable to Ethereum's validator set, and significantly stronger than any permissioned blockchain where a single consortium controls all nodes.
+
+\subsection{Summary of Trust Assumptions}
+
+TrustVault's trustless verification requires only two assumptions:
+\begin{enumerate}
+  \item \textbf{SHA-256 is collision-resistant}: No one can find two inputs with the same SHA-256 output. This is a standard assumption in all modern cryptographic systems.
+  \item \textbf{The ICP subnet is honest-majority}: Fewer than one-third of the subnet's nodes are malicious at any given time. This is enforced by ICP's decentralized node selection and NNS governance.
+\end{enumerate}
+
+If both assumptions hold, then: (a) no one can forge a credential, (b) no one can tamper with a stored credential without detection, (c) no one can issue a credential without being a registered university, and (d) no one can tamper with the verification result or the verification interface in transit. The verifier does not need to trust TrustVault, the issuing university, or any individual ICP node — only the mathematics of SHA-256 and BLS signatures.
 
 % =========================================================
 \section{Implementation}
