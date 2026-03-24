@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.7)  24 MAR 2026 18:04
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.7)  24 MAR 2026 19:22
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -955,14 +955,12 @@ Package pgfplots notification 'compat/show suggested version=true': document ha
 s been generated with the most recent feature set (\pgfplotsset{compat=1.18}).
 
 \c@lstlisting=\count342
-** WARNING: \and is valid only when in conference or peerreviewca
-modes (line 65).
-LaTeX Font Info:    Trying to load font information for U+msa on input line 85.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 83.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 85.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 83.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
@@ -972,13 +970,18 @@ f-dist/fonts/enc/dvips/base/8r.enc}
 
 
 ]
-Underfull \hbox (badness 1552) in paragraph at lines 136--137
+Underfull \hbox (badness 1552) in paragraph at lines 134--135
 []\T1/ptm/b/n/10 Public (per-mis-sion-less) blockchains \T1/ptm/m/n/10 like Bit
 -coin and
  []
 
+
+Underfull \hbox (badness 1810) in paragraph at lines 141--142
+[]\T1/ptm/m/n/10 The In-ter-net Com-puter Pro-to-col [[]], [[]] is a pub-lic
+ []
+
 LaTeX Font Info:    Trying to load font information for T1+pcr on input line 16
-6.
+4.
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 ) [2] [3]
@@ -1055,51 +1058,51 @@ Underfull \hbox (badness 5939) in paragraph at lines 444--445
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 466--467
+Underfull \hbox (badness 10000) in paragraph at lines 461--462
 []\T1/ptm/b/n/10 Unauthorized is-suance pre-ven-tion\T1/ptm/m/n/10 : The
  []
 
 
-Underfull \hbox (badness 1502) in paragraph at lines 466--467
+Underfull \hbox (badness 1502) in paragraph at lines 461--462
 \T1/pcr/m/n/10 issueCertificate \T1/ptm/m/n/10 func-tion is gated by reg-is-ter
 ed
  []
 
 Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
-nput line 494.
+nput line 489.
 [6]
-Underfull \hbox (badness 5161) in paragraph at lines 573--574
+Underfull \hbox (badness 5161) in paragraph at lines 568--569
 \T1/ptm/m/n/10 and ver-i-fi-ca-tion (70%) at con-cur-rency lev-els $\OML/cmm/m/
 it/10 c \OMS/cmsy/m/n/10 2
  []
 
 
-Underfull \hbox (badness 2326) in paragraph at lines 574--575
+Underfull \hbox (badness 2326) in paragraph at lines 569--570
 []\T1/ptm/b/n/10 Throughput\T1/ptm/m/n/10 : Sus-tained 30-second se-quen-tial i
 s-suance,
  []
 
 [7]
-Package pgfplots info on input line 630: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 625: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
-Package pgfplots info on input line 700: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 695: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
 
-Underfull \hbox (badness 1661) in paragraph at lines 792--793
+Underfull \hbox (badness 1661) in paragraph at lines 787--788
 []\T1/ptm/m/n/10 At 100 con-cur-rent queries, the sys-tem achieves \T1/ptm/b/n/
 10 86.6
  []
 
 [8]
-Package pgfplots info on input line 846: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 841: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
  [9]
-Underfull \hbox (badness 2922) in paragraph at lines 963--964
+Underfull \hbox (badness 2922) in paragraph at lines 958--959
 \T1/pcr/m/n/10 deploy --network ic\T1/ptm/m/n/10 . Each can-is-ter re-ceived a
  []
 
 [10] [11]
-Underfull \hbox (badness 6220) in paragraph at lines 1124--1128
+Underfull \hbox (badness 6220) in paragraph at lines 1119--1123
 []\T1/ptm/m/n/8 DFINITY Foun-da-tion, ``HTTP Gate-way Pro-to-col Spec-i-fi-ca-t
 ion,''
  []
@@ -1110,13 +1113,13 @@ LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
 Package rerunfilecheck Info: File `journal_paper.out' has not changed.
-(rerunfilecheck)             Checksum: 6DDBE4D763075CB0A992BA7A2A7017CD;10912.
+(rerunfilecheck)             Checksum: 9991808CF5177AA5423FB4E4E63DEAA9;10905.
  ) 
 Here is how much of TeX's memory you used:
- 36206 strings out of 476106
- 835810 string characters out of 5793934
- 2308975 words of memory out of 5000000
- 57443 multiletter control sequences out of 15000+600000
+ 36212 strings out of 476106
+ 835903 string characters out of 5793934
+ 2192975 words of memory out of 5000000
+ 57450 multiletter control sequences out of 15000+600000
  679604 words of font info for 166 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  84i,19n,93p,1012b,2301s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1132,16 +1135,15 @@ nts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
 mr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pf
 b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr
 /share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/
-texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/share/t
-exlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm5.pfb></usr/share/tex
-live/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-di
-st/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/
-urw/times/utmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr
-8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on journal_paper.pdf (12 pages, 300741 bytes).
+texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm5.pfb></usr/share/te
+xlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-d
+ist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1
+/urw/times/utmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utm
+r8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on journal_paper.pdf (12 pages, 292349 bytes).
 PDF statistics:
- 673 PDF objects out of 1000 (max. 8388607)
+ 671 PDF objects out of 1000 (max. 8388607)
  612 compressed objects within 7 object streams
- 213 named destinations out of 1000 (max. 500000)
+ 212 named destinations out of 1000 (max. 500000)
  525 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -4,6 +4,7 @@
 \providecommand\HyField@AuxAddToCoFields[2]{}
 \citation{chahal2021credential}
 \citation{buterin2014ethereum}
+\citation{wood2014ethereum}
 \citation{androulaki2018fabric}
 \citation{hanke2018dfinity}
 \@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
@@ -12,7 +13,9 @@
 \citation{chahal2021credential}
 \citation{buterin2020eth2}
 \citation{androulaki2018fabric}
+\citation{sharmaperformance2019}
 \citation{hanke2018dfinity}
+\citation{dfinity2022geeks}
 \citation{hanke2018dfinity}
 \citation{boneh2001bls}
 \citation{boneh2001bls}
@@ -39,6 +42,7 @@
 \citation{w3c2022vc}
 \citation{allen2016decentralized}
 \citation{allen2016decentralized}
+\citation{camenisch2001efficient}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-C}4}On-Chain Web Serving}{3}{subsubsection.2.3.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-C}5}Network Nervous System and Governance}{3}{subsubsection.2.3.5}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-C}6}Cycles and Cost Model}{3}{subsubsection.2.3.6}\protected@file@percent }
@@ -82,16 +86,16 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Technology Stack}{6}{subsection.6.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}Canister Upgrade Safety}{6}{subsection.6.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Key Code Paths}{6}{subsection.6.3}\protected@file@percent }
-\newlabel{lst:issue}{{1}{7}{Simplified issuance flow in Motoko}{lstlisting.1}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}Simplified issuance flow in Motoko}{7}{lstlisting.1}\protected@file@percent }
+\newlabel{lst:issue}{{1}{6}{Simplified issuance flow in Motoko}{lstlisting.1}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}Simplified issuance flow in Motoko}{6}{lstlisting.1}\protected@file@percent }
 \newlabel{lst:verify}{{2}{7}{Simplified verification flow}{lstlisting.2}{}}
 \@writefile{lol}{\contentsline {lstlisting}{\numberline {2}Simplified verification flow}{7}{lstlisting.2}\protected@file@percent }
 \newlabel{lst:insert}{{3}{7}{Incremental Merkle leaf insertion}{lstlisting.3}{}}
 \@writefile{lol}{\contentsline {lstlisting}{\numberline {3}Incremental Merkle leaf insertion}{7}{lstlisting.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-D}}Performance Monitoring}{7}{subsection.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-E}}Benchmark Suite}{7}{subsection.6.5}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Parallel Issuance --- ICP Mainnet (3 trials each)}}{7}{table.3}\protected@file@percent }
 \newlabel{tab:issuance}{{III}{7}{Parallel Issuance --- ICP Mainnet (3 trials each)}{table.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-E}}Benchmark Suite}{7}{subsection.6.5}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-F}}Reproducibility}{7}{subsection.6.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {VII}Experimental Evaluation}{7}{section.7}\protected@file@percent }
 \newlabel{sec:eval}{{VII}{7}{Experimental Evaluation}{section.7}{}}
@@ -104,10 +108,11 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-C}}Throughput and Scalability}{8}{subsection.7.3}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Verification Latency --- 500-Certificate Database (ms)}}{8}{table.5}\protected@file@percent }
 \newlabel{tab:verif}{{V}{8}{Verification Latency --- 500-Certificate Database (ms)}{table.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Verification latency (p50/p95/p99) for 1 to 500 sequential queries. p99 stays below 1 second across all scales.}}{8}{figure.4}\protected@file@percent }
-\newlabel{fig:verif_perc}{{4}{8}{Verification latency (p50/p95/p99) for 1 to 500 sequential queries. p99 stays below 1 second across all scales}{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Verification latency (p50/p95/p99) for different batch sizes. Each batch of $n$ queries is issued sequentially. p99 stays below 1 second across all scales.}}{8}{figure.4}\protected@file@percent }
+\newlabel{fig:verif_perc}{{4}{8}{Verification latency (p50/p95/p99) for different batch sizes. Each batch of $n$ queries is issued sequentially. p99 stays below 1 second across all scales}{figure.4}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VII-C}1}Merkle Tree Growth Impact}{8}{subsubsection.7.3.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VII-C}2}Concurrent Verification Throughput}{8}{subsubsection.7.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-D}}Concurrent Mixed Workload}{8}{subsection.7.4}\protected@file@percent }
 \citation{buterin2020eth2}
 \citation{androulaki2018fabric}
 \citation{dinh2017blockbench}
@@ -118,7 +123,6 @@
 \newlabel{fig:throughput}{{5}{9}{Issuance throughput vs.\ batch size. The two curves track closely, confirming that the O($\log n$) Merkle insert cost does not degrade throughput as the database grows}{figure.5}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Merkle Tree Growth --- Batch Wall-Clock Time}}{9}{table.6}\protected@file@percent }
 \newlabel{tab:merkle_growth}{{VI}{9}{Merkle Tree Growth --- Batch Wall-Clock Time}{table.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-D}}Concurrent Mixed Workload}{9}{subsection.7.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-E}}Block Finality}{9}{subsection.7.5}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-F}}Cross-Platform Comparison}{9}{subsection.7.6}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Concurrent Verification Throughput}}{9}{table.7}\protected@file@percent }
@@ -128,23 +132,23 @@
 \@writefile{toc}{\contentsline {section}{\numberline {VIII}Discussion}{9}{section.8}\protected@file@percent }
 \newlabel{sec:discussion}{{VIII}{9}{Discussion}{section.8}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-A}}Practical Suitability}{9}{subsection.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-B}}Limitations}{9}{subsection.8.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VIII-B}1}Throughput Ceiling}{9}{subsubsection.8.2.1}\protected@file@percent }
 \citation{w3c2022vc}
 \@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Latency by operation type. Verification stays under 850~ms even at $c = 50$. Issuance grows gradually due to consensus serialization.}}{10}{figure.7}\protected@file@percent }
 \newlabel{fig:conc_lat}{{7}{10}{Latency by operation type. Verification stays under 850~ms even at $c = 50$. Issuance grows gradually due to consensus serialization}{figure.7}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {VIII}{\ignorespaces Block Finality Time (20 samples)}}{10}{table.8}\protected@file@percent }
 \newlabel{tab:finality}{{VIII}{10}{Block Finality Time (20 samples)}{table.8}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-B}}Limitations}{10}{subsection.8.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-C}}Throughput Ceiling}{10}{subsection.8.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VIII-C}1}Revocation Cost}{10}{subsubsection.8.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VIII-C}2}Network Latency}{10}{subsubsection.8.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VIII-C}3}ICP Platform Dependency}{10}{subsubsection.8.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VIII-C}4}Hash-Based Verification}{10}{subsubsection.8.3.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-D}}Comparison with W3C Verifiable Credentials}{10}{subsection.8.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-E}}Privacy Considerations}{10}{subsection.8.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-F}}Deployment Experience}{10}{subsection.8.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VIII-B}2}Revocation Cost}{10}{subsubsection.8.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VIII-B}3}Network Latency}{10}{subsubsection.8.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VIII-B}4}ICP Platform Dependency}{10}{subsubsection.8.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VIII-B}5}Hash Collision Risk}{10}{subsubsection.8.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-C}}Comparison with W3C Verifiable Credentials}{10}{subsection.8.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-D}}Privacy Considerations}{10}{subsection.8.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-E}}Deployment Experience}{10}{subsection.8.5}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {IX}{\ignorespaces Cross-Platform Comparison (all non-ICP values from cited literature)}}{11}{table.9}\protected@file@percent }
 \newlabel{tab:comparison}{{IX}{11}{Cross-Platform Comparison (all non-ICP values from cited literature)}{table.9}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-G}}Scalability Projections}{11}{subsection.8.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-F}}Scalability Projections}{11}{subsection.8.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {IX}Conclusion and Future Work}{11}{section.9}\protected@file@percent }
 \newlabel{sec:conclusion}{{IX}{11}{Conclusion and Future Work}{section.9}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IX-A}}Future Work}{11}{subsection.9.1}\protected@file@percent }

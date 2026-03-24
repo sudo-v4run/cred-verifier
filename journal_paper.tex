@@ -51,10 +51,8 @@
 
 \title{TrustVault: A Fully On-Chain, Trustless Academic Credential Verification System on the Internet Computer Protocol}
 
-\author{
-  Varun~Gudamsetti
-  \and
-  Shruti~Jadon
+\author{Varun~Gudamsetti
+  and~Shruti~Jadon
   \thanks{V.~Gudamsetti and S.~Jadon are with the Department of Computer Science and Engineering, PES University, Bengaluru, Karnataka, India. E-mail: varun.gudamsetti@pes.edu, shrutijadon@pes.edu.}
 }
 
@@ -78,15 +76,15 @@ Blockchain, Internet Computer Protocol, Academic Credentials, Merkle Tree, Certi
 \section{Introduction}
 \label{sec:intro}
 
-Academic credential fraud is a serious and growing problem. Studies estimate that a significant portion of job applications contain misrepresented qualifications~\cite{chahal2021credential}. When an employer wants to check whether a candidate truly holds a claimed degree, the typical process involves contacting the issuing university, waiting days for a response, and trusting that the reply is genuine. This manual approach is slow, expensive, and does not scale to global hiring.
+Academic credential fraud is a serious and growing problem. Studies estimate that roughly one in five job applications in certain regions contain misrepresented qualifications~\cite{chahal2021credential}. When an employer wants to check whether a candidate truly holds a claimed degree, the typical process involves contacting the issuing university, waiting days for a response, and trusting that the reply is genuine. This manual approach is slow, expensive, and does not scale to global hiring.
 
 Several digital alternatives exist, but each has significant drawbacks:
 
 \begin{itemize}[leftmargin=*]
   \item \textbf{Centralized registries} (e.g., government databases, third-party services like the National Student Clearinghouse) are convenient, but if the registry goes offline, gets hacked, or is corrupted, verification becomes impossible. The verifier must trust the registry operator completely.
-  \item \textbf{Public blockchains like Ethereum}~\cite{buterin2014ethereum} offer strong tamper resistance, but writing a single credential record costs several dollars in gas fees, making it impractical for universities that issue thousands of degrees annually. Moreover, the verification interface (website) still runs on a regular web server.
+  \item \textbf{Public blockchains like Ethereum}~\cite{buterin2014ethereum} offer strong tamper resistance, but writing a single credential record costs \$0.20--\$2.00 in gas fees depending on network congestion~\cite{wood2014ethereum}, making it impractical for universities that issue thousands of degrees annually. Moreover, the verification interface (website) still runs on a regular web server.
   \item \textbf{Permissioned blockchains like Hyperledger Fabric}~\cite{androulaki2018fabric} reduce cost but reintroduce trust: one must trust all consortium members. If the consortium is compromised, so are the credentials.
-  \item \textbf{Hybrid systems} that store only hashes on-chain while keeping actual data on a separate server effectively bring back centralization through the back door.
+  \item \textbf{Hybrid systems} that store only hashes on-chain while keeping actual data on a separate server reintroduce centralization for the off-chain component.
 \end{itemize}
 
 A key observation is that \emph{none} of the above systems serve the verification interface from the blockchain itself. The user-facing website is always hosted on a traditional cloud server (AWS, GCP, etc.), which means it can be tampered with, taken down, or censored independently of the on-chain data.
@@ -134,13 +132,13 @@ A blockchain is a distributed ledger — a shared database maintained by multipl
 Two types of blockchains are relevant:
 \begin{itemize}[leftmargin=*]
   \item \textbf{Public (permissionless) blockchains} like Bitcoin and Ethereum allow anyone to join the network and validate transactions. They offer strong decentralization but can be expensive (gas fees) and slow (Ethereum PoS finality takes about 12--24 seconds~\cite{buterin2020eth2}).
-  \item \textbf{Permissioned blockchains} like Hyperledger Fabric~\cite{androulaki2018fabric} restrict participation to known entities. They achieve higher throughput (up to 3,500 transactions per second) and lower cost, but the verifier must trust the consortium that operates the chain.
+  \item \textbf{Permissioned blockchains} like Hyperledger Fabric~\cite{androulaki2018fabric} restrict participation to known entities. They achieve higher throughput (up to 3,500 transactions per second~\cite{sharmaperformance2019}) and lower cost, but the verifier must trust the consortium that operates the chain.
 \end{itemize}
 
 \subsection{Internet Computer Protocol (ICP)}
 \label{subsec:icp}
 
-The Internet Computer Protocol~\cite{hanke2018dfinity} is a public blockchain that takes a fundamentally different approach. Instead of running a single global chain, ICP operates multiple independent \emph{subnets}, each consisting of 13--40 geographically distributed \emph{replica nodes} operated by independent entities. Each subnet runs its own consensus protocol and hosts a set of smart contracts called \emph{canisters}.
+The Internet Computer Protocol~\cite{hanke2018dfinity,dfinity2022geeks} is a public blockchain that takes a fundamentally different approach. Instead of running a single global chain, ICP operates multiple independent \emph{subnets}, each consisting of 13--40 geographically distributed \emph{replica nodes} operated by independent entities. Each subnet runs its own consensus protocol and hosts a set of smart contracts called \emph{canisters}.
 
 \subsubsection{Consensus}
 ICP uses a four-phase Byzantine Fault Tolerant (BFT) consensus protocol~\cite{hanke2018dfinity}:
@@ -224,7 +222,7 @@ The key gap that TrustVault fills: no prior system (a) stores the complete crede
 
 \subsection{Self-Sovereign Identity and Decentralized Identifiers}
 
-The Self-Sovereign Identity (SSI) movement~\cite{allen2016decentralized} advocates for individuals to own and control their own identity data, without depending on any central authority. Decentralized Identifiers (DIDs) and Verifiable Credentials (VCs) are the technical building blocks of SSI. While TrustVault shares the goal of eliminating trust in central authorities, it takes a different approach: instead of giving each individual control over their credential data, TrustVault stores credentials on a public blockchain where anyone can verify them. The two approaches are complementary — a future version of TrustVault could wrap its credentials in W3C VC format and associate them with DIDs.
+The Self-Sovereign Identity (SSI) movement~\cite{allen2016decentralized} advocates for individuals to own and control their own identity data, without depending on any central authority. Anonymous credential schemes~\cite{camenisch2001efficient} take this further by letting holders prove attributes without revealing their full identity. Decentralized Identifiers (DIDs) and Verifiable Credentials (VCs) are the technical building blocks of SSI. While TrustVault shares the goal of eliminating trust in central authorities, it takes a different approach: instead of giving each individual control over their credential data, TrustVault stores credentials on a public blockchain where anyone can verify them. The two approaches are complementary — a future version of TrustVault could wrap its credentials in W3C VC format and associate them with DIDs.
 
 \subsection{Blockchain Timestamping for Academic Documents}
 
@@ -281,14 +279,16 @@ All three roles interact with the system through the on-chain React frontend, wh
   \node[mod] (ut) at (4.0, 0.0) {Utils /\\Metrics};
   \node[api] (main) at (2.0, 1.75) {\textbf{main.mo} \quad (Public API)};
   \node[fe] (front) at (2.0, 2.85) {Frontend canister (React\,+\,Vite)};
-  \node[actor] (uni) at (0.7, 4.05) {University\\(Issuer)};
-  \node[actor] (ver) at (3.3, 4.05) {Verifier\\(Employer)};
+  \node[actor] (uni) at (0.0, 4.05) {University\\(Issuer)};
+  \node[actor] (stu) at (2.0, 4.05) {Student\\(Holder)};
+  \node[actor] (ver) at (4.0, 4.05) {Verifier\\(Employer)};
   \node[font=\scriptsize\bfseries, icpblue] at (2.0, 4.55) {--- ICP Mainnet ---};
-  \node[certd] (cd)  at (2.0, -1.10) {CertifiedData.set()};
+  \node[certd] (cd)  at (2.0, -1.10) {Certified Data API};
   \node[bls]   (sub) at (2.0, -2.00) {Subnet BLS Signature};
   \draw[arr, dashed, gray] (uni.south) -- node[left=2pt, font=\tiny, pos=0.5]{HTTPS} (front.north west);
+  \draw[arr, dashed, gray] (stu.south) -- node[right=1pt, font=\tiny, pos=0.5]{HTTPS} (front.north);
   \draw[arr, dashed, gray] (ver.south) -- node[right=2pt, font=\tiny, pos=0.5]{HTTPS} (front.north east);
-  \draw[arr] (front.south) -- node[right=2pt, font=\tiny]{Candid RPC} (main.north);
+  \draw[arr] (front.south) -- node[right=2pt, font=\tiny]{Candid} (main.north);
   \draw[thick] (main.south) -- (2.0, 0.85);
   \draw[thick] (0.0, 0.85)  -- (4.0, 0.85);
   \draw[arr]   (0.0, 0.85)  -- (cm.north);
@@ -353,7 +353,7 @@ The frontend is a React single-page application built with Vite and hosted entir
   \item \textbf{Verification Portal}: Allows any employer or third party to verify a credential by entering its certificate ID. The portal calls \texttt{verifyCertificate} (a query function), receives the Merkle proof and verification result, and displays a clear pass/fail status along with the full credential details.
 \end{itemize}
 
-The frontend communicates with the backend through auto-generated Candid type bindings (Candid is ICP's interface description language, analogous to Protocol Buffers or GraphQL schemas). These bindings ensure type safety: the JavaScript frontend code is guaranteed to match the Motoko backend API at compile time.
+These Candid bindings ensure type safety: the JavaScript frontend code is guaranteed to match the Motoko backend API at compile time.
 
 \subsection{Workflow}
 
@@ -447,11 +447,6 @@ Verification requires \emph{no trust in the issuing institution}. Given a certif
   \item \textbf{BLS signature check}: Verify the subnet's threshold BLS signature over the state tree root using the publicly known subnet key.
   \item \textbf{Root match}: Confirm that the canister's certified value in the state tree equals $\hat{R}$.
 \end{enumerate}
-
-The complete chain of trust can be expressed as:
-\begin{equation}
-  \text{fields} \xrightarrow{\text{SHA-256}} h_c \xrightarrow{\;\pi\;} \hat{R} \xrightarrow{\text{state tree}} \text{BLS sig} \xrightarrow{\text{subnet key}} \checkmark
-\end{equation}
 
 Steps 1--2 run entirely on the client side with no network call. Step 3 requires a single HTTP query to any ICP gateway (there is no need to contact the issuing university). The subnet public key is published by the DFINITY Foundation and can be independently verified via the on-chain Network Nervous System (NNS). No step requires trusting any single entity.
 
@@ -597,7 +592,7 @@ Table~\ref{tab:issuance} reports the wall-clock time and throughput for parallel
 \centering\small\renewcommand{\arraystretch}{1.1}
 \begin{tabular}{@{}crrrr@{}}
 \toprule
-\textbf{Batch ($n$)} & \textbf{Wall (ms)} & \textbf{p95 (ms)} & \textbf{Thpt (certs/s)} & \textbf{Stddev} \\
+\textbf{Batch ($n$)} & \textbf{Wall (ms)} & \textbf{p95 (ms)} & \textbf{Thpt (certs/s)} & \textbf{Std.\ Dev} \\
 \midrule
 1   & 1{,}943  & 2{,}111  & 0.52 & 143.6 \\
 10  & 2{,}596  & 3{,}054  & 4.02 & 498.1 \\
@@ -709,7 +704,7 @@ Verification is a \emph{query call} — it does not go through consensus and cos
   \addlegendentry{p99}
 \end{axis}
 \end{tikzpicture}
-\caption{Verification latency (p50/p95/p99) for 1 to 500 sequential queries. p99 stays below 1 second across all scales.}
+\caption{Verification latency (p50/p95/p99) for different batch sizes. Each batch of $n$ queries is issued sequentially. p99 stays below 1 second across all scales.}
 \label{fig:verif_perc}
 \end{figure}
 
@@ -761,7 +756,7 @@ To isolate the effect of database size on issuance latency, we measured batch wa
 \toprule
 \textbf{Batch ($n$)} & \textbf{Wall (ms)} & \textbf{DB Before} & \textbf{DB After} \\
 \midrule
-1   & 2{,}290  & 3{,}280 & 3{,}280 \\
+1   & 2{,}290  & 3{,}279 & 3{,}280 \\
 10  & 1{,}828  & 3{,}281 & 3{,}291 \\
 50  & 8{,}582  & 3{,}295 & 3{,}345 \\
 100 & 15{,}234 & 3{,}361 & 3{,}461 \\
@@ -795,7 +790,7 @@ At 100 concurrent queries, the system achieves \textbf{86.6 queries/s} — well 
 
 In a real-world deployment, the canister would receive issuance and verification requests simultaneously. The concurrent benchmark submits a mix of 30\% issuance (update) and 70\% verification (query) calls at increasing concurrency levels $c \in \{1, 5, 10, 25, 50\}$.
 
-Fig.~\ref{fig:conc_tput} shows the total throughput (operations per second, counting both call types). Throughput grows from 0.55 ops/s at $c = 1$ to \textbf{13.59 ops/s} at $c = 50$ — a 25$\times$ speed-up with \textbf{zero errors} at all levels. The growth is sub-linear because issuance calls are serialized by consensus (one per round), while verification queries scale freely.
+Fig.~\ref{fig:conc_tput} shows the total throughput (operations per second, counting both call types). Throughput grows from 0.55 ops/s at $c = 1$ to \textbf{13.59 ops/s} at $c = 50$ — a 25$\times$ speedup with \textbf{zero errors} at all levels. The growth is sub-linear because issuance calls are serialized by consensus (one per round), while verification queries scale freely.
 
 \begin{figure}[t]
 \centering
@@ -928,7 +923,7 @@ The 2.36-second finality means that a freshly issued credential becomes verifiab
 
 \subsection{Limitations}
 
-\subsection{Throughput Ceiling}
+\subsubsection{Throughput Ceiling}
 TrustVault's parallel throughput plateaus at approximately 7.3 certs/s because ICP serializes update calls within a single canister — only one update can be processed per consensus round (approximately 2 seconds). This is a fundamental property of ICP's consensus model: each canister processes state-mutating calls sequentially to guarantee consistency.
 
 For a single university, this throughput is more than sufficient — even a large university issuing 50,000 credentials annually could process all of them in under 2 hours. For a national-scale system handling millions of credentials simultaneously, a multi-canister sharding architecture would be necessary. In such an architecture, credentials would be distributed across multiple backend canisters (e.g., one per state or region), each maintaining its own Merkle tree. A coordinator canister could aggregate the individual Merkle roots into a global root for cross-canister verification.
@@ -942,7 +937,7 @@ Our benchmarks were run from India (50--80~ms RTT to ICP boundary nodes). Users 
 \subsubsection{ICP Platform Dependency}
 TrustVault is built on ICP and relies on the ICP subnet infrastructure. If the DFINITY Foundation or the NNS governance system were to make breaking changes to the platform, the canister might need to be updated. However, ICP's governance is decentralized (proposals require community approval via NNS voting), and canisters can be made ``blackholed'' (immutable) if desired — at the cost of giving up upgradeability.
 
-\subsubsection{Hash-Based Verification}
+\subsubsection{Hash Collision Risk}
 The current certificate hash is computed from core identity fields. If two students have identical names, IDs, degree types, majors, and graduation dates (an unlikely but theoretically possible collision), their hashes could collide. In practice, the unique \texttt{certificate\_id} field removes this risk.
 
 \subsection{Comparison with W3C Verifiable Credentials}
@@ -951,7 +946,7 @@ TrustVault's certificate schema is not currently compatible with the W3C Verifia
 
 \subsection{Privacy Considerations}
 
-TrustVault stores credential data on a public blockchain, which means that anyone can query the canister to look up credentials by student ID or university name. While this is the intended behavior for a verification system (the whole point is that anyone can verify), it may raise privacy concerns in jurisdictions with strict data protection laws (e.g., GDPR). A privacy-preserving extension could use zero-knowledge proofs to allow verification without revealing the full credential details — for example, proving ``this person holds a Bachelor's degree from university X'' without revealing their GPA or exact graduation date. We consider this an important direction for future work.
+TrustVault stores credential data on a public blockchain, which means that anyone can query the canister to look up credentials by student ID or university name. While this is the intended behavior for a verification system (anyone should be able to verify), it may raise privacy concerns in jurisdictions with strict data protection laws (e.g., GDPR). A privacy-preserving extension could use zero-knowledge proofs to allow verification without revealing the full credential details — for example, proving ``this person holds a Bachelor's degree from university X'' without revealing their GPA or exact graduation date. We consider this an important direction for future work.
 
 \subsection{Deployment Experience}
 
@@ -994,7 +989,7 @@ Our comprehensive benchmarks on the live ICP mainnet demonstrate practical perfo
   \item Concurrent mixed-workload throughput of 13.6 ops/s with zero errors.
   \item Block finality of 2.36 seconds (p99 under 3 seconds).
   \item Issuance cost of approximately \$0.001 per certificate.
-  \item O($\log n$) Merkle tree scaling confirmed with less than 10\% throughput difference between a fresh and a 3,400-certificate database.
+  \item O($\log n$) Merkle tree scaling confirmed with less than 10\% throughput difference between a fresh and a 3,280+ certificate database.
 \end{itemize}
 
 Compared to Ethereum PoS, TrustVault is 10$\times$ faster in finality and 200--2{,}000$\times$ cheaper per credential. Compared to Hyperledger Fabric, TrustVault provides true zero-trust verification without requiring trust in a consortium.
