@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.7)  24 MAR 2026 19:45
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.7)  24 MAR 2026 20:00
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1058,68 +1058,69 @@ Underfull \hbox (badness 5939) in paragraph at lines 445--446
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 462--463
-[]\T1/ptm/b/n/10 Unauthorized is-suance pre-ven-tion\T1/ptm/m/n/10 : The
+Underfull \hbox (badness 1496) in paragraph at lines 488--489
+\T1/ptm/m/n/10 (re-quires con-trol-ling the can-is-ter's con-troller Prin-ci-pa
+l,
  []
 
-
-Underfull \hbox (badness 1502) in paragraph at lines 462--463
-\T1/pcr/m/n/10 issueCertificate \T1/ptm/m/n/10 func-tion is gated by reg-is-ter
-ed
- []
-
-Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
-nput line 490.
 [6]
-Underfull \hbox (badness 5161) in paragraph at lines 569--570
+Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
+nput line 543.
+ [7]
+Underfull \hbox (badness 5161) in paragraph at lines 622--623
 \T1/ptm/m/n/10 and ver-i-fi-ca-tion (70%) at con-cur-rency lev-els $\OML/cmm/m/
 it/10 c \OMS/cmsy/m/n/10 2
  []
 
 
-Underfull \hbox (badness 2326) in paragraph at lines 570--571
+Underfull \hbox (badness 2326) in paragraph at lines 623--624
 []\T1/ptm/b/n/10 Throughput\T1/ptm/m/n/10 : Sus-tained 30-second se-quen-tial i
 s-suance,
  []
 
-[7]
-Package pgfplots info on input line 626: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 679: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
-Package pgfplots info on input line 696: Using 'lua backend=false' for axis: x 
+[8]
+Package pgfplots info on input line 749: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
 
-Underfull \hbox (badness 1661) in paragraph at lines 788--789
+Underfull \hbox (badness 1661) in paragraph at lines 841--842
 []\T1/ptm/m/n/10 At 100 con-cur-rent queries, the sys-tem achieves \T1/ptm/b/n/
 10 86.6
  []
 
-[8]
-Package pgfplots info on input line 842: Using 'lua backend=false' for axis: x 
+[9]
+Package pgfplots info on input line 895: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
- [9]
-Underfull \hbox (badness 2922) in paragraph at lines 959--960
+ [10]
+Underfull \hbox (badness 2922) in paragraph at lines 1012--1013
 \T1/pcr/m/n/10 deploy --network ic\T1/ptm/m/n/10 . Each can-is-ter re-ceived a
  []
 
-[10] [11]
-Underfull \hbox (badness 6220) in paragraph at lines 1120--1124
+[11]
+
+Package balance Warning: You have called \balance in second column
+(balance)                Columns might not be balanced.
+
+[12]
+Underfull \hbox (badness 6220) in paragraph at lines 1173--1177
 []\T1/ptm/m/n/8 DFINITY Foun-da-tion, ``HTTP Gate-way Pro-to-col Spec-i-fi-ca-t
 ion,''
  []
 
-[12] (./journal_paper.aux)
+[13] (./journal_paper.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
 Package rerunfilecheck Info: File `journal_paper.out' has not changed.
-(rerunfilecheck)             Checksum: 9991808CF5177AA5423FB4E4E63DEAA9;10905.
+(rerunfilecheck)             Checksum: 8FAFFD9B58A3EBEF182B4AC06923995B;12057.
  ) 
 Here is how much of TeX's memory you used:
- 36211 strings out of 476106
- 835884 string characters out of 5793934
- 2192975 words of memory out of 5000000
- 57449 multiletter control sequences out of 15000+600000
+ 36233 strings out of 476106
+ 836160 string characters out of 5793934
+ 2181975 words of memory out of 5000000
+ 57458 multiletter control sequences out of 15000+600000
  679604 words of font info for 166 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  84i,19n,93p,1012b,2301s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1140,10 +1141,10 @@ xlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-d
 ist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1
 /urw/times/utmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utm
 r8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on journal_paper.pdf (12 pages, 292291 bytes).
+Output written on journal_paper.pdf (13 pages, 299028 bytes).
 PDF statistics:
- 671 PDF objects out of 1000 (max. 8388607)
- 612 compressed objects within 7 object streams
- 212 named destinations out of 1000 (max. 500000)
- 525 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 719 PDF objects out of 1000 (max. 8388607)
+ 659 compressed objects within 7 object streams
+ 225 named destinations out of 1000 (max. 500000)
+ 581 words of extra memory for PDF output out of 10000 (max. 10000000)
 
