@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.7)  15 APR 2026 02:18
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.7)  15 APR 2026 02:40
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -921,7 +921,7 @@ LaTeX Font Info:    ... okay on input line 50.
 LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 50.
 LaTeX Font Info:    ... okay on input line 50.
 
--- Lines per column: 56 (exact).
+-- Lines per column: 58 (exact).
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count336
@@ -955,12 +955,13 @@ Package pgfplots notification 'compat/show suggested version=true': document ha
 s been generated with the most recent feature set (\pgfplotsset{compat=1.18}).
 
 \c@lstlisting=\count342
-LaTeX Font Info:    Trying to load font information for U+msa on input line 95.
+LaTeX Font Info:    Calculating math sizes for size <11> on input line 75.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 75.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 95.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 75.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
@@ -1093,6 +1094,9 @@ Underfull \hbox (badness 1661) in paragraph at lines 853--854
 Package pgfplots info on input line 907: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
 [9] [10]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 Underfull \hbox (badness 2922) in paragraph at lines 1024--1025
 \T1/pcr/m/n/10 deploy --network ic\T1/ptm/m/n/10 . Each can-is-ter re-ceived a
  []
@@ -1108,17 +1112,6 @@ Underfull \hbox (badness 6220) in paragraph at lines 1185--1189
 ion,''
  []
 
-
-** Conference Paper **
-Before submitting the final camera ready copy, remember to:
-
- 1. Manually equalize the lengths of two columns on the last page
- of your paper;
-
- 2. Ensure that any PostScript and/or PDF output post-processing
- uses only Type 1 fonts and that every step in the generation
- process uses the appropriate paper size.
-
 [13] (./journal_paper.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
@@ -1128,11 +1121,11 @@ Package rerunfilecheck Info: File `journal_paper.out' has not changed.
 (rerunfilecheck)             Checksum: 8FAFFD9B58A3EBEF182B4AC06923995B;12057.
  ) 
 Here is how much of TeX's memory you used:
- 36239 strings out of 476106
- 836308 string characters out of 5793934
- 2148975 words of memory out of 5000000
- 57464 multiletter control sequences out of 15000+600000
- 679604 words of font info for 166 fonts, out of 8000000 for 9000
+ 36256 strings out of 476106
+ 836508 string characters out of 5793934
+ 2152975 words of memory out of 5000000
+ 57480 multiletter control sequences out of 15000+600000
+ 683546 words of font info for 179 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  84i,19n,93p,1012b,2301s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></us
@@ -1152,7 +1145,7 @@ xlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-d
 ist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1
 /urw/times/utmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utm
 r8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on journal_paper.pdf (13 pages, 297637 bytes).
+Output written on journal_paper.pdf (13 pages, 298239 bytes).
 PDF statistics:
  719 PDF objects out of 1000 (max. 8388607)
  659 compressed objects within 7 object streams
