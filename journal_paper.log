@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.7)  24 MAR 2026 20:00
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.7)  15 APR 2026 02:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -921,7 +921,7 @@ LaTeX Font Info:    ... okay on input line 50.
 LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 50.
 LaTeX Font Info:    ... okay on input line 50.
 
--- Lines per column: 58 (exact).
+-- Lines per column: 56 (exact).
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count336
@@ -955,12 +955,12 @@ Package pgfplots notification 'compat/show suggested version=true': document ha
 s been generated with the most recent feature set (\pgfplotsset{compat=1.18}).
 
 \c@lstlisting=\count342
-LaTeX Font Info:    Trying to load font information for U+msa on input line 83.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 95.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 83.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 95.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
@@ -970,130 +970,130 @@ f-dist/fonts/enc/dvips/base/8r.enc}
 
 
 ]
-Underfull \hbox (badness 1552) in paragraph at lines 134--135
+Underfull \hbox (badness 1552) in paragraph at lines 146--147
 []\T1/ptm/b/n/10 Public (per-mis-sion-less) blockchains \T1/ptm/m/n/10 like Bit
 -coin and
  []
 
 
-Underfull \hbox (badness 1810) in paragraph at lines 141--142
+Underfull \hbox (badness 1810) in paragraph at lines 153--154
 []\T1/ptm/m/n/10 The In-ter-net Com-puter Pro-to-col [[]], [[]] is a pub-lic
  []
 
-LaTeX Font Info:    Trying to load font information for T1+pcr on input line 16
-4.
-(/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
+[2]
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 17
+6.
+ (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
-) [2] [3]
-Underfull \hbox (badness 10000) in paragraph at lines 309--310
+) [3]
+Underfull \hbox (badness 10000) in paragraph at lines 321--322
 \T1/pcr/m/n/10 issueCertificate\T1/ptm/m/n/10 , \T1/pcr/m/n/10 revokeCertificat
 e\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 309--310
+Underfull \hbox (badness 10000) in paragraph at lines 321--322
 \T1/pcr/m/n/10 verifyCertificate\T1/ptm/m/n/10 , \T1/pcr/m/n/10 registerUnivers
 ity\T1/ptm/m/n/10 ,
  []
 
 [4]
-Overfull \hbox (22.18016pt too wide) in paragraph at lines 324--338
+Overfull \hbox (22.18016pt too wide) in paragraph at lines 336--350
  [][] 
  []
 
 
-Underfull \hbox (badness 5388) in paragraph at lines 340--341
+Underfull \hbox (badness 5388) in paragraph at lines 352--353
 []\T1/ptm/m/n/10 The \T1/pcr/m/n/10 certificate_hash \T1/ptm/m/n/10 is com-pute
 d as $\OML/cmm/m/it/10 H \OT1/cmr/m/n/10 =
  []
 
 
-Overfull \hbox (48.60773pt too wide) in paragraph at lines 340--341
+Overfull \hbox (48.60773pt too wide) in paragraph at lines 352--353
 []\OT1/cmr/m/n/10 ([]\OMS/cmsy/m/n/10 k[]k[]k[]k[]k[]k[]\OT1/cmr/m/n/10 )$\T1/p
 tm/m/n/10 .
  []
 
 
-Underfull \hbox (badness 2970) in paragraph at lines 352--353
+Underfull \hbox (badness 2970) in paragraph at lines 364--365
 []\T1/ptm/b/n/10 Student Por-tal\T1/ptm/m/n/10 : Al-lows stu-dents to view thei
 r cre-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 363--364
+Underfull \hbox (badness 10000) in paragraph at lines 375--376
 []\T1/ptm/b/n/10 University reg-is-ters\T1/ptm/m/n/10 : A uni-ver-sity calls
  []
 
 
-Underfull \hbox (badness 1735) in paragraph at lines 363--364
+Underfull \hbox (badness 1735) in paragraph at lines 375--376
 \T1/pcr/m/n/10 registerUniversity(name) \T1/ptm/m/n/10 with its Prin-ci-pal.
  []
 
 
-Underfull \hbox (badness 3088) in paragraph at lines 364--365
+Underfull \hbox (badness 3088) in paragraph at lines 376--377
 \T1/ptm/m/n/10 clicks ``Is-sue.'' The back-end cre-ates the cer-tifi-cate
  []
 
 
-Underfull \hbox (badness 6173) in paragraph at lines 390--391
+Underfull \hbox (badness 6173) in paragraph at lines 402--403
 []\T1/ptm/b/n/10 Revocation \T1/ptm/m/n/10 (O($\OML/cmm/m/it/10 n$\T1/ptm/m/n/1
 0 )): When a cer-tifi-cate is re-voked,
  []
 
 
-Underfull \hbox (badness 3229) in paragraph at lines 390--391
+Underfull \hbox (badness 3229) in paragraph at lines 402--403
 \T1/ptm/m/n/10 its \T1/pcr/m/n/10 is_revoked \T1/ptm/m/n/10 flag is set to true
 , and the en-tire
  []
 
 [5]
-Underfull \hbox (badness 10000) in paragraph at lines 445--446
+Underfull \hbox (badness 10000) in paragraph at lines 457--458
 []\T1/ptm/b/n/10 Hash check\T1/ptm/m/n/10 : Re-com-pute $\OML/cmm/m/it/10 h[] \
 OT1/cmr/m/n/10 =
  []
 
 
-Underfull \hbox (badness 5939) in paragraph at lines 445--446
+Underfull \hbox (badness 5939) in paragraph at lines 457--458
 []\OT1/cmr/m/n/10 ([])$ \T1/ptm/m/n/10 and con-firm it matches
  []
 
 
-Underfull \hbox (badness 1496) in paragraph at lines 488--489
+Underfull \hbox (badness 1496) in paragraph at lines 500--501
 \T1/ptm/m/n/10 (re-quires con-trol-ling the can-is-ter's con-troller Prin-ci-pa
 l,
  []
 
 [6]
 Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
-nput line 543.
+nput line 555.
  [7]
-Underfull \hbox (badness 5161) in paragraph at lines 622--623
+Underfull \hbox (badness 5161) in paragraph at lines 634--635
 \T1/ptm/m/n/10 and ver-i-fi-ca-tion (70%) at con-cur-rency lev-els $\OML/cmm/m/
 it/10 c \OMS/cmsy/m/n/10 2
  []
 
 
-Underfull \hbox (badness 2326) in paragraph at lines 623--624
+Underfull \hbox (badness 2326) in paragraph at lines 635--636
 []\T1/ptm/b/n/10 Throughput\T1/ptm/m/n/10 : Sus-tained 30-second se-quen-tial i
 s-suance,
  []
 
-Package pgfplots info on input line 679: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 691: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
 [8]
-Package pgfplots info on input line 749: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 761: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
 
-Underfull \hbox (badness 1661) in paragraph at lines 841--842
+Underfull \hbox (badness 1661) in paragraph at lines 853--854
 []\T1/ptm/m/n/10 At 100 con-cur-rent queries, the sys-tem achieves \T1/ptm/b/n/
 10 86.6
  []
 
-[9]
-Package pgfplots info on input line 895: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 907: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
- [10]
-Underfull \hbox (badness 2922) in paragraph at lines 1012--1013
+[9] [10]
+Underfull \hbox (badness 2922) in paragraph at lines 1024--1025
 \T1/pcr/m/n/10 deploy --network ic\T1/ptm/m/n/10 . Each can-is-ter re-ceived a
  []
 
@@ -1103,10 +1103,21 @@ Package balance Warning: You have called \balance in second column
 (balance)                Columns might not be balanced.
 
 [12]
-Underfull \hbox (badness 6220) in paragraph at lines 1173--1177
+Underfull \hbox (badness 6220) in paragraph at lines 1185--1189
 []\T1/ptm/m/n/8 DFINITY Foun-da-tion, ``HTTP Gate-way Pro-to-col Spec-i-fi-ca-t
 ion,''
  []
+
+
+** Conference Paper **
+Before submitting the final camera ready copy, remember to:
+
+ 1. Manually equalize the lengths of two columns on the last page
+ of your paper;
+
+ 2. Ensure that any PostScript and/or PDF output post-processing
+ uses only Type 1 fonts and that every step in the generation
+ process uses the appropriate paper size.
 
 [13] (./journal_paper.aux)
  ***********
@@ -1117,10 +1128,10 @@ Package rerunfilecheck Info: File `journal_paper.out' has not changed.
 (rerunfilecheck)             Checksum: 8FAFFD9B58A3EBEF182B4AC06923995B;12057.
  ) 
 Here is how much of TeX's memory you used:
- 36233 strings out of 476106
- 836160 string characters out of 5793934
- 2181975 words of memory out of 5000000
- 57458 multiletter control sequences out of 15000+600000
+ 36239 strings out of 476106
+ 836308 string characters out of 5793934
+ 2148975 words of memory out of 5000000
+ 57464 multiletter control sequences out of 15000+600000
  679604 words of font info for 166 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  84i,19n,93p,1012b,2301s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1141,7 +1152,7 @@ xlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-d
 ist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1
 /urw/times/utmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utm
 r8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on journal_paper.pdf (13 pages, 299028 bytes).
+Output written on journal_paper.pdf (13 pages, 297637 bytes).
 PDF statistics:
  719 PDF objects out of 1000 (max. 8388607)
  659 compressed objects within 7 object streams
