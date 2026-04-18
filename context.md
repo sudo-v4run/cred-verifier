@@ -43,6 +43,7 @@
 │       └── credential_backend/   # Auto-generated Candid JS bindings
 ├── benchmarks/
 │   ├── run.js                    # CLI entry point for benchmark suites
+│   ├── README.md                 # Benchmark documentation and results summary
 │   ├── suite/
 │   │   ├── config.js             # Scales, network config, canister ID
 │   │   ├── agent.js              # ICP actor factory (authed + anon)
@@ -54,7 +55,7 @@
 │   │   ├── stats.js              # Statistical helpers (mean, stddev, percentiles)
 │   │   └── reporter.js           # Console output + JSON persistence
 │   ├── results/
-│   │   ├── mainnet_2026-03-06/   # Final benchmark run results (authoritative)
+│   │   ├── mainnet_2026-03-06/   # Authoritative canonical results (March 2026)
 │   │   │   ├── issuance_ic_mainnet_2026-03-06.json
 │   │   │   ├── verification_ic_mainnet_2026-03-06.json
 │   │   │   ├── concurrent_ic_mainnet_2026-03-06.json
@@ -62,7 +63,8 @@
 │   │   └── .gitkeep
 │   └── visualize/
 │       ├── generate_graphs.py    # Python script to produce PNG/PDF/HTML graphs
-│       └── requirements.txt
+│       ├── requirements.txt
+│       └── figures/              # Generated PNG/PDF figures + summary_table.tex
 ├── Paper/
 │   ├── Conference/research_paper.tex
 │   └── Journal/journal_paper.tex
@@ -400,6 +402,8 @@ REPEAT_PER_N        = 3
 
 - `saveResult(suite, data)` → `results/{suite}_{timestamp}.json`
 - `saveLive(suite, data)` → `results/{suite}_live.json` (overwritten after each N-point for crash safety)
+
+Note: after a benchmark run, copy the desired result files into `results/mainnet_2026-03-06/` with canonical names to make them authoritative.
 
 ---
 

@@ -2,9 +2,9 @@
 
 End-to-end performance measurement for the research paper:
 
-> *"TrustVault: Decentralised Academic Credential Verification on the Internet Computer Protocol"*
+> *"TrustVault: Trustless, Scalable, and Low-Cost On-Chain Academic Credential Verification Using Internet Computer Protocol"*
 
-Benchmarks run **exclusively on IC mainnet** against the deployed canister.
+Benchmarks run **exclusively on IC mainnet** against the deployed canister (`pekzw-diaaa-aaaad-afh3q-cai`).
 No synthetic data, no local replica — real-world measurements only.
 
 ---
@@ -13,10 +13,10 @@ No synthetic data, no local replica — real-world measurements only.
 
 | Suite | What it proves | Key metric |
 |---|---|---|
-| **Issuance** | Latency and throughput as N certificates are issued (N = 1, 10, 100, 1 000, 10 000). Sequential and parallel modes. | Mean/p95/p99 latency, certs/s |
-| **Verification** | Query-call verification latency and throughput at N = 1 → 10 000 concurrent verifiers. Certificate lookup by student ID / university name. | Query latency (ms), queries/s |
-| **Concurrent** | Mixed workload: 30% issuance + 70% verification at C = 1, 5, 10, 25, 50, 100, 500 simultaneous callers. ICP finality measurement. | ops/s, error rate, finality (ms) |
-| **Throughput** | 60-second sustained issuance, Merkle tree rebuild time vs DB size, and peak burst (1 000 simultaneous calls). | certs/s over time, O(N log N) growth |
+| **Issuance** | Latency and throughput as N certificates are issued (N = 1, 10, 50, 100). Sequential and parallel modes. | Mean/p95/p99 latency, certs/s |
+| **Verification** | Query-call verification latency and throughput at N = 1, 10, 100, 500 concurrent verifiers. Certificate lookup by student ID / university name. | Query latency (ms), queries/s |
+| **Concurrent** | Mixed workload: 30% issuance + 70% verification at C = 1, 5, 10, 25, 50 simultaneous callers. ICP finality measurement. | ops/s, error rate, finality (ms) |
+| **Throughput** | 30-second sustained issuance, Merkle tree rebuild time vs DB size, and peak burst (100 simultaneous calls). | certs/s over time, O(log N) growth |
 
 ---
 
@@ -56,14 +56,8 @@ node run.js --suite throughput
 node run.js --help
 ```
 
-Results are saved as JSON files in `benchmarks/results/`.
-
-> **Estimated run times on mainnet:**
-> - `issuance`     — ~2–4 hours (sequential issuance up to N=1000)
-> - `verification` — ~30–60 min (pre-populate + query at all scales)
-> - `concurrent`   — ~1–2 hours (C up to 500 mixed callers)
-> - `throughput`   — ~30 min (60s sustained + burst)
-> - `all`          — ~5–8 hours total
+Results are saved as timestamped JSON files in `benchmarks/results/`.
+The authoritative canonical results are in `benchmarks/results/mainnet_2026-03-06/`.
 
 ---
 
@@ -75,7 +69,7 @@ cd benchmarks/visualize
 # Install Python dependencies
 pip install -r requirements.txt
 
-# Generate all figures
+# Generate all figures (reads from mainnet_2026-03-06/ automatically)
 python3 generate_graphs.py
 ```
 
@@ -90,8 +84,8 @@ Output in `benchmarks/visualize/figures/`:
 | `Fig05_latency_cdf.png/.pdf` | Latency CDF for issuance and verification |
 | `Fig06_merkle_growth.png/.pdf` | Merkle tree rebuild time vs DB size |
 | `Fig07_latency_boxplots.png/.pdf` | Latency distributions (box plots) |
-| `Fig08_throughput_over_time.png/.pdf` | Throughput stability during 60s sustained load |
-| `Fig09_burst_analysis.png/.pdf` | Peak burst: error rate and latency percentiles |
+| `Fig08_throughput_over_time.png/.pdf` | Throughput stability during 30s sustained load |
+| `Fig09_burst_analysis.png/.pdf` | Peak burst (100 calls): error rate and latency percentiles |
 | `Fig10_finality_time.png/.pdf` | ICP finality vs Ethereum/Bitcoin (reference comparison) |
 | `summary_table.tex` | LaTeX table for direct inclusion in paper |
 | `dashboard.html` | Interactive Plotly dashboard |
@@ -121,7 +115,9 @@ benchmarks/
     stress.js           # runThroughput — sustained load & Merkle growth
     stats.js            # Statistical helpers (mean, p95, p99, CDF ...)
     reporter.js         # Console logging and JSON result writer
-  results/              # Benchmark JSON outputs (git-ignored)
+  results/
+    mainnet_2026-03-06/ # Authoritative canonical results (March 2026)
+    .gitkeep
   visualize/
     generate_graphs.py  # Matplotlib + Plotly figure generator
     requirements.txt
@@ -130,16 +126,59 @@ benchmarks/
 
 ---
 
+## Authoritative Results (IC Mainnet, 2026-03-06)
+
+All numbers below are from `results/mainnet_2026-03-06/`.
+
+### Issuance (parallel burst)
+
+| Batch (N) | Wall mean (ms) | Throughput (certs/s) | p95 (ms) |
+|-----------|---------------|---------------------|----------|
+| 1         | 1943          | 0.52                | 2111     |
+| 10        | 2596          | 4.02                | 3054     |
+| 50        | 6933          | 7.23                | 7320     |
+| 100       | 13969         | 7.31                | 15416    |
+
+### Verification (sequential, 500-cert DB)
+
+| Queries (N) | Mean (ms) | p50 (ms) | p95 (ms) | p99 (ms) |
+|-------------|-----------|----------|----------|----------|
+| 1           | 227       | 202      | 396      | 414      |
+| 10          | 359       | 345      | 600      | 627      |
+| 100         | 405       | 400      | 693      | 937      |
+| 500         | 389       | 381      | 644      | 829      |
+
+### Concurrent mixed workload (30% issue / 70% verify)
+
+| C  | Throughput (ops/s) | Wall mean (ms) | Error rate |
+|----|-------------------|----------------|------------|
+| 1  | 0.48              | 2107           | 0%         |
+| 5  | 2.24              | 2304           | 0%         |
+| 10 | 4.20              | 2417           | 0%         |
+| 25 | 9.14              | 2899           | 0%         |
+| 50 | 13.09             | 3830           | 0%         |
+
+### ICP Finality (20 samples)
+
+- min: 1443 ms, mean: **2400 ms**, p50: 2490 ms, p75: 2564 ms, p95: 2987 ms, p99: **3047 ms**
+
+### Throughput / Merkle growth
+
+- Sustained (30s): **17 certs** → **0.57 certs/s**, stable across 10s windows
+- Peak burst (100 simultaneous): **100/100 succeeded**, 7.25 certs/s, 0% error rate
+
+---
+
 ## Research Claims Validated
 
 | Claim | Suite | Evidence |
 |---|---|---|
-| Sub-second query verification | Verification | p50 < 300ms at N=10 000 |
-| O(log N) Merkle proof | Verification, Throughput | Latency grows sub-linearly with N |
-| ~2s finality (vs ~12s Ethereum) | Concurrent | Finality histogram, median < 3s |
-| Near-linear throughput under concurrency | Concurrent | ops/s vs C graph |
-| Stable latency under sustained load | Throughput | 10-second throughput windows |
-| Throughput plateau with zero error degradation | Issuance (parallel) | ~7.3 certs/s ceiling maintained at N=50–100 with ~0% error rate |
+| Fast query verification | Verification | p50 ≤ 400 ms at N=500, min 60 ms |
+| O(log N) Merkle insert | Issuance, Throughput | Throughput nearly identical at fresh vs 3,600+ cert DB |
+| ~2.4s finality (vs ~24s Ethereum PoS) | Concurrent | Finality mean 2400 ms, p99 < 3050 ms |
+| Near-linear throughput under concurrency | Concurrent | 13.09 ops/s at C=50, 0% error rate |
+| Stable latency under sustained load | Throughput | 0.5/0.6/0.5 certs/s across three 10s windows |
+| Zero error rate under burst | Issuance (parallel) | 100/100 succeeded at N=100 burst |
 
 ---
 
@@ -155,7 +194,7 @@ This is not a weakness — it is expected and correct behaviour for ICP's execut
   successive consensus rounds rather than executed in true parallel.
 - As a consequence, throughput asymptotes to `1 / round_time` per canister ≈ 0.5 calls/s sequential,
   with burst batching lifting effective throughput to ~7 certs/s before the queue saturates.
-- Crucially, **error rate stays near 0%** across all N values. The canister does not reject, crash,
+- Crucially, **error rate stays at 0%** across all N values. The canister does not reject, crash,
   or corrupt state under burst load — the queue absorbs excess requests gracefully.
 
 The plateau therefore proves **single-canister resilience under burst load**, not a flaw.
@@ -167,24 +206,11 @@ Our benchmark measures one canister on one subnet. ICP's architecture separates 
 | Scope | Throughput |
 |---|---|
 | Single-canister ceiling (this benchmark) | ~7–8 update calls/s (burst) |
-| Single subnet capacity (DFINITY, Jun 2025) | ~1,200 update calls/s sustained; 2,000 rps with tuned params |
+| Single subnet capacity (DFINITY, Jun 2025) | ~1,200 update calls/s sustained |
 | All 42 subnets — network peak (mainnet, Nov 2025) | **25,621 update calls/s** |
 
 Source: [IC Performance](https://learn.internetcomputer.org/hc/en-us/articles/39320190051348-Performance),
 DFINITY Foundation, 2025.
-
-The ~7.3 certs/s measured here is consistent with expectations for a single canister running
-update calls on an application subnet — it reflects the per-canister serialisation floor, not
-an ICP network ceiling.
-
-### Does ICP add a new subnet automatically when load increases?
-
-**No.** A canister is permanently assigned to a single subnet and cannot span or migrate
-across subnets automatically. New subnets are created through
-**NNS governance proposals** voted on by ICP token holders — a deliberate network
-expansion decision, not an on-demand response to individual canister pressure. A newly
-created subnet immediately makes capacity available for *new* canisters deployed to it;
-it does not benefit an existing canister already assigned to a different subnet.
 
 ### How to scale beyond the single-canister ceiling
 
@@ -192,11 +218,8 @@ If credential issuance volume exceeds the single-canister ceiling, the correct I
 is **horizontal canister sharding**:
 
 1. Deploy multiple `credential_backend` canisters — ideally across different subnets.
-2. Route issuance requests across canisters by, for example, university principal or a
-   hash-partitioned certificate ID prefix.
-3. Each additional canister on a separate subnet contributes another ~7–8 certs/s burst
-   capacity independently.
+2. Route issuance requests across canisters by university principal or hash-partitioned certificate ID prefix.
+3. Each additional canister on a separate subnet contributes another ~7–8 certs/s burst capacity independently.
 
 Extrapolating to ICP's current 42 subnets: **42 × 7.3 ≈ 307 certs/s** of parallel issuance
-throughput would be achievable for a sharded multi-canister deployment — a figure that
-comfortably serves any realistic university credentialing workload at global scale.
+throughput would be achievable for a sharded multi-canister deployment.
