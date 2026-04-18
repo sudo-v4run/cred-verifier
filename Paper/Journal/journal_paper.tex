@@ -77,7 +77,7 @@
 \begin{abstract}
 Fake academic credentials are a growing problem that affects employers, universities, and students worldwide. Current verification methods are either manual and slow, or depend on centralized databases that can be tampered with or go offline. Blockchain-based solutions have been proposed, but public blockchains like Ethereum charge high fees for every write operation, and permissioned blockchains like Hyperledger Fabric require trust in consortium members. In all existing systems, the verification website itself runs on a regular web server — a single point of failure.
 
-This paper presents \textbf{TrustVault}, an academic credential verification system that is \emph{fully on-chain} — both the data and the user-facing website live on the Internet Computer Protocol (ICP) blockchain. TrustVault uses an incremental Merkle tree combined with ICP's \emph{Certified Variables} (values signed by the subnet's threshold BLS key) so that anyone can verify a credential mathematically, without trusting any single server or institution. We deploy TrustVault on the ICP mainnet and run a comprehensive benchmark suite. Our results show: single-certificate issuance in about 1.9 seconds, verification queries as fast as 177 milliseconds, parallel throughput up to 7.3 certificates per second, concurrent mixed-workload throughput of 13.6 operations per second with zero errors, block finality of 2.36 seconds (p99 under 3 seconds), and an issuance cost of approximately \$0.001 per certificate — orders of magnitude cheaper than Ethereum.
+This paper presents \textbf{TrustVault}, an academic credential verification system that is \emph{fully on-chain} — both the data and the user-facing website live on the Internet Computer Protocol (ICP) blockchain. TrustVault uses an incremental Merkle tree combined with ICP's \emph{Certified Variables} (values signed by the subnet's threshold BLS key) so that anyone can verify a credential mathematically, without trusting any single server or institution. We deploy TrustVault on the ICP mainnet and run a comprehensive benchmark suite. Our results show: single-certificate issuance in about 1.9 seconds, verification queries as fast as 60 milliseconds, parallel throughput up to 7.3 certificates per second, concurrent mixed-workload throughput of 13.1 operations per second with zero errors, block finality of 2.40 seconds (p99 under 3.05 seconds), and an issuance cost of approximately \$0.001 per certificate — orders of magnitude cheaper than Ethereum.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -724,7 +724,7 @@ Table~\ref{tab:seq_issuance} shows the per-certificate latency when certificates
 
 \subsection{Verification Latency}
 
-Verification is a \emph{query call} — it does not go through consensus and costs nothing to the caller. Table~\ref{tab:verif} and Fig.~\ref{fig:verif_perc} report verification latency against a live database of 500 certificates. The fastest observed query returned in \textbf{177~ms}, confirming that the Merkle proof computation adds negligible overhead. Even at 100 concurrent queries, the p99 remains below 1 second.
+Verification is a \emph{query call} — it does not go through consensus and costs nothing to the caller. Table~\ref{tab:verif} and Fig.~\ref{fig:verif_perc} report verification latency against a live database of 500 certificates. The fastest observed query returned in \textbf{60~ms}, confirming that the Merkle proof computation adds negligible overhead. Even at 100 concurrent queries, the p99 remains below 1 second.
 
 \begin{table}[t]
 \caption{Verification Latency --- 500-Certificate Database (ms)}
@@ -734,10 +734,10 @@ Verification is a \emph{query call} — it does not go through consensus and cos
 \toprule
 \textbf{Queries} & \textbf{Min} & \textbf{Mean} & \textbf{p50} & \textbf{p75} & \textbf{p95} & \textbf{p99} \\
 \midrule
-1   & 217 & 380 & 432 & 462 & 485 & 490 \\
-10  & 177 & 518 & 512 & 578 & 722 & 980 \\
-100 & --- & 491 & 498 & 567 & 787 & 994 \\
-500 & --- & 485 & 477 & 563 & 693 & 924 \\
+1   & 60  & 227 & 202 & 310 & 396 & 414 \\
+10  & 60  & 359 & 345 & 460 & 600 & 627 \\
+100 & --- & 405 & 400 & 505 & 693 & 937 \\
+500 & --- & 389 & 381 & 488 & 644 & 829 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -760,13 +760,13 @@ Verification is a \emph{query call} — it does not go through consensus and cos
   label style={font=\scriptsize},
 ]
   \addplot[fill=icpblue!70, draw=icpblue]
-    coordinates {(n=1,432)(n=10,512)(n=100,498)(n=500,477)};
+    coordinates {(n=1,202)(n=10,345)(n=100,400)(n=500,381)};
   \addlegendentry{p50}
   \addplot[fill=icpyellow!80, draw=icpyellow!60!black]
-    coordinates {(n=1,485)(n=10,722)(n=100,787)(n=500,693)};
+    coordinates {(n=1,396)(n=10,600)(n=100,693)(n=500,644)};
   \addlegendentry{p95}
   \addplot[fill=icpred!70, draw=icpred]
-    coordinates {(n=1,490)(n=10,980)(n=100,994)(n=500,924)};
+    coordinates {(n=1,414)(n=10,627)(n=100,937)(n=500,829)};
   \addlegendentry{p99}
 \end{axis}
 \end{tikzpicture}
@@ -856,7 +856,7 @@ At 100 concurrent queries, the system achieves \textbf{86.6 queries/s} — well 
 
 In a real-world deployment, the canister would receive issuance and verification requests simultaneously. The concurrent benchmark submits a mix of 30\% issuance (update) and 70\% verification (query) calls at increasing concurrency levels $c \in \{1, 5, 10, 25, 50\}$.
 
-Fig.~\ref{fig:conc_tput} shows the total throughput (operations per second, counting both call types). Throughput grows from 0.55 ops/s at $c = 1$ to \textbf{13.59 ops/s} at $c = 50$ — a 25$\times$ speedup with \textbf{zero errors} at all levels. The growth is sub-linear because issuance calls are serialized by consensus (one per round), while verification queries scale freely.
+Fig.~\ref{fig:conc_tput} shows the total throughput (operations per second, counting both call types). Throughput grows from 0.48 ops/s at $c = 1$ to \textbf{13.09 ops/s} at $c = 50$ — a 27$\times$ speedup with \textbf{zero errors} at all levels. The growth is sub-linear because issuance calls are serialized by consensus (one per round), while verification queries scale freely.
 
 \begin{figure}[t]
 \centering
@@ -875,10 +875,10 @@ Fig.~\ref{fig:conc_tput} shows the total throughput (operations per second, coun
 ]
   \addplot[mark=*, thick, color=icpblue, mark size=2.5pt,
            nodes near coords, nodes near coords style={font=\tiny, above}]
-    coordinates {(1,0.55)(5,2.65)(10,5.60)(25,8.30)(50,13.59)};
+    coordinates {(1,0.48)(5,2.24)(10,4.20)(25,9.14)(50,13.09)};
   \addlegendentry{Measured (0\% error rate)}
   \addplot[dashed, color=gray, no marks]
-    coordinates {(0,0)(50,13.59)};
+    coordinates {(0,0)(50,13.09)};
   \addlegendentry{Linear reference}
 \end{axis}
 \end{tikzpicture}
@@ -886,7 +886,7 @@ Fig.~\ref{fig:conc_tput} shows the total throughput (operations per second, coun
 \label{fig:conc_tput}
 \end{figure}
 
-Fig.~\ref{fig:conc_lat} breaks down the latency by operation type. Verification latency (query call, no consensus) remains stable between 565--847~ms across all concurrency levels. Issuance latency (update call, requires consensus) grows gradually from 1.7~s to 2.8~s as contention increases — a graceful degradation.
+Fig.~\ref{fig:conc_lat} breaks down the latency by operation type. Verification latency (query call, no consensus) remains stable between 554--635~ms across all concurrency levels. Issuance latency (update call, requires consensus) grows gradually from 2.2~s to 2.9~s as contention increases — a graceful degradation.
 
 \begin{figure}[t]
 \centering
@@ -906,14 +906,14 @@ Fig.~\ref{fig:conc_lat} breaks down the latency by operation type. Verification 
   label style={font=\scriptsize},
 ]
   \addplot[fill=icpblue!70, draw=icpblue]
-    coordinates {(c=5,1745)(c=10,1503)(c=25,2516)(c=50,2779)};
+    coordinates {(c=5,2236)(c=10,2235)(c=25,2362)(c=50,2912)};
   \addlegendentry{Issuance (update)}
   \addplot[fill=icpgreen!60, draw=icpgreen!80!black]
-    coordinates {(c=5,745)(c=10,565)(c=25,642)(c=50,847)};
+    coordinates {(c=5,554)(c=10,635)(c=25,572)(c=50,595)};
   \addlegendentry{Verification (query)}
 \end{axis}
 \end{tikzpicture}
-\caption{Latency by operation type. Verification stays under 850~ms even at $c = 50$. Issuance grows gradually due to consensus serialization.}
+\caption{Latency by operation type. Verification stays under 640~ms even at $c = 50$. Issuance grows gradually due to consensus serialization.}
 \label{fig:conc_lat}
 \end{figure}
 
@@ -929,18 +929,18 @@ Block finality — the time from when a transaction is submitted until it is per
 \toprule
 \textbf{Metric} & \textbf{Value (ms)} \\
 \midrule
-Minimum   & 832 \\
-Mean      & 2{,}356 \\
-Std.\ Dev    & 421 \\
-p50       & 2{,}395 \\
-p75       & 2{,}622 \\
-p95       & 2{,}811 \\
-p99       & 2{,}944 \\
+Minimum   & 1{,}443 \\
+Mean      & 2{,}400 \\
+Std.\ Dev    & 385 \\
+p50       & 2{,}490 \\
+p75       & 2{,}564 \\
+p95       & 2{,}987 \\
+p99       & 3{,}047 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The mean finality of \textbf{2.36 seconds} with a tight p99 of \textbf{2.94 seconds} confirms that ICP's consensus is fast and predictable. This makes TrustVault suitable for interactive use cases — an employer can verify a credential in real time during a job interview.
+The mean finality of \textbf{2.40 seconds} with a tight p99 of \textbf{3.05 seconds} confirms that ICP's consensus is fast and predictable. This makes TrustVault suitable for interactive use cases — an employer can verify a credential in real time during a job interview.
 
 \subsection{Cross-Platform Comparison}
 
@@ -954,7 +954,7 @@ Table~\ref{tab:comparison} places TrustVault's measured performance alongside pu
 \toprule
 \textbf{Metric} & \textbf{ICP (TrustVault)} & \textbf{Ethereum PoS} & \textbf{Hyperledger Fabric} \\
 \midrule
-Block finality        & \textbf{2.36~s} (measured)    & $\approx$24~s~\cite{buterin2020eth2}  & $<$1~s~\cite{androulaki2018fabric} \\
+Block finality        & \textbf{2.40~s} (measured)    & $\approx$24~s~\cite{buterin2020eth2}  & $<$1~s~\cite{androulaki2018fabric} \\
 Throughput            & 7.3 certs/s (measured)        & 15--30 TPS~\cite{dinh2017blockbench}  & $\approx$3{,}500 TPS~\cite{androulaki2018fabric} \\
 Issuance cost         & \textbf{\$0.001} (measured)   & \$0.20--\$2.00~\cite{wood2014ethereum} & Near-zero \\
 Verification cost     & \textbf{\$0} (query call)     & \$0.05--\$0.50~\cite{wood2014ethereum} & Near-zero \\
@@ -967,7 +967,7 @@ Data storage          & Full record on-chain          & Hash only (data off-chai
 
 Key observations:
 \begin{itemize}[leftmargin=*]
-  \item ICP's finality (2.36~s) is about 10$\times$ faster than Ethereum PoS (24~s) but slower than Fabric ($<$1~s). However, Fabric requires trusting the consortium.
+  \item ICP's finality (2.40~s) is about 10$\times$ faster than Ethereum PoS (24~s) but slower than Fabric ($<$1~s). However, Fabric requires trusting the consortium.
   \item ICP's per-credential cost (\$0.001) is 200--2{,}000$\times$ cheaper than Ethereum.
   \item TrustVault is the only system where both the verification result and the verification \emph{interface} are served from the blockchain itself.
   \item Fabric achieves far higher raw throughput (3{,}500 TPS), but this is for a permissioned network where all validators are known and trusted — a fundamentally different security model.
@@ -985,7 +985,7 @@ The benchmark results demonstrate that TrustVault is practical for real-world us
 
 For employers, verification queries return in under 500~ms (median) and are completely free. An employer portal could verify hundreds of candidates per minute without any cost or rate-limiting concern.
 
-The 2.36-second finality means that a freshly issued credential becomes verifiable within about 3 seconds of issuance — fast enough for interactive use cases such as verifying a credential during a live interview.
+The 2.40-second finality means that a freshly issued credential becomes verifiable within about 3 seconds of issuance — fast enough for interactive use cases such as verifying a credential during a live interview.
 
 \subsection{Limitations}
 
@@ -1050,10 +1050,10 @@ This paper presented TrustVault, a fully on-chain academic credential verificati
 Our comprehensive benchmarks on the live ICP mainnet demonstrate practical performance:
 \begin{itemize}[leftmargin=*]
   \item Single-certificate issuance in approximately 1.9 seconds.
-  \item Verification queries as fast as 177~ms (free of charge).
+  \item Verification queries as fast as 60~ms (free of charge).
   \item Parallel throughput up to 7.3 certificates per second.
-  \item Concurrent mixed-workload throughput of 13.6 ops/s with zero errors.
-  \item Block finality of 2.36 seconds (p99 under 3 seconds).
+  \item Concurrent mixed-workload throughput of 13.1 ops/s with zero errors.
+  \item Block finality of 2.40 seconds (p99 under 3.05 seconds).
   \item Issuance cost of approximately \$0.001 per certificate.
   \item O($\log n$) Merkle tree scaling confirmed with less than 10\% throughput difference between a fresh and a 3,280+ certificate database.
 \end{itemize}

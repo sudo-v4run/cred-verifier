@@ -59,7 +59,7 @@
 │   │   │   ├── verification_ic_mainnet_2026-03-06.json
 │   │   │   ├── concurrent_ic_mainnet_2026-03-06.json
 │   │   │   └── throughput_ic_mainnet_2026-03-06.json
-│   │   └── *_live.json           # In-progress snapshots (same data, status=in-progress)
+│   │   └── .gitkeep
 │   └── visualize/
 │       ├── generate_graphs.py    # Python script to produce PNG/PDF/HTML graphs
 │       └── requirements.txt

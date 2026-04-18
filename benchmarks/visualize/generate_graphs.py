@@ -117,11 +117,10 @@ def cdf(data):
 
 # ── load data ─────────────────────────────────────────────────────────────────
 
-iss  = load_latest("issuance_*.json")
-ver  = load_latest("verification_*.json")
-# Use the log-matched run files for concurrent and throughput
-conc = load_latest("concurrent_2026-03-06T19-59-20-777Z.json") or load_latest("concurrent_*.json")
-thr  = load_latest("throughput_2026-03-06T20-00-42-345Z.json") or load_latest("throughput_*.json")
+iss  = load_latest("mainnet_2026-03-06/issuance_*.json")
+ver  = load_latest("mainnet_2026-03-06/verification_*.json")
+conc = load_latest("mainnet_2026-03-06/concurrent_*.json")
+thr  = load_latest("mainnet_2026-03-06/throughput_*.json")
 
 available = {k: v for k, v in [("iss", iss), ("ver", ver), ("conc", conc), ("thr", thr)] if v}
 print(f"\nLoaded benchmark files: {list(available.keys())}")
