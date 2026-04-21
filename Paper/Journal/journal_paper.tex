@@ -114,7 +114,7 @@ The \textbf{Internet Computer Protocol (ICP)}~\cite{hanke2018dfinity}, developed
 This paper makes the following contributions:
 
 \begin{enumerate}
-  \item We design and implement \textbf{TrustVault}, the first fully on-chain academic credential verification system — both frontend and backend — deployed on a public blockchain mainnet.
+  \item We design and implement \textbf{TrustVault}, among the first fully on-chain academic credential verification systems — with both frontend and backend on a public blockchain mainnet — and provide comprehensive reproducible mainnet benchmarks that demonstrate practical viability.
   \item We integrate an \textbf{incremental binary Merkle tree} with ICP's Certified Variables to create a tamper-evident credential registry that costs O($\log n$) per insert.
   \item We describe a \textbf{trustless verification protocol} in which a verifier who knows only the ICP root public key can independently confirm any credential without contacting the issuing university.
   \item We present a \textbf{comprehensive performance evaluation} on ICP mainnet, covering issuance latency, verification latency, throughput, scalability, concurrent mixed workloads, block finality, and cost — all measured on a live production deployment.
@@ -472,7 +472,13 @@ The security properties of the Merkle tree and verification protocol are analyze
 \section{Security Analysis}
 \label{sec:security}
 
-TrustVault's central claim is \emph{trustless verification}: a verifier does not need to trust any single server, institution, or even the canister code to confirm that a credential is authentic. This section analyzes why specific attack vectors fail against TrustVault's design.
+TrustVault's central claim is \emph{trustless verification}: a verifier does not need to trust any single server, institution, or even the canister code to confirm that a credential is authentic. This section provides a formal threat-model-based security analysis.
+
+\subsection{Threat Model}
+
+We consider the following adversarial capabilities. A \emph{malicious issuer} attempts to issue forged or altered credentials. A \emph{tampered storage adversary} attempts to modify stored certificate data on the canister. A \emph{network adversary} (MITM) intercepts or modifies responses in transit between client and boundary node. A \emph{replay attacker} reuses a valid certificate or submits duplicate issuance requests. A \emph{compromised node subset} controls up to $f < n/3$ subnet replicas that behave arbitrarily. We assume: (1)~SHA-256 is collision-resistant; (2)~BLS12-381 is secure under the Computational Diffie--Hellman (CDH) assumption~\cite{boneh2001bls}; (3)~the ICP subnet is honest-majority at any given time.
+
+We now analyze how each adversarial capability is countered by TrustVault's design.
 
 \subsection{Credential Forgery}
 
@@ -521,10 +527,12 @@ This is not a theoretical guarantee of impossibility — no distributed system p
 
 \subsection{Summary of Trust Assumptions}
 
-TrustVault's trustless verification requires only two assumptions:
+TrustVault's trustless verification rests on the following assumptions:
 \begin{enumerate}
   \item \textbf{SHA-256 is collision-resistant}: No one can find two inputs with the same SHA-256 output. This is a standard assumption in all modern cryptographic systems.
+  \item \textbf{BLS12-381 is secure}: The CDH problem on the BLS12-381 pairing-friendly curve is computationally infeasible~\cite{boneh2001bls}, ensuring threshold BLS signatures cannot be forged without controlling the full signing key.
   \item \textbf{The ICP subnet is honest-majority}: Fewer than one-third of the subnet's nodes are malicious at any given time. This is enforced by ICP's decentralized node selection and NNS governance.
+  \item \textbf{NNS governance integrity}: The Network Nervous System, through which subnet keys are managed and protocol upgrades are deployed, is not compromised. All upgrades require community approval via NNS voting — DFINITY cannot unilaterally change the platform — but this remains a trust assumption not present in a fully permissionless system.
 \end{enumerate}
 
 If both assumptions hold, then: (a) no one can forge a credential, (b) no one can tamper with a stored credential without detection, (c) no one can issue a credential without being a registered university, and (d) no one can tamper with the verification result or the verification interface in transit. The verifier does not need to trust TrustVault, the issuing university, or any individual ICP node — only the mathematics of SHA-256 and BLS signatures.
@@ -646,7 +654,7 @@ The complete source code, benchmark suite, and raw result JSON files are availab
 \section{Experimental Evaluation}
 \label{sec:eval}
 
-All benchmarks were run against the live ICP mainnet canister \texttt{pekzw-diaaa-aaaad-afh3q-cai} in March 2026 using a Node.js benchmark suite (\texttt{@dfinity/agent}) from Bengaluru, India (approximately 50--80~ms round-trip time to ICP boundary nodes). Each experiment was repeated 3 times. We report mean, standard deviation, and percentiles (p50, p95, p99).
+All benchmarks were run against the live ICP mainnet canister \texttt{pekzw-diaaa-aaaad-afh3q-cai} in March 2026 using a Node.js benchmark suite (\texttt{@dfinity/agent}) from Bengaluru, India (approximately 50--80~ms round-trip time to ICP boundary nodes). Each experiment was repeated 3 times; we acknowledge that confidence intervals are wider with three trials than with the 10--30 trials common in high-throughput benchmarking studies~\cite{dinh2017blockbench}. We report mean, standard deviation, and percentiles (p50, p95, p99). These measurements reflect network conditions from Bengaluru; users closer to ICP boundary nodes would observe lower absolute latencies.
 
 \subsection{Issuance Latency}
 
@@ -968,9 +976,9 @@ Data storage          & Full record on-chain          & Hash only (data off-chai
 Key observations:
 \begin{itemize}[leftmargin=*]
   \item ICP's finality (2.40~s) is about 10$\times$ faster than Ethereum PoS (24~s) but slower than Fabric ($<$1~s). However, Fabric requires trusting the consortium.
-  \item ICP's per-credential cost (\$0.001) is 200--2{,}000$\times$ cheaper than Ethereum.
+  \item ICP's per-credential cost (\$0.001) is 200--2{,}000$\times$ cheaper than Ethereum. Note: the Ethereum cost range~\cite{wood2014ethereum} reflects pre-EIP-1559 baselines; post-Merge costs vary widely with network demand and have exceeded \$50 per transaction in high-demand periods.
   \item TrustVault is the only system where both the verification result and the verification \emph{interface} are served from the blockchain itself.
-  \item Fabric achieves far higher raw throughput (3{,}500 TPS), but this is for a permissioned network where all validators are known and trusted — a fundamentally different security model.
+  \item Fabric achieves far higher raw throughput (3{,}500 TPS), but this is for a permissioned network where all validators are known and trusted — a fundamentally different security model. The Fabric figure is also a general-transaction benchmark~\cite{androulaki2018fabric}, not a credential-issuance measurement; a matched-workload comparison would require running Fabric with equivalent credential schemas.
 \end{itemize}
 
 % =========================================================
