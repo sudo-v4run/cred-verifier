@@ -187,7 +187,7 @@ Unlike Ethereum or Bitcoin, ICP canisters can respond directly to HTTP requests.
 ICP is governed by the \emph{Network Nervous System} (NNS), an on-chain decentralized autonomous organization (DAO). The NNS controls subnet creation, node onboarding, protocol upgrades, and other governance decisions. All changes require community approval through a proposal-and-voting mechanism where ICP token holders stake tokens as ``neurons'' with voting power. This means no single entity — including the DFINITY Foundation — can unilaterally change the platform. Subnet public keys are also registered and verifiable through the NNS, which forms the root of trust for the entire Certified Variables mechanism.
 
 \subsubsection{Cycles and Cost Model}
-Computation on ICP is paid for using \emph{cycles}, which are pegged to the Swiss Franc at a fixed exchange rate (1 trillion cycles = 1 XDR $\approx$ \$1.35). Canister operators ``top up'' their canisters with cycles, and each operation (update call, memory storage, network bandwidth) consumes a known amount. Critically, \emph{query calls are free} for the caller — the canister operator absorbs the cost. This means that credential verification in TrustVault costs nothing to the employer or verifier, regardless of how many queries they make. Issuance (an update call) costs approximately 590,000 cycles per call, which translates to roughly \$0.001 per certificate at current exchange rates.
+Computation on ICP is paid for using \emph{cycles}, which are pegged to the Swiss Franc at a fixed exchange rate (1 trillion cycles = 1 XDR $\approx$ \$1.35). Canister operators ``top up'' their canisters with cycles, and each operation (update call, memory storage, network bandwidth) consumes a known amount. Critically, \emph{query calls are free} for the caller — the canister operator absorbs the cost. This means that credential verification in TrustVault costs nothing to the employer or verifier, regardless of how many queries they make. Issuance (an update call) costs roughly \$0.001 per certificate at current ICP cycle prices (approximately 1~trillion cycles $\approx$ \$1.35 USD), making credential issuance orders of magnitude cheaper than Ethereum.
 
 % =========================================================
 \section{Related Work}
@@ -482,6 +482,8 @@ We now analyze how each adversarial capability is countered by TrustVault's desi
 
 \subsection{Credential Forgery}
 
+\textit{Scope of this analysis:} The properties below describe the system as designed for production with SHA-256 as the hash function. The current prototype uses simplified placeholder functions (UTF-8 hex encoding for certificate hashes; XOR-based combination for Merkle internal nodes) that do not provide cryptographic collision resistance. These must be replaced with SHA-256 before the guarantees below hold; see Section~\ref{sec:discussion} for this limitation.
+
 An attacker who wants to forge a credential (create a fake degree that passes verification) must produce a valid Merkle proof that links the forged certificate's hash to the BLS-signed root. This requires one of the following:
 
 \begin{enumerate}
@@ -508,6 +510,8 @@ To bypass this, the attacker would need to either:
 
 Neither is a vulnerability in TrustVault's design — they are operational security requirements that apply to any system.
 
+\textit{Note}: in the current prototype, \texttt{registerUniversity} is a public call that any ICP principal can invoke without restriction. For this security property to hold in production, that function must be gated to the canister controller or an NNS-governed whitelist.
+
 \subsection{Man-in-the-Middle Attacks}
 
 A traditional MITM attack intercepts traffic between the user and the server and modifies it. In TrustVault, this attack fails at two levels:
@@ -533,6 +537,7 @@ TrustVault's trustless verification rests on the following assumptions:
   \item \textbf{BLS12-381 is secure}: The CDH problem on the BLS12-381 pairing-friendly curve is computationally infeasible~\cite{boneh2001bls}, ensuring threshold BLS signatures cannot be forged without controlling the full signing key.
   \item \textbf{The ICP subnet is honest-majority}: Fewer than one-third of the subnet's nodes are malicious at any given time. This is enforced by ICP's decentralized node selection and NNS governance.
   \item \textbf{NNS governance integrity}: The Network Nervous System, through which subnet keys are managed and protocol upgrades are deployed, is not compromised. All upgrades require community approval via NNS voting — DFINITY cannot unilaterally change the platform — but this remains a trust assumption not present in a fully permissionless system.
+  \item \textbf{Collision-resistant hashing}: The certificate hash function and Merkle tree node combination use SHA-256 or an equivalent collision-resistant primitive. The current prototype substitutes simplified placeholder functions; this assumption is not satisfied until they are replaced.
 \end{enumerate}
 
 If both assumptions hold, then: (a) no one can forge a credential, (b) no one can tamper with a stored credential without detection, (c) no one can issue a credential without being a registered university, and (d) no one can tamper with the verification result or the verification interface in transit. The verifier does not need to trust TrustVault, the issuing university, or any individual ICP node — only the mathematics of SHA-256 and BLS signatures.
@@ -1013,6 +1018,12 @@ TrustVault is built on ICP and relies on the ICP subnet infrastructure. If the D
 
 \subsubsection{Hash Collision Risk}
 The current certificate hash is computed from core identity fields. If two students have identical names, IDs, degree types, majors, and graduation dates (an unlikely but theoretically possible collision), their hashes could collide. In practice, the unique \texttt{certificate\_id} field removes this risk.
+
+\subsubsection{Prototype Hash Functions}
+The current implementation uses simplified placeholder hash functions rather than SHA-256. Specifically, \texttt{computeCertificateHash()} in \texttt{CertificateManager.mo} encodes the concatenated certificate fields as their UTF-8 byte sequence in hexadecimal — not a cryptographic hash. \texttt{combineHashes()} in \texttt{Utils.mo} XORs the character bytes of two hex strings into a 32-byte array rather than applying SHA-256. While sufficient to produce unique identifiers for the benchmarking prototype and for demonstrating the system architecture, these functions do \emph{not} provide the collision resistance required for the security guarantees in Section~\ref{sec:security}. Replacing both with SHA-256 (e.g., via the \texttt{mo:sha2} Motoko package) is a prerequisite for production deployment.
+
+\subsubsection{Open University Registration}
+The \texttt{registerUniversity()} function is currently a public, permissionless call: any ICP principal can invoke it and immediately gain the ability to issue credentials. This is acceptable for a research prototype but means the ``Unauthorized Issuance'' security guarantee does not hold against a motivated attacker on the live canister. Production hardening requires restricting this call to the canister controller, an admin principal, or an NNS-governed governance proposal.
 
 \subsection{Comparison with W3C Verifiable Credentials}
 

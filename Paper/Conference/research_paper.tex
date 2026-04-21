@@ -500,6 +500,8 @@ We consider the following adversarial capabilities: (i)~a \emph{malicious issuer
 
 \subsection{Security Guarantees}
 
+\textit{Note on prototype implementation:} The security properties below describe the system as designed for production, assuming a collision-resistant hash function (SHA-256) for both certificate hashing and Merkle tree node combination. The current prototype uses simplified placeholder functions (UTF-8 hex encoding for certificate hashes; XOR-based combination for Merkle nodes). These do not provide cryptographic collision resistance; a production deployment must replace them with SHA-256 before the guarantees below hold.
+
 \textbf{Data Integrity.} Any modification to a stored certificate changes its SHA-256 hash $h_c$. The Merkle proof computed from the original hash no longer validates; the verifier detects the mismatch in Step~1 of the verification protocol (Section~\ref{sec:trustless}) without any network call. \textit{Backed by: Merkle tree + SHA-256 hash consistency.}
 
 \textbf{Authenticity.} The Merkle root is threshold BLS-signed by the ICP subnet. Forging a valid subnet signature requires compromising $>1/3$ of subnet nodes simultaneously — computationally and logistically infeasible across a geographically diverse, independently operated network. No single node can unilaterally produce a fraudulent signature. \textit{Backed by: ICP Certified Variables + BFT threshold BLS.}
@@ -515,6 +517,8 @@ We consider the following adversarial capabilities: (i)~a \emph{malicious issuer
 \subsection{Trust Assumptions and Limitations}
 
 TrustVault's guarantees rest on: (1)~SHA-256 collision resistance; (2)~BLS12-381 CDH security; (3)~ICP honest-majority subnet ($< n/3$ malicious replicas); and (4)~NNS governance integrity for subnet key management. Revocation requires an O($n$) Merkle rebuild; for large databases this adds measurable latency. The system is ICP-specific with no cross-chain verification support.
+
+\textbf{Prototype limitations for production hardening:} (a)~\textit{Hashing}: the current implementation uses simplified placeholder hash functions that do not satisfy collision resistance; SHA-256 must be substituted before the security guarantees in Section~\ref{sec:security} apply. (b)~\textit{University registration}: \texttt{registerUniversity} is currently a permissionless public call that any ICP principal can invoke. In a production deployment this must be restricted to the canister controller or an NNS-governed whitelist to prevent unauthorized credential issuance.
 
 % =========================================================
 \section{Related Work and Conclusion}
