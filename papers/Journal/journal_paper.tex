@@ -231,7 +231,7 @@ Self-Sovereign Identity~\cite{allen2016decentralized} & Varies  & No  & Partial 
 \end{tabular}
 \end{table*}
 
-The key gap that TrustVault fills: no prior system (a) stores the complete credential record on a public blockchain, (b) serves the verification interface from the blockchain itself, (c) provides mathematically verifiable proofs via Certified Variables, and (d) has been benchmarked on a live mainnet deployment with published results.
+The key gap that TrustVault fills: no prior system (a) stores the complete credential record on a public blockchain, (b) serves the verification interface from the blockchain itself, (c) provides mathematically verifiable proofs via Certified Variables, and (d) has been benchmarked on a public mainnet deployment with published, reproducible results.
 
 \subsection{Self-Sovereign Identity and Decentralized Identifiers}
 
@@ -249,7 +249,7 @@ Nzaou et al.~\cite{nzaou2022credential} conducted a systematic review of 47 bloc
 \section{System Architecture}
 \label{sec:architecture}
 
-TrustVault consists of two ICP canisters deployed on the public mainnet: a \emph{backend canister} written in Motoko (ICP's native language) that stores credentials and handles business logic, and a \emph{frontend canister} (an asset canister) that hosts a React single-page application served directly over HTTPS from the blockchain.
+TrustVault consists of two ICP canisters implemented and evaluated on the public ICP mainnet: a \emph{backend canister} written in Motoko (ICP's native language) that stores credentials and handles business logic, and a \emph{frontend canister} (an asset canister) that hosts a React single-page application served directly over HTTPS from the blockchain.
 
 \subsection{High-Level Architecture}
 
@@ -563,7 +563,7 @@ This section describes the technology stack, deployment details, and reproducibi
   \item \textbf{Backend}: Written in Motoko, ICP's native programming language designed for canister development. Motoko provides orthogonal persistence (canister state survives upgrades automatically) and actor-based concurrency.
   \item \textbf{Frontend}: A React single-page application built with Vite. It includes three portals: a University Portal for issuance, a Student Portal for viewing credentials, and a Verification Portal for employers.
   \item \textbf{Candid Interface}: Auto-generated Candid bindings ensure type-safe communication between the JavaScript frontend and the Motoko backend.
-  \item \textbf{Deployment}: Both canisters are deployed on ICP mainnet using the \texttt{dfx} CLI tool provided by DFINITY. The backend canister ID is \texttt{pekzw-diaaa-aaaad-afh3q-cai}.
+  \item \textbf{Deployment}: Both canisters were deployed on ICP mainnet using the \texttt{dfx} CLI tool provided by DFINITY. The backend canister ID is \texttt{pekzw-diaaa-aaaad-afh3q-cai} (active during benchmarking, March 2026).
 \end{itemize}
 
 \subsection{Canister Upgrade Safety}
