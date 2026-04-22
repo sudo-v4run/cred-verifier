@@ -343,7 +343,7 @@ Each credential is stored as a Motoko record with the fields shown in Table~\ref
 \texttt{recipient}          & Record & Student name, ID, principal \\
 \texttt{credential}         & Record & Degree, major, GPA, dates \\
 \texttt{is\_revoked}        & Bool   & Revocation flag \\
-\texttt{block\_timestamp}   & Int64  & Consensus timestamp (ns) \\
+\texttt{block\_timestamp}   & Int    & Consensus timestamp (ns) \\
 \texttt{schema\_version}    & Text   & Currently ``1.0'' \\
 \bottomrule
 \multicolumn{3}{@{}p{\columnwidth}@{}}{\scriptsize $^\ddagger$ Prototype; SHA-256 required for production (see Section~\ref{sec:discussion}).}\\
@@ -405,7 +405,7 @@ In the prototype \texttt{combineHashes()} XORs the character bytes of its two he
 
 \textbf{Insertion} (O($\log n$)): When a new certificate is issued, its hash is placed at the next available leaf position. Then, only the nodes along the path from that leaf to the root are recomputed — a sequence of $\lceil\log_2 n\rceil$ hash operations. The updated 32-byte root is committed via \texttt{CertifiedData.set()}.
 
-\textbf{Proof generation} (O($\log n$)): To prove that a certificate exists in the tree, the system returns the list of \emph{sibling hashes} along the path from the leaf to the root. The verifier can recompute the root from these siblings and compare it to the certified root.
+\textbf{Proof generation} (O($n$) in current implementation): To prove that a certificate exists in the tree, the system linearly scans all $n$ leaves to locate the target leaf hash (O($n$)), then walks O($\log n$) nodes to the root collecting sibling hashes. An index-based lookup would reduce this to O($\log n$); that optimization is left to future work.
 
 \textbf{Revocation} (O($n$)): When a certificate is revoked, its \texttt{is\_revoked} flag is set to true, and the entire Merkle tree is rebuilt. The new root is committed via \texttt{CertifiedData.set()}, invalidating all previous proofs within one consensus round (about 2 seconds).
 
@@ -462,7 +462,7 @@ Fig.~\ref{fig:merkle} illustrates the tree structure and a sample proof path.
 Verification requires \emph{no trust in the issuing institution}. Given a certificate and its Merkle proof $\pi$, the verifier performs five steps:
 
 \begin{enumerate}
-  \item \textbf{Hash check}: Recompute $h_c = \text{SHA-256}(\text{certificate fields})$ and confirm it matches the stored \texttt{certificate\_hash}.
+  \item \textbf{Hash check}: Recompute $h_c = H(\text{certificate fields})$ and confirm it matches the stored \texttt{certificate\_hash} ($H$ is SHA-256 in production; bytesToHex(UTF-8(\textbf{f}$_{1..7}$)) in the current prototype — see Section~\ref{sec:discussion}).
   \item \textbf{Merkle proof walk}: Recompute the root from $h_c$ and the sibling hashes in $\pi$: $\hat{R} = \text{verifyProof}(h_c, \pi)$.
   \item \textbf{Fetch ICP certificate}: Request the ICP \emph{Certificate} (the BLS-signed state tree) from any ICP gateway node.
   \item \textbf{BLS signature check}: Verify the subnet's threshold BLS signature over the state tree root using the publicly known subnet key.
@@ -571,7 +571,7 @@ ICP canisters can be upgraded without losing data, thanks to Motoko's \texttt{pr
 
 \subsection{Key Code Paths}
 
-Listing~\ref{lst:issue} shows the simplified issuance flow. The three key steps are: (1) verify that the caller is a registered university, (2) create the certificate record and compute its SHA-256 hash, and (3) insert the hash as a Merkle leaf and commit the new root via \texttt{CertifiedData.set()}.
+Listing~\ref{lst:issue} shows the simplified issuance flow. The three key steps are: (1) verify that the caller is a registered university, (2) create the certificate record and compute its certificate hash (\texttt{computeCertificateHash()}), and (3) insert the hash as a Merkle leaf and commit the new root via \texttt{CertifiedData.set()}.
 
 \begin{lstlisting}[caption={Simplified issuance flow in Motoko},label={lst:issue},language={}]
 public shared(msg) func issueCertificate(
@@ -633,8 +633,9 @@ public func insertLeaf(
     var cur = state.cap - 1 + n;
     while (cur > 0) {
         let p = (cur - 1) / 2;
-        state.nodes[p] := SHA256(
-            state.nodes[2*p+1] # state.nodes[2*p+2]);
+        state.nodes[p] := combineHashes(
+            state.nodes[2*p+1], state.nodes[2*p+2]);
+        // prototype: XOR-based; production: SHA-256
         cur := p;
     };
     state.nodes[0] // return new root
@@ -1030,7 +1031,7 @@ TrustVault is built on ICP and relies on the ICP subnet infrastructure. If the D
 A thorough code-complexity analysis against ICP's official pricing formula~\cite{dfinity2025gascost} (updated Dec.\ 2025) gives the following per-call breakdown. On a 13-node subnet, ICP charges: (i)~1{,}200{,}000 cycles (base) + 2{,}000 cycles per byte for ingress messages; (ii)~5{,}000{,}000 cycles per update message execution; and (iii)~1 cycle per executed WebAssembly (Wasm) instruction~\cite{dfinity2025gascost}. At 1\,trillion cycles $= 1$\,XDR $\approx$ \$1.354820\,USD (May 2025), 1\,billion cycles $\approx$ \$0.001355.
 
 \paragraph{Payload.}
-\texttt{issueCertificate} takes 12 text fields and one float. A representative call (names~$\approx$30\,B, IDs~$\approx$15\,B, dates~$\approx$10\,B, degree/major/URL~$\approx$30\,B each, Candid framing~$\approx$50\,B) totals $\approx$400\,bytes.
+\texttt{issueCertificate} takes 11 text fields and one float (\texttt{gpa}). A representative call (names~$\approx$30\,B, IDs~$\approx$15\,B, dates~$\approx$10\,B, degree/major/URL~$\approx$30\,B each, Candid framing~$\approx$50\,B) totals $\approx$400\,bytes.
 
 \paragraph{Wasm instruction count.}
 We trace each call site through the Motoko source:

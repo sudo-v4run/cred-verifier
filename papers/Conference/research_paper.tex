@@ -108,7 +108,7 @@ The \textit{Internet Computer Protocol} (ICP) \cite{hanke2018dfinity} offers a q
 \label{sec:design}
 
 \subsection{Architecture}
-The Motoko backend is organized into five modules: \textbf{main.mo} (public actor — \texttt{issueCertificate}, \texttt{revokeCertificate}, \texttt{verifyCertificate}), \textbf{CertificateManager.mo} (record hashing and management), \textbf{MerkleTree.mo} (incremental binary Merkle tree), \textbf{Utils.mo} (SHA-256, hex encoding), and \textbf{PerformanceMetrics.mo} (telemetry). The frontend is a React + Vite single-page application inside an ICP asset canister, served directly over HTTPS from the blockchain with no external hosting. It communicates with the backend through auto-generated Candid type bindings. Fig.~\ref{fig:sysarch} illustrates the full system.
+The Motoko backend is organized into five modules: \textbf{main.mo} (public actor — \texttt{issueCertificate}, \texttt{revokeCertificate}, \texttt{verifyCertificate}), \textbf{CertificateManager.mo} (record hashing and management), \textbf{MerkleTree.mo} (incremental binary Merkle tree), \textbf{Utils.mo} (hex encoding, hash combination), and \textbf{PerformanceMetrics.mo} (telemetry). The frontend is a React + Vite single-page application inside an ICP asset canister, served directly over HTTPS from the blockchain with no external hosting. It communicates with the backend through auto-generated Candid type bindings. Fig.~\ref{fig:sysarch} illustrates the full system.
 
 \begin{figure}[t]
 \centering
@@ -183,31 +183,33 @@ The Motoko backend is organized into five modules: \textbf{main.mo} (public acto
 \label{fig:sysarch}
 \end{figure}
 
-Access control is enforced via ICP \textit{Principals} — Ed25519-derived cryptographic identities. Only registered university principals may call \texttt{issueCertificate} or \texttt{revokeCertificate}; \texttt{verifyCertificate} is a free public query. Each certificate (Table~\ref{tab:schema}) carries a SHA-256 hash of its core identity fields and a consensus-set nanosecond timestamp. Stable Motoko variables persist the certificate map and Merkle root across canister upgrades.
+Access control is enforced via ICP \textit{Principals} — Ed25519-derived cryptographic identities. Only registered university principals may call \texttt{issueCertificate} or \texttt{revokeCertificate}; \texttt{verifyCertificate} is a free public query. Each certificate (Table~\ref{tab:schema}) carries a certificate hash of its core identity fields (SHA-256 in production; see Section~\ref{sec:security} for prototype limitations) and a consensus-set nanosecond timestamp. Stable Motoko variables persist the certificate map and Merkle root across canister upgrades.
 
 \begin{table}[h]
 \caption{Certificate Schema}
 \label{tab:schema}
 \centering\small\renewcommand{\arraystretch}{1.1}
-\begin{tabular}{@{}lll@{}}
+\begin{tabular}{@{}llp{2.5cm}@{}}
 \toprule
 \textbf{Field} & \textbf{Type} & \textbf{Description} \\
 \midrule
-\texttt{certificate\_hash} & Text   & SHA-256 of core fields \\
+\texttt{certificate\_hash} & Text   & UTF-8 hex of core fields$^\dagger$ \\
 \texttt{issuer}            & Record & University name, canister ID \\
 \texttt{recipient}         & Record & Student name, ID, principal \\
-\texttt{credential}        & Record & Degree type, major, GPA \\
+\texttt{credential}        & Record & Degree, major, GPA \\
 \texttt{is\_revoked}       & Bool   & Revocation flag \\
-\texttt{block\_timestamp}  & Int64  & Nanoseconds since Unix epoch \\
+\texttt{block\_timestamp}  & Int    & Consensus timestamp (ns) \\
 \bottomrule
+\multicolumn{3}{@{}l}{\scriptsize $^\dagger$ Prototype; SHA-256 required for production (see Section~\ref{sec:security}).}\\
 \end{tabular}
 \end{table}
 
 \subsection{Incremental Merkle Tree and Certified Data}
-All certificate hashes are leaves of a complete binary Merkle tree stored as a flat array of size $2C{-}1$, where $C$ is the smallest power of two $\geq$ the certificate count. Leaf $i$ is at index $C{-}1{+}i$; the root is at index 0. Internal node $j$ satisfies:
+All certificate hashes are leaves of a complete binary Merkle tree stored as a flat array of size $2C{-}1$, where $C$ is the smallest power of two $\geq$ the certificate count. Leaf $i$ is at index $C{-}1{+}i$; the root is at index 0. Each internal node stores the combined hash of its two children:
 \begin{equation}
-  \mathtt{nodes}[j] = H(\mathtt{nodes}[2j{+}1] \;\|\; \mathtt{nodes}[2j{+}2])
+  \mathtt{nodes}[j] = \texttt{combineHashes}(\mathtt{nodes}[2j{+}1],\;\mathtt{nodes}[2j{+}2])
 \end{equation}
+(XOR-based in the current prototype; SHA-256 in production — see Section~\ref{sec:security}.)
 Inserting a new leaf recomputes only the $O(\log n)$ path to the root (Fig.~\ref{fig:merkle}). After each issuance, the 32-byte Merkle root is committed with \texttt{CertifiedData.set()}, and the subnet threshold BLS-signs it within the next consensus round. Revocation triggers a full O($n$) rebuild; the new certified root invalidates all pre-revocation proofs within one consensus round ($\approx$2\,s).
 
 \begin{figure}[t]
@@ -259,11 +261,11 @@ Inserting a new leaf recomputes only the $O(\log n)$ path to the root (Fig.~\ref
 \section{Trustless Verification}
 \label{sec:trustless}
 
-Verification requires no trust in the issuing institution. Given a certificate and its Merkle proof $\pi$, the verifier: (1) recomputes $h_c = \mathrm{SHA256}(\text{cert fields})$ and checks it matches the stored \texttt{certificate\_hash}; (2) walks the Merkle proof to obtain the claimed root $\hat{R} = \mathrm{verifyProof}(h_c, \pi)$; (3) fetches the ICP \textit{Certificate} (authenticated state tree + BLS witness) from any ICP gateway; (4) verifies the subnet's threshold BLS signature over the state tree root using the publicly known subnet key; (5) confirms the canister's certified value in the state tree equals $\hat{R}$.
+Verification requires no trust in the issuing institution. Given a certificate and its Merkle proof $\pi$, the verifier: (1) recomputes $h_c = H(\text{cert fields})$ and checks it matches the stored \texttt{certificate\_hash} ($H$ is SHA-256 in production; the prototype substitutes UTF-8 hex encoding — see Section~\ref{sec:security}); (2) walks the Merkle proof to obtain the claimed root $\hat{R} = \mathrm{verifyProof}(h_c, \pi)$; (3) fetches the ICP \textit{Certificate} (authenticated state tree + BLS witness) from any ICP gateway; (4) verifies the subnet's threshold BLS signature over the state tree root using the publicly known subnet key; (5) confirms the canister's certified value in the state tree equals $\hat{R}$.
 
 The complete chain of trust is:
 \begin{equation}
-  \text{cert fields} \xrightarrow{\text{SHA-256}} h_c \xrightarrow{\;\pi\;} \hat{R} \xrightarrow{\text{state tree}} \text{BLS sig} \xrightarrow{\text{subnet key}} \checkmark
+  \text{cert fields} \xrightarrow{H} h_c \xrightarrow{\;\pi\;} \hat{R} \xrightarrow{\text{state tree}} \text{BLS sig} \xrightarrow{\text{subnet key}} \checkmark
 \end{equation}
 Steps 1--2 execute client-side with no network call. Step 3 requires a single HTTP query to any ICP gateway. The subnet public key is published by the DFINITY Foundation and independently verifiable via the on-chain NNS — no step requires contacting the issuing institution.
 

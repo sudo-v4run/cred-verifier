@@ -2,8 +2,8 @@ This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloade
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**journal_paper.tex
-(./journal_paper.tex
+**research_paper.tex
+(./research_paper.tex
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
 (/usr/share/texlive/texmf-dist/tex/latex/ieeetran/IEEEtran.cls
@@ -403,7 +403,7 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 )
 \Hy@SectionHShift=\skip58
 )
-Package hyperref Info: Option `colorlinks' set `false' on input line 17.
+Package hyperref Info: Option `colorlinks' set `false' on input line 21.
 
 (/usr/share/texlive/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty
 (/usr/share/texlive/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty
@@ -881,60 +881,47 @@ File: listings.cfg 2023/02/27 1.9 listings configuration
 ))
 Package: listings 2023/02/27 1.9 (Carsten Heinz)
 
-(/usr/share/texlive/texmf-dist/tex/latex/enumitem/enumitem.sty
-Package: enumitem 2019/06/20 v3.9 Customized lists
-\labelindent=\skip59
-\enit@outerparindent=\dimen323
-\enit@toks=\toks47
-\enit@inbox=\box73
-\enit@count@id=\count333
-\enitdp@description=\count334
-)
-(/usr/share/texlive/texmf-dist/tex/latex/preprint/balance.sty
-Package: balance 1999/02/23 4.3 (PWD)
-\oldvsize=\dimen324
-)
 (/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count335
-\l__pdf_internal_box=\box74
+\l__color_backend_stack_int=\count333
+\l__pdf_internal_box=\box73
 )
-(./journal_paper.aux)
-\openout1 = `journal_paper.aux'.
+(./research_paper.aux)
+\openout1 = `research_paper.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 50.
-LaTeX Font Info:    ... okay on input line 50.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 50.
-LaTeX Font Info:    ... okay on input line 50.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 50.
-LaTeX Font Info:    ... okay on input line 50.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 50.
-LaTeX Font Info:    ... okay on input line 50.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 50.
-LaTeX Font Info:    ... okay on input line 50.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 50.
-LaTeX Font Info:    ... okay on input line 50.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 50.
-LaTeX Font Info:    ... okay on input line 50.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 50.
-LaTeX Font Info:    ... okay on input line 50.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 50.
-LaTeX Font Info:    ... okay on input line 50.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
 
--- Lines per column: 58 (exact).
+-- Lines per column: 56 (exact).
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count336
-\scratchdimen=\dimen325
-\scratchbox=\box75
-\nofMPsegments=\count337
-\nofMParguments=\count338
-\everyMPshowfont=\toks48
-\MPscratchCnt=\count339
-\MPscratchDim=\dimen326
-\MPnumerator=\count340
-\makeMPintoPDFobject=\count341
-\everyMPtoPDFconversion=\toks49
+\scratchcounter=\count334
+\scratchdimen=\dimen323
+\scratchbox=\box74
+\nofMPsegments=\count335
+\nofMParguments=\count336
+\everyMPshowfont=\toks47
+\MPscratchCnt=\count337
+\MPscratchDim=\dimen324
+\MPnumerator=\count338
+\makeMPintoPDFobject=\count339
+\everyMPtoPDFconversion=\toks48
 ) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
@@ -944,300 +931,203 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package hyperref Info: Link coloring OFF on input line 50.
+Package hyperref Info: Link coloring OFF on input line 56.
 
-(./journal_paper.out) (./journal_paper.out)
+(./research_paper.out) (./research_paper.out)
 \@outlinefile=\write4
-\openout4 = `journal_paper.out'.
+\openout4 = `research_paper.out'.
 
 
 Package pgfplots notification 'compat/show suggested version=true': document ha
 s been generated with the most recent feature set (\pgfplotsset{compat=1.18}).
 
-\c@lstlisting=\count342
-LaTeX Font Info:    Calculating math sizes for size <11> on input line 75.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 75.
+\c@lstlisting=\count340
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 83
+.
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
+File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
+)
+LaTeX Font Info:    Trying to load font information for U+msa on input line 83.
+
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 75.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 83.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texlive/texm
-f-dist/fonts/enc/dvips/base/8r.enc}
+)
+Underfull \hbox (badness 3503) in paragraph at lines 82--84
+[]\T1/ptm/b/it/9 Abstract\T1/ptm/b/n/9 ---Academic cre-den-tial fraud im-poses 
+sig-nif-i-cant
+ []
+
+
+Underfull \hbox (badness 5533) in paragraph at lines 111--112
+[]\T1/ptm/m/n/10 The Mo-toko back-end is or-ga-nized into five mod-
+ []
+
+
+Underfull \hbox (badness 2285) in paragraph at lines 111--112
+\T1/ptm/m/n/10 ules: \T1/ptm/b/n/10 main.mo \T1/ptm/m/n/10 (pub-lic ac-tor ^^V 
+\T1/pcr/m/n/10 issueCertificate\T1/ptm/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 5417) in paragraph at lines 186--187
+[]\T1/ptm/m/n/10 Access con-trol is en-forced via ICP \T1/ptm/m/it/10 Prin-ci-p
+als \T1/ptm/m/n/10 ^^V
+ []
+
+
+Underfull \hbox (badness 1552) in paragraph at lines 186--187
+\T1/ptm/m/n/10 Ed25519-derived cryp-to-graphic iden-ti-ties. Only reg-is-tered
+ []
+
+
+Underfull \hbox (badness 1748) in paragraph at lines 186--187
+\T1/ptm/m/n/10 uni-ver-sity prin-ci-pals may call \T1/pcr/m/n/10 issueCertifica
+te \T1/ptm/m/n/10 or
+ []
+
+[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texlive/texmf-
+dist/fonts/enc/dvips/base/8r.enc}
 
 
 ]
-Underfull \hbox (badness 1552) in paragraph at lines 146--147
-[]\T1/ptm/b/n/10 Public (per-mis-sion-less) blockchains \T1/ptm/m/n/10 like Bit
--coin and
+Underfull \hbox (badness 10000) in paragraph at lines 197--198
+[]|\T1/ptm/m/n/9 University name,
  []
 
 
-Underfull \hbox (badness 1810) in paragraph at lines 153--154
-[]\T1/ptm/m/n/10 The In-ter-net Com-puter Pro-to-col [[]], [[]] is a pub-lic
+Underfull \hbox (badness 10000) in paragraph at lines 199--200
+[]|\T1/ptm/m/n/9 Degree, ma-jor,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 201--202
+[]|\T1/ptm/m/n/9 Consensus
  []
 
 [2]
-LaTeX Font Info:    Trying to load font information for T1+pcr on input line 17
-6.
- (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
-File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
-) [3]
-Underfull \hbox (badness 10000) in paragraph at lines 321--322
-\T1/pcr/m/n/10 issueCertificate\T1/ptm/m/n/10 , \T1/pcr/m/n/10 revokeCertificat
-e\T1/ptm/m/n/10 ,
+Package pgfplots info on input line 313: Using 'lua backend=false' for axis: x 
+coord trafo unsupported.
+Package pgfplots info on input line 363: Using 'lua backend=false' for axis: x 
+coord trafo unsupported.
+Package pgfplots info on input line 459: Using 'lua backend=false' for axis: x 
+coord trafo unsupported.
+
+Overfull \hbox (23.00343pt too wide) in paragraph at lines 481--493
+ [][] 
+ []
+
+[3]
+Underfull \hbox (badness 2096) in paragraph at lines 511--512
+[]\T1/ptm/b/n/10 Replay Re-sis-tance. \T1/ptm/m/n/10 Each cer-tifi-cate car-rie
+s a unique
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 321--322
-\T1/pcr/m/n/10 verifyCertificate\T1/ptm/m/n/10 , \T1/pcr/m/n/10 registerUnivers
-ity\T1/ptm/m/n/10 ,
+Underfull \hbox (badness 10000) in paragraph at lines 511--512
+\T1/pcr/m/n/10 certificate_id \T1/ptm/m/n/10 and a consensus-set nanosec-ond
  []
 
 [4]
-Underfull \hbox (badness 10000) in paragraph at lines 341--342
-[]|\T1/ptm/m/n/8 UTF-8 hex of core
+Underfull \hbox (badness 10000) in paragraph at lines 523--524
+[]\T1/ptm/b/n/10 Prototype lim-i-ta-tions for pro-duc-tion hard-en-ing:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 342--343
-[]|\T1/ptm/m/n/8 Institution name, ID,
+Underfull \hbox (badness 1596) in paragraph at lines 523--524
+\T1/ptm/m/n/10 (a) \T1/ptm/m/it/10 Hash-ing\T1/ptm/m/n/10 : the cur-rent im-ple
+-men-ta-tion uses sim-pli-fied
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 344--345
-[]|\T1/ptm/m/n/8 Degree, ma-jor, GPA,
+Underfull \hbox (badness 1688) in paragraph at lines 523--524
+\T1/ptm/m/n/10 place-holder hash func-tions that do not sat-isfy col-li-sion
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 346--347
-[]|\T1/ptm/m/n/8 Consensus times-tamp
+Underfull \hbox (badness 3792) in paragraph at lines 523--524
+\T1/ptm/m/n/10 a pro-duc-tion de-ploy-ment would re-strict reg-is-tra-tion to
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 353--354
-[]\T1/ptm/m/n/10 The \T1/pcr/m/n/10 certificate_hash \T1/ptm/m/n/10 is pro-
+Underfull \hbox (badness 1622) in paragraph at lines 531--532
+[]\T1/ptm/b/n/10 Conclusion. \T1/ptm/m/n/10 Trust-Vault demon-strates that ICP'
+s Cer-ti-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 353--354
-\T1/ptm/m/n/10 duced by \T1/pcr/m/n/10 computeCertificateHash()
+Underfull \hbox (badness 4819) in paragraph at lines 534--535
+[]$[]$\T1/ptm/m/n/7 Derived from ICP's of-fi-cial pric-ing for-mula [[]] (up-da
+ted Dec. 2025):
  []
 
 
-Underfull \hbox (badness 3219) in paragraph at lines 353--354
-\T1/ptm/m/n/10 (\T1/pcr/m/n/10 CertificateManager.mo\T1/ptm/m/n/10 ). In the pr
-o-to-type, seven
+Underfull \hbox (badness 1552) in paragraph at lines 534--535
+\T1/ptm/m/n/7 ingress fee = 1.2M+2K$\OMS/cmsy/m/n/7 ^^B$\T1/ptm/m/n/7 bytes; up
+-date ex-e-cu-tion base = 5M cy-cles; 1 ex-e-
  []
 
 
-Underfull \hbox (badness 2626) in paragraph at lines 353--354
-\T1/pcr/m/n/10 major\T1/ptm/m/n/10 , \T1/pcr/m/n/10 date\T1/ptm/m/n/10 ) are co
-n-cate-nated, UTF-8 en-coded, and
- []
+** Conference Paper **
+Before submitting the final camera ready copy, remember to:
 
+ 1. Manually equalize the lengths of two columns on the last page
+ of your paper;
 
-Underfull \hbox (badness 2970) in paragraph at lines 370--371
-[]\T1/ptm/b/n/10 Student Por-tal\T1/ptm/m/n/10 : Al-lows stu-dents to view thei
-r cre-
- []
+ 2. Ensure that any PostScript and/or PDF output post-processing
+ uses only Type 1 fonts and that every step in the generation
+ process uses the appropriate paper size.
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 381--382
-[]\T1/ptm/b/n/10 University reg-is-ters\T1/ptm/m/n/10 : A uni-ver-sity calls
- []
-
-
-Underfull \hbox (badness 1735) in paragraph at lines 381--382
-\T1/pcr/m/n/10 registerUniversity(name) \T1/ptm/m/n/10 with its Prin-ci-pal.
- []
-
-
-Underfull \hbox (badness 5147) in paragraph at lines 382--383
-[]\T1/ptm/b/n/10 University is-sues cre-den-tial\T1/ptm/m/n/10 : The uni-ver-si
-ty fills
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 382--383
-\T1/ptm/m/n/10 in the stu-dent's in-for-ma-tion in the Uni-ver-sity
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 382--383
-\T1/ptm/m/n/10 Por-tal and clicks ``Is-sue.'' The back-end cre-ates
- []
-
-
-Underfull \hbox (badness 2343) in paragraph at lines 382--383
-\T1/ptm/m/n/10 the cer-tifi-cate record, com-putes its cer-tifi-cate hash
- []
-
-
-Underfull \hbox (badness 1742) in paragraph at lines 382--383
-\T1/ptm/m/n/10 (\T1/pcr/m/n/10 computeCertificateHash()\T1/ptm/m/n/10 ), in-ser
-ts the hash
- []
-
-[5]
-Underfull \hbox (badness 6173) in paragraph at lines 410--411
-[]\T1/ptm/b/n/10 Revocation \T1/ptm/m/n/10 (O($\OML/cmm/m/it/10 n$\T1/ptm/m/n/1
-0 )): When a cer-tifi-cate is re-voked,
- []
-
-
-Underfull \hbox (badness 3229) in paragraph at lines 410--411
-\T1/ptm/m/n/10 its \T1/pcr/m/n/10 is_revoked \T1/ptm/m/n/10 flag is set to true
-, and the en-tire
- []
-
-[6]
-Underfull \hbox (badness 1496) in paragraph at lines 516--517
-\T1/ptm/m/n/10 (re-quires con-trol-ling the can-is-ter's con-troller Prin-ci-pa
-l,
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 521--522
-[]\T1/ptm/m/it/10 Note\T1/ptm/m/n/10 : for ease of pro-to-type test-ing,
- []
-
-
-Underfull \hbox (badness 4686) in paragraph at lines 521--522
-\T1/pcr/m/n/10 registerUniversity \T1/ptm/m/n/10 is a per-mis-sion-less call th
-at
- []
-
-
-Underfull \hbox (badness 2401) in paragraph at lines 521--522
-\T1/ptm/m/n/10 any ICP prin-ci-pal can in-voke with-out re-stric-tion. This
- []
-
-[7]
-Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
-nput line 576.
-
-Underfull \hbox (badness 5161) in paragraph at lines 656--657
-\T1/ptm/m/n/10 and ver-i-fi-ca-tion (70%) at con-cur-rency lev-els $\OML/cmm/m/
-it/10 c \OMS/cmsy/m/n/10 2
- []
-
-
-Underfull \hbox (badness 2326) in paragraph at lines 657--658
-[]\T1/ptm/b/n/10 Throughput\T1/ptm/m/n/10 : Sus-tained 30-second se-quen-tial i
-s-suance,
- []
-
-[8]
-Package pgfplots info on input line 713: Using 'lua backend=false' for axis: x 
-coord trafo unsupported.
-Package pgfplots info on input line 783: Using 'lua backend=false' for axis: x 
-coord trafo unsupported.
- [9]
-Underfull \hbox (badness 1661) in paragraph at lines 875--876
-[]\T1/ptm/m/n/10 At 100 con-cur-rent queries, the sys-tem achieves \T1/ptm/b/n/
-10 86.6
- []
-
-Package pgfplots info on input line 929: Using 'lua backend=false' for axis: x 
-coord trafo unsupported.
-[10] [11]
-Underfull \hbox (badness 10000) in paragraph at lines 1040--1041
-[]\T1/pcr/b/n/10 createCertificate\T1/ptm/m/n/10 : 6 string con-cate-na-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1040--1041
-\T1/ptm/m/n/10 tions ($\OMS/cmsy/m/n/10 ^^Y$\T1/ptm/m/n/10 150chars to-tal), \T
-1/pcr/m/n/10 Text.encodeUtf8\T1/ptm/m/n/10 ,
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1043--1044
-[]\T1/pcr/b/n/10 CertifiedData.set \T1/ptm/b/n/10 + \T1/pcr/b/n/10 textTo32Byte
-Blob\T1/ptm/m/n/10 :
- []
-
-
-Underfull \hbox (badness 3514) in paragraph at lines 1067--1068
-\T1/ptm/m/n/10 im-ple-men-ta-tion. Even the up-per bound ($0.000023) is
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1067--1068
-\OML/cmm/m/it/10 >$\T1/ptm/b/n/10 8,000$\OMS/cmsy/m/n/10 ^^B$ \T1/ptm/b/n/10 ch
-eaper \T1/ptm/m/n/10 than Ethereum's $0.20--$2.00 per
- []
-
-
-Underfull \hbox (badness 2229) in paragraph at lines 1067--1068
-\T1/ptm/m/n/10 cre-den-tial write. Di-rect cy-cle in-stru-men-ta-tion via ICP's
-
- []
-
-
-Overfull \hbox (24.0pt too wide) in paragraph at lines 1067--1068
-\T1/pcr/m/n/10 ExperimentalInternetComputer.countInstructions
- []
-
-[12]
-Underfull \hbox (badness 2922) in paragraph at lines 1093--1094
-\T1/pcr/m/n/10 deploy --network ic\T1/ptm/m/n/10 . Each can-is-ter re-ceived a
- []
-
-[13]
-Underfull \hbox (badness 6220) in paragraph at lines 1259--1263
-[]\T1/ptm/m/n/8 DFINITY Foun-da-tion, ``HTTP Gate-way Pro-to-col Spec-i-fi-ca-t
-ion,''
- []
-
-[14] (./journal_paper.aux)
+[5] (./research_paper.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
-Package rerunfilecheck Info: File `journal_paper.out' has not changed.
-(rerunfilecheck)             Checksum: 1BEF4A9C9B8487140C0C36D2079AFD25;12780.
+Package rerunfilecheck Info: File `research_paper.out' has not changed.
+(rerunfilecheck)             Checksum: AF59DEC3B429B727FE713C1C340DC158;2793.
  ) 
 Here is how much of TeX's memory you used:
- 36298 strings out of 476106
- 837064 string characters out of 5793933
- 2321975 words of memory out of 5000000
- 57497 multiletter control sequences out of 15000+600000
- 687755 words of font info for 190 fonts, out of 8000000 for 9000
+ 35380 strings out of 476106
+ 824576 string characters out of 5793933
+ 1976975 words of memory out of 5000000
+ 56781 multiletter control sequences out of 15000+600000
+ 681232 words of font info for 174 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 84i,19n,93p,1016b,2301s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/shar
-e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texl
-ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/tex
-mf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist
-/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
-ublic/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/
-cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.
-pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/shar
-e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texli
-ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texm
-f-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/
-fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/t
-ype1/public/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
-blic/amsfonts/symbols/msbm5.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/
-courier/ucrb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8
-a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/sha
-re/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texlive/tex
-mf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/t
-ype1/urw/times/utmri8a.pfb>
-Output written on journal_paper.pdf (14 pages, 364025 bytes).
+ 84i,19n,93p,1417b,2301s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share
+/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texliv
+e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/f
+onts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/ty
+pe1/public/amsfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
+nts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
+mr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb>
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/
+share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/t
+exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fon
+ts/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type
+1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/publ
+ic/amsfonts/symbols/msam10.pfb></usr/share/texlive/texmf-dist/fonts/type1/publi
+c/amsfonts/symbols/msbm5.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/cou
+rier/ucrb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.p
+fb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/
+texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texlive/texmf-
+dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type
+1/urw/times/utmri8a.pfb>
+Output written on research_paper.pdf (5 pages, 309950 bytes).
 PDF statistics:
- 804 PDF objects out of 1000 (max. 8388607)
- 730 compressed objects within 8 object streams
- 239 named destinations out of 1000 (max. 500000)
- 613 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 327 PDF objects out of 1000 (max. 8388607)
+ 265 compressed objects within 3 object streams
+ 52 named destinations out of 1000 (max. 500000)
+ 149 words of extra memory for PDF output out of 10000 (max. 10000000)
 
