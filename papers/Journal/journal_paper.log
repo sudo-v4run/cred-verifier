@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.4.21)  22 APR 2026 06:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.4.21)  22 APR 2026 06:16
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -999,8 +999,23 @@ ity\T1/ptm/m/n/10 ,
  []
 
 [4]
-Overfull \hbox (22.18016pt too wide) in paragraph at lines 336--351
- [][] 
+Underfull \hbox (badness 10000) in paragraph at lines 341--342
+[]|\T1/ptm/m/n/8 UTF-8 hex of core
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 342--343
+[]|\T1/ptm/m/n/8 Institution name, ID,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 344--345
+[]|\T1/ptm/m/n/8 Degree, ma-jor, GPA,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 346--347
+[]|\T1/ptm/m/n/8 Consensus times-tamp
  []
 
 
@@ -1202,9 +1217,9 @@ Package rerunfilecheck Info: File `journal_paper.out' has not changed.
 Here is how much of TeX's memory you used:
  36297 strings out of 476106
  837050 string characters out of 5793933
- 2311975 words of memory out of 5000000
+ 2310975 words of memory out of 5000000
  57497 multiletter control sequences out of 15000+600000
- 686947 words of font info for 190 fonts, out of 8000000 for 9000
+ 687755 words of font info for 190 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  84i,19n,93p,1016b,2301s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
@@ -1230,7 +1245,7 @@ a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/sha
 re/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texlive/tex
 mf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/t
 ype1/urw/times/utmri8a.pfb>
-Output written on journal_paper.pdf (14 pages, 363479 bytes).
+Output written on journal_paper.pdf (14 pages, 363520 bytes).
 PDF statistics:
  802 PDF objects out of 1000 (max. 8388607)
  728 compressed objects within 8 object streams

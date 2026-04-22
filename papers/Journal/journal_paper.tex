@@ -332,21 +332,21 @@ Each credential is stored as a Motoko record with the fields shown in Table~\ref
 \begin{table}[h]
 \caption{Certificate Record Schema}
 \label{tab:schema}
-\centering\small\renewcommand{\arraystretch}{1.1}
-\begin{tabular}{@{}lll@{}}
+\centering\footnotesize\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{@{}llp{2.8cm}@{}}
 \toprule
 \textbf{Field} & \textbf{Type} & \textbf{Description} \\
 \midrule
 \texttt{certificate\_id}    & Text   & Unique identifier \\
 \texttt{certificate\_hash}  & Text   & UTF-8 hex of core fields$^\ddagger$ \\
-\texttt{issuer}             & Record & University name, canister ID, URL \\
+\texttt{issuer}             & Record & Institution name, ID, URL \\
 \texttt{recipient}          & Record & Student name, ID, principal \\
-\texttt{credential}         & Record & Degree type, major, GPA, dates \\
+\texttt{credential}         & Record & Degree, major, GPA, dates \\
 \texttt{is\_revoked}        & Bool   & Revocation flag \\
-\texttt{block\_timestamp}   & Int64  & Consensus-set nanosecond timestamp \\
+\texttt{block\_timestamp}   & Int64  & Consensus timestamp (ns) \\
 \texttt{schema\_version}    & Text   & Currently ``1.0'' \\
 \bottomrule
-\multicolumn{3}{@{}l}{\scriptsize $^\ddagger$ Prototype implementation; SHA-256 required for production (see Section~\ref{sec:discussion}).}\\
+\multicolumn{3}{@{}p{\columnwidth}@{}}{\scriptsize $^\ddagger$ Prototype; SHA-256 required for production (see Section~\ref{sec:discussion}).}\\
 \end{tabular}
 \end{table}
 
