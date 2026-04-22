@@ -338,7 +338,7 @@ Each credential is stored as a Motoko record with the fields shown in Table~\ref
 \textbf{Field} & \textbf{Type} & \textbf{Description} \\
 \midrule
 \texttt{certificate\_id}    & Text   & Unique identifier \\
-\texttt{certificate\_hash}  & Text   & Hex-encoded UTF-8 of concatenated fields (prototype; see Section~\ref{sec:discussion}) \\
+\texttt{certificate\_hash}  & Text   & UTF-8 hex of core fields$^\ddagger$ \\
 \texttt{issuer}             & Record & University name, canister ID, URL \\
 \texttt{recipient}          & Record & Student name, ID, principal \\
 \texttt{credential}         & Record & Degree type, major, GPA, dates \\
@@ -346,14 +346,16 @@ Each credential is stored as a Motoko record with the fields shown in Table~\ref
 \texttt{block\_timestamp}   & Int64  & Consensus-set nanosecond timestamp \\
 \texttt{schema\_version}    & Text   & Currently ``1.0'' \\
 \bottomrule
+\multicolumn{3}{@{}l}{\scriptsize $^\ddagger$ Prototype implementation; SHA-256 required for production (see Section~\ref{sec:discussion}).}\\
 \end{tabular}
 \end{table}
 
 The \texttt{certificate\_hash} is produced by \texttt{computeCertificateHash()} in \texttt{CertificateManager.mo}. In the current prototype the seven core fields are concatenated, UTF-8 encoded, and hex-encoded:
-\begin{equation}
-  H_{\text{proto}} = \texttt{bytesToHex}\bigl(\text{UTF-8}(\texttt{id}\,\|\,\texttt{issuer}\,\|\,\texttt{name}\,\|\,\texttt{student\_id}\,\|\,\texttt{degree}\,\|\,\texttt{major}\,\|\,\texttt{date})\bigr)
+\begin{multline}
+  H_{\text{proto}} = \texttt{bytesToHex}\bigl(\text{UTF-8}(\\
+    \texttt{id}\,\|\,\texttt{issuer}\,\|\,\texttt{name}\,\|\,\texttt{student\_id}\,\|\,\texttt{degree}\,\|\,\texttt{major}\,\|\,\texttt{date})\bigr)
   \label{eq:cert-hash}
-\end{equation}
+\end{multline}
 In production this function should be replaced with a collision-resistant primitive such as SHA-256 (see Section~\ref{sec:discussion}). This hash becomes a leaf in the Merkle tree.
 
 \subsection{Access Control}
@@ -395,10 +397,11 @@ This section explains how TrustVault achieves trustless verification — a proce
 All certificate hashes are stored as leaves of a complete binary Merkle tree~\cite{merkle1989certified}. The tree is implemented as a flat array of size $2C - 1$, where $C$ is the smallest power of two greater than or equal to the number of certificates. Leaf $i$ is at array index $C - 1 + i$, and the root is at index 0.
 
 Each internal node stores the combined hash of its two children:
-\begin{equation}
-  \texttt{nodes}[j] = \texttt{combineHashes}(\texttt{nodes}[2j+1],\; \texttt{nodes}[2j+2])
+\begin{multline}
+  \texttt{nodes}[j] = \\
+    \texttt{combineHashes}(\texttt{nodes}[2j{+}1],\; \texttt{nodes}[2j{+}2])
   \label{eq:merkle}
-\end{equation}
+\end{multline}
 In the prototype \texttt{combineHashes()} XORs the character bytes of its two hex-string inputs into a 32-byte array and hex-encodes the result. In production this should be replaced by $\text{SHA-256}(\texttt{nodes}[2j+1] \| \texttt{nodes}[2j+2])$ (see Section~\ref{sec:discussion}).
 
 \textbf{Insertion} (O($\log n$)): When a new certificate is issued, its hash is placed at the next available leaf position. Then, only the nodes along the path from that leaf to the root are recomputed — a sequence of $\lceil\log_2 n\rceil$ hash operations. The updated 32-byte root is committed via \texttt{CertifiedData.set()}.

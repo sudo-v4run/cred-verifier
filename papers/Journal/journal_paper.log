@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.4.21)  22 APR 2026 06:06
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.4.21)  22 APR 2026 06:11
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -999,202 +999,195 @@ ity\T1/ptm/m/n/10 ,
  []
 
 [4]
-Overfull \hbox (146.8928pt too wide) in paragraph at lines 336--350
+Overfull \hbox (22.18016pt too wide) in paragraph at lines 336--351
  [][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 352--353
+Underfull \hbox (badness 10000) in paragraph at lines 353--354
 []\T1/ptm/m/n/10 The \T1/pcr/m/n/10 certificate_hash \T1/ptm/m/n/10 is pro-duce
 d
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 352--353
+Underfull \hbox (badness 10000) in paragraph at lines 353--354
 \T1/ptm/m/n/10 by \T1/pcr/m/n/10 computeCertificateHash() \T1/ptm/m/n/10 in
  []
 
 
-Underfull \hbox (badness 5119) in paragraph at lines 352--353
+Underfull \hbox (badness 5119) in paragraph at lines 353--354
 \T1/pcr/m/n/10 CertificateManager.mo\T1/ptm/m/n/10 . In the cur-rent pro-to-typ
 e
  []
 
 
-Overfull \hbox (161.08658pt too wide) detected at line 356
-[][][]\OML/cmm/m/it/10 H[] \OT1/cmr/m/n/10 = [][][]([] \OMS/cmsy/m/n/10 k [] k 
-[] k [] k [] k [] k []\OT1/cmr/m/n/10 )[]
+Overfull \hbox (38.47186pt too wide) detected at line 358
+ []$[][] \OMS/cmsy/m/n/10 k [] k [] k [] k [] k [] k []\OT1/cmr/m/n/10 )[]$ [] 
+ 
  []
 
 
-Underfull \hbox (badness 2970) in paragraph at lines 369--370
+Underfull \hbox (badness 2970) in paragraph at lines 371--372
 []\T1/ptm/b/n/10 Student Por-tal\T1/ptm/m/n/10 : Al-lows stu-dents to view thei
 r cre-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 380--381
+Underfull \hbox (badness 10000) in paragraph at lines 382--383
 []\T1/ptm/b/n/10 University reg-is-ters\T1/ptm/m/n/10 : A uni-ver-sity calls
  []
 
 
-Underfull \hbox (badness 1735) in paragraph at lines 380--381
+Underfull \hbox (badness 1735) in paragraph at lines 382--383
 \T1/pcr/m/n/10 registerUniversity(name) \T1/ptm/m/n/10 with its Prin-ci-pal.
  []
 
 
-Underfull \hbox (badness 5147) in paragraph at lines 381--382
+Underfull \hbox (badness 5147) in paragraph at lines 383--384
 []\T1/ptm/b/n/10 University is-sues cre-den-tial\T1/ptm/m/n/10 : The uni-ver-si
 ty fills
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 381--382
+Underfull \hbox (badness 10000) in paragraph at lines 383--384
 \T1/ptm/m/n/10 in the stu-dent's in-for-ma-tion in the Uni-ver-sity
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 381--382
+Underfull \hbox (badness 10000) in paragraph at lines 383--384
 \T1/ptm/m/n/10 Por-tal and clicks ``Is-sue.'' The back-end cre-ates
  []
 
 
-Underfull \hbox (badness 2343) in paragraph at lines 381--382
+Underfull \hbox (badness 2343) in paragraph at lines 383--384
 \T1/ptm/m/n/10 the cer-tifi-cate record, com-putes its cer-tifi-cate hash
  []
 
 
-Underfull \hbox (badness 1742) in paragraph at lines 381--382
+Underfull \hbox (badness 1742) in paragraph at lines 383--384
 \T1/ptm/m/n/10 (\T1/pcr/m/n/10 computeCertificateHash()\T1/ptm/m/n/10 ), in-ser
 ts the hash
  []
 
-
-Overfull \hbox (10.627pt too wide) detected at line 401
-[][][][]\OT1/cmr/m/n/10 [\OML/cmm/m/it/10 j\OT1/cmr/m/n/10 ] = []([][2\OML/cmm/
-m/it/10 j \OT1/cmr/m/n/10 + 1]\OML/cmm/m/it/10 ;  []\OT1/cmr/m/n/10 [2\OML/cmm/
-m/it/10 j \OT1/cmr/m/n/10 + 2])
- []
-
 [5]
-Underfull \hbox (badness 6173) in paragraph at lines 408--409
+Underfull \hbox (badness 6173) in paragraph at lines 411--412
 []\T1/ptm/b/n/10 Revocation \T1/ptm/m/n/10 (O($\OML/cmm/m/it/10 n$\T1/ptm/m/n/1
 0 )): When a cer-tifi-cate is re-voked,
  []
 
 
-Underfull \hbox (badness 3229) in paragraph at lines 408--409
+Underfull \hbox (badness 3229) in paragraph at lines 411--412
 \T1/ptm/m/n/10 its \T1/pcr/m/n/10 is_revoked \T1/ptm/m/n/10 flag is set to true
 , and the en-tire
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 463--464
+Underfull \hbox (badness 10000) in paragraph at lines 466--467
 []\T1/ptm/b/n/10 Hash check\T1/ptm/m/n/10 : Re-com-pute $\OML/cmm/m/it/10 h[] \
 OT1/cmr/m/n/10 =
  []
 
 
-Underfull \hbox (badness 5939) in paragraph at lines 463--464
+Underfull \hbox (badness 5939) in paragraph at lines 466--467
 []\OT1/cmr/m/n/10 ([])$ \T1/ptm/m/n/10 and con-firm it matches
  []
 
 [6]
-Underfull \hbox (badness 1496) in paragraph at lines 514--515
+Underfull \hbox (badness 1496) in paragraph at lines 517--518
 \T1/ptm/m/n/10 (re-quires con-trol-ling the can-is-ter's con-troller Prin-ci-pa
 l,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 519--520
+Underfull \hbox (badness 10000) in paragraph at lines 522--523
 []\T1/ptm/m/it/10 Note\T1/ptm/m/n/10 : for ease of pro-to-type test-ing,
  []
 
 
-Underfull \hbox (badness 4686) in paragraph at lines 519--520
+Underfull \hbox (badness 4686) in paragraph at lines 522--523
 \T1/pcr/m/n/10 registerUniversity \T1/ptm/m/n/10 is a per-mis-sion-less call th
 at
  []
 
 
-Underfull \hbox (badness 2401) in paragraph at lines 519--520
+Underfull \hbox (badness 2401) in paragraph at lines 522--523
 \T1/ptm/m/n/10 any ICP prin-ci-pal can in-voke with-out re-stric-tion. This
  []
 
 [7]
 Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
-nput line 574.
+nput line 577.
 
-Underfull \hbox (badness 5161) in paragraph at lines 653--654
+Underfull \hbox (badness 5161) in paragraph at lines 656--657
 \T1/ptm/m/n/10 and ver-i-fi-ca-tion (70%) at con-cur-rency lev-els $\OML/cmm/m/
 it/10 c \OMS/cmsy/m/n/10 2
  []
 
 
-Underfull \hbox (badness 2326) in paragraph at lines 654--655
+Underfull \hbox (badness 2326) in paragraph at lines 657--658
 []\T1/ptm/b/n/10 Throughput\T1/ptm/m/n/10 : Sus-tained 30-second se-quen-tial i
 s-suance,
  []
 
 [8]
-Package pgfplots info on input line 710: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 713: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
-Package pgfplots info on input line 780: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 783: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
  [9]
-Underfull \hbox (badness 1661) in paragraph at lines 872--873
+Underfull \hbox (badness 1661) in paragraph at lines 875--876
 []\T1/ptm/m/n/10 At 100 con-cur-rent queries, the sys-tem achieves \T1/ptm/b/n/
 10 86.6
  []
 
-Package pgfplots info on input line 926: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 929: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
 [10] [11]
-Underfull \hbox (badness 10000) in paragraph at lines 1037--1038
+Underfull \hbox (badness 10000) in paragraph at lines 1040--1041
 []\T1/pcr/b/n/10 createCertificate\T1/ptm/m/n/10 : 6 string con-cate-na-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1037--1038
+Underfull \hbox (badness 10000) in paragraph at lines 1040--1041
 \T1/ptm/m/n/10 tions ($\OMS/cmsy/m/n/10 ^^Y$\T1/ptm/m/n/10 150chars to-tal), \T
 1/pcr/m/n/10 Text.encodeUtf8\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1040--1041
+Underfull \hbox (badness 10000) in paragraph at lines 1043--1044
 []\T1/pcr/b/n/10 CertifiedData.set \T1/ptm/b/n/10 + \T1/pcr/b/n/10 textTo32Byte
 Blob\T1/ptm/m/n/10 :
  []
 
 
-Underfull \hbox (badness 3514) in paragraph at lines 1064--1065
+Underfull \hbox (badness 3514) in paragraph at lines 1067--1068
 \T1/ptm/m/n/10 im-ple-men-ta-tion. Even the up-per bound ($0.000023) is
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1064--1065
+Underfull \hbox (badness 10000) in paragraph at lines 1067--1068
 \OML/cmm/m/it/10 >$\T1/ptm/b/n/10 8,000$\OMS/cmsy/m/n/10 ^^B$ \T1/ptm/b/n/10 ch
 eaper \T1/ptm/m/n/10 than Ethereum's $0.20--$2.00 per
  []
 
 
-Underfull \hbox (badness 2229) in paragraph at lines 1064--1065
+Underfull \hbox (badness 2229) in paragraph at lines 1067--1068
 \T1/ptm/m/n/10 cre-den-tial write. Di-rect cy-cle in-stru-men-ta-tion via ICP's
 
  []
 
 
-Overfull \hbox (24.0pt too wide) in paragraph at lines 1064--1065
+Overfull \hbox (24.0pt too wide) in paragraph at lines 1067--1068
 \T1/pcr/m/n/10 ExperimentalInternetComputer.countInstructions
  []
 
 [12]
-Underfull \hbox (badness 2922) in paragraph at lines 1090--1091
+Underfull \hbox (badness 2922) in paragraph at lines 1093--1094
 \T1/pcr/m/n/10 deploy --network ic\T1/ptm/m/n/10 . Each can-is-ter re-ceived a
  []
 
 [13]
-Underfull \hbox (badness 6220) in paragraph at lines 1256--1260
+Underfull \hbox (badness 6220) in paragraph at lines 1259--1263
 []\T1/ptm/m/n/8 DFINITY Foun-da-tion, ``HTTP Gate-way Pro-to-col Spec-i-fi-ca-t
 ion,''
  []
@@ -1237,7 +1230,7 @@ pe1/public/amsfonts/symbols/msbm5.pfb></usr/share/texlive/texmf-dist/fonts/type
 sr/share/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texli
 ve/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/f
 onts/type1/urw/times/utmri8a.pfb>
-Output written on journal_paper.pdf (14 pages, 354427 bytes).
+Output written on journal_paper.pdf (14 pages, 355308 bytes).
 PDF statistics:
  797 PDF objects out of 1000 (max. 8388607)
  725 compressed objects within 8 object streams
