@@ -6,7 +6,7 @@
 %% Required packages: IEEEtran, tikz, pgfplots, pgfplotstable,
 %%                    amsmath, booktabs, hyperref, cleveref
 
-\documentclass[conference]{IEEEtran}
+\documentclass[conference,a4paper]{IEEEtran}
 
 %% ---------- packages ----------
 \usepackage[T1]{fontenc}
@@ -80,7 +80,7 @@
 
 % =========================================================
 \begin{abstract}
-Academic credential fraud imposes significant costs on institutions and employers worldwide. Existing solutions rely on either centralized registries or permissioned blockchains, both of which retain trust dependencies and single points of failure. This paper presents \textit{TrustVault}, a fully on-chain academic credential verification system deployed on the Internet Computer Protocol (ICP) mainnet (canister \texttt{pekzw-diaaa-aaaad-afh3q-cai}). TrustVault stores credential data and its serving frontend inside ICP canisters and uses ICP \textit{Certified Variables} — backed by threshold BLS signatures from a decentralized subnet — for mathematically verifiable, zero-trust authentication. An incremental binary Merkle tree provides O($\log n$) update cost as the credential database scales. Live mainnet benchmarks show issuance latency of $\approx$1.9\,s, verification queries as fast as 60\,ms, parallel throughput up to 7.3\,certs/s, concurrent mixed-load throughput of 13.1\,ops/s, and issuance cost of $\approx$\$0.00002 per certificate.
+Academic credential fraud imposes significant costs on institutions and employers worldwide. Existing solutions rely on either centralized registries or permissioned blockchains, both of which retain trust dependencies and single points of failure. This paper presents \textit{TrustVault}, a fully on-chain academic credential verification system deployed on the Internet Computer Protocol (ICP) mainnet (canister \texttt{pekzw-diaaa-aaaad-afh3q-cai}). TrustVault stores credential data and its serving frontend inside ICP canisters and uses ICP \textit{Certified Variables} — backed by threshold BLS signatures from a decentralized subnet — for mathematically verifiable, zero-trust authentication. An incremental binary Merkle tree provides O($\log n$) update cost as the credential database scales, with each leaf representing a cryptographic commitment to a certificate record. Live mainnet benchmarks show issuance latency of $\approx$1.9\,s, verification queries as fast as 60\,ms, parallel throughput up to 7.3\,certs/s, concurrent mixed-load throughput of 13.1\,ops/s, and issuance cost of $\approx$\$0.00002 per certificate — over 10{,}000$\times$ cheaper than comparable Ethereum operations. The prototype demonstrates practical feasibility; production deployment requires cryptographic hash hardening.
 \end{abstract}
 
 \begin{IEEEkeywords}
