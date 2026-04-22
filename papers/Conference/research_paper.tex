@@ -327,7 +327,7 @@ Table~\ref{tab:issuance} reports wall time and throughput for parallel issuance 
 \end{figure}
 
 \subsection{Verification Latency}
-Verification is a \textit{query} call — no consensus, no fee. Table~\ref{tab:verif} and Fig.~\ref{fig:verif_perc} report latency over a live database of 500 certificates. Minimum observed latency was \textbf{60\,ms}, confirming that Merkle proof computation adds negligible overhead. The p99 remains below 938\,ms even for 100-query bursts, making it suitable for real-time employer verification portals.
+Verification is a \textit{query} call — no consensus, no fee. Table~\ref{tab:verif} and Fig.~\ref{fig:verif_perc} report latency over a 500-certificate database measured in March 2026. Minimum observed latency was \textbf{60\,ms}, confirming that Merkle proof computation adds negligible overhead. The p99 remains below 938\,ms even for 100-query bursts, making it suitable for real-time employer verification portals.
 
 \begin{table}[t]
 \caption{Verification Latency --- ICP Mainnet, 500-cert database}
@@ -380,7 +380,7 @@ Verification is a \textit{query} call — no consensus, no fee. Table~\ref{tab:v
 \end{figure}
 
 \subsection{Throughput and Scalability}
-Fig.~\ref{fig:throughput} overlays issuance throughput under two conditions: a fresh (low-count) database and a large database ($\approx$3,280--3,461 existing certificates). The two curves nearly coincide, confirming O($\log n$) tree-insert scalability independent of database size. Peak throughput of \textbf{7.3\,certs/s} is achieved at batch size 50. Over a 30-second sequential run, sustained throughput was stable at 0.50--0.60\,certs/s with no degradation. A peak burst of 100 simultaneous certificates completed at 6.69\,certs/s with \textbf{0\% error rate}.
+Fig.~\ref{fig:throughput} overlays issuance throughput under two conditions: a fresh (low-count) database and a large database ($\approx$3,280--3,461 existing certificates). The two curves nearly coincide, confirming O($\log n$) tree-insert scalability independent of database size. Peak throughput of \textbf{7.3\,certs/s} was achieved at batch size 50. Over a 30-second sequential run, sustained throughput was stable at 0.50--0.60\,certs/s with no degradation. A peak burst of 100 simultaneous certificates completed at 6.69\,certs/s with \textbf{0\% error rate}.
 
 \begin{figure}[t]
 \centering
