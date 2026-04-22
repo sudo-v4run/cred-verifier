@@ -25,3 +25,8 @@ dist/
 .env
 
 .mops
+
+# LaTeX build artifacts
+papers/**/*.log
+papers/**/*.aux
+papers/**/*.out
