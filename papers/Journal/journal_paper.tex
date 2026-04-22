@@ -33,6 +33,7 @@
 }
 \usepackage{enumitem}
 \usepackage{balance}
+\usepackage{tabularx}
 
 %% ---------- custom colours ----------
 \definecolor{icpblue}{RGB}{59,130,246}
@@ -333,7 +334,7 @@ Each credential is stored as a Motoko record with the fields shown in Table~\ref
 \caption{Certificate Record Schema}
 \label{tab:schema}
 \centering\footnotesize\renewcommand{\arraystretch}{1.1}
-\begin{tabular}{@{}llp{2.8cm}@{}}
+\begin{tabularx}{\columnwidth}{@{}ll>{{\raggedright\arraybackslash}}X@{}}
 \toprule
 \textbf{Field} & \textbf{Type} & \textbf{Description} \\
 \midrule
@@ -347,7 +348,7 @@ Each credential is stored as a Motoko record with the fields shown in Table~\ref
 \texttt{schema\_version}    & Text   & Currently ``1.0'' \\
 \bottomrule
 \multicolumn{3}{@{}p{\columnwidth}@{}}{\scriptsize $^\ddagger$ Prototype; SHA-256 required for production (see Section~\ref{sec:discussion}).}\\
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 The \texttt{certificate\_hash} is produced by \texttt{computeCertificateHash()} (\texttt{CertificateManager.mo}). In the prototype, seven core fields (\texttt{id}, \texttt{issuer}, \texttt{name}, \texttt{student\_id}, \texttt{degree}, \texttt{major}, \texttt{date}) are concatenated, UTF-8 encoded, and hex-encoded. Denoting their concatenation as $\mathbf{f}_{1..7}$:
