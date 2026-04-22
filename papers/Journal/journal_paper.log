@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.4.21)  22 APR 2026 06:11
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.4.21)  22 APR 2026 06:13
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1005,189 +1005,188 @@ Overfull \hbox (22.18016pt too wide) in paragraph at lines 336--351
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 353--354
-[]\T1/ptm/m/n/10 The \T1/pcr/m/n/10 certificate_hash \T1/ptm/m/n/10 is pro-duce
-d
+[]\T1/ptm/m/n/10 The \T1/pcr/m/n/10 certificate_hash \T1/ptm/m/n/10 is pro-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 353--354
-\T1/ptm/m/n/10 by \T1/pcr/m/n/10 computeCertificateHash() \T1/ptm/m/n/10 in
+\T1/ptm/m/n/10 duced by \T1/pcr/m/n/10 computeCertificateHash()
  []
 
 
-Underfull \hbox (badness 5119) in paragraph at lines 353--354
-\T1/pcr/m/n/10 CertificateManager.mo\T1/ptm/m/n/10 . In the cur-rent pro-to-typ
-e
+Underfull \hbox (badness 3219) in paragraph at lines 353--354
+\T1/ptm/m/n/10 (\T1/pcr/m/n/10 CertificateManager.mo\T1/ptm/m/n/10 ). In the pr
+o-to-type, seven
  []
 
 
-Overfull \hbox (38.47186pt too wide) detected at line 358
- []$[][] \OMS/cmsy/m/n/10 k [] k [] k [] k [] k [] k []\OT1/cmr/m/n/10 )[]$ [] 
- 
+Underfull \hbox (badness 2626) in paragraph at lines 353--354
+\T1/pcr/m/n/10 major\T1/ptm/m/n/10 , \T1/pcr/m/n/10 date\T1/ptm/m/n/10 ) are co
+n-cate-nated, UTF-8 en-coded, and
  []
 
 
-Underfull \hbox (badness 2970) in paragraph at lines 371--372
+Underfull \hbox (badness 2970) in paragraph at lines 370--371
 []\T1/ptm/b/n/10 Student Por-tal\T1/ptm/m/n/10 : Al-lows stu-dents to view thei
 r cre-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 382--383
+Underfull \hbox (badness 10000) in paragraph at lines 381--382
 []\T1/ptm/b/n/10 University reg-is-ters\T1/ptm/m/n/10 : A uni-ver-sity calls
  []
 
 
-Underfull \hbox (badness 1735) in paragraph at lines 382--383
+Underfull \hbox (badness 1735) in paragraph at lines 381--382
 \T1/pcr/m/n/10 registerUniversity(name) \T1/ptm/m/n/10 with its Prin-ci-pal.
  []
 
 
-Underfull \hbox (badness 5147) in paragraph at lines 383--384
+Underfull \hbox (badness 5147) in paragraph at lines 382--383
 []\T1/ptm/b/n/10 University is-sues cre-den-tial\T1/ptm/m/n/10 : The uni-ver-si
 ty fills
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 383--384
+Underfull \hbox (badness 10000) in paragraph at lines 382--383
 \T1/ptm/m/n/10 in the stu-dent's in-for-ma-tion in the Uni-ver-sity
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 383--384
+Underfull \hbox (badness 10000) in paragraph at lines 382--383
 \T1/ptm/m/n/10 Por-tal and clicks ``Is-sue.'' The back-end cre-ates
  []
 
 
-Underfull \hbox (badness 2343) in paragraph at lines 383--384
+Underfull \hbox (badness 2343) in paragraph at lines 382--383
 \T1/ptm/m/n/10 the cer-tifi-cate record, com-putes its cer-tifi-cate hash
  []
 
 
-Underfull \hbox (badness 1742) in paragraph at lines 383--384
+Underfull \hbox (badness 1742) in paragraph at lines 382--383
 \T1/ptm/m/n/10 (\T1/pcr/m/n/10 computeCertificateHash()\T1/ptm/m/n/10 ), in-ser
 ts the hash
  []
 
 [5]
-Underfull \hbox (badness 6173) in paragraph at lines 411--412
+Underfull \hbox (badness 6173) in paragraph at lines 410--411
 []\T1/ptm/b/n/10 Revocation \T1/ptm/m/n/10 (O($\OML/cmm/m/it/10 n$\T1/ptm/m/n/1
 0 )): When a cer-tifi-cate is re-voked,
  []
 
 
-Underfull \hbox (badness 3229) in paragraph at lines 411--412
+Underfull \hbox (badness 3229) in paragraph at lines 410--411
 \T1/ptm/m/n/10 its \T1/pcr/m/n/10 is_revoked \T1/ptm/m/n/10 flag is set to true
 , and the en-tire
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 466--467
+Underfull \hbox (badness 10000) in paragraph at lines 465--466
 []\T1/ptm/b/n/10 Hash check\T1/ptm/m/n/10 : Re-com-pute $\OML/cmm/m/it/10 h[] \
 OT1/cmr/m/n/10 =
  []
 
 
-Underfull \hbox (badness 5939) in paragraph at lines 466--467
+Underfull \hbox (badness 5939) in paragraph at lines 465--466
 []\OT1/cmr/m/n/10 ([])$ \T1/ptm/m/n/10 and con-firm it matches
  []
 
 [6]
-Underfull \hbox (badness 1496) in paragraph at lines 517--518
+Underfull \hbox (badness 1496) in paragraph at lines 516--517
 \T1/ptm/m/n/10 (re-quires con-trol-ling the can-is-ter's con-troller Prin-ci-pa
 l,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 522--523
+Underfull \hbox (badness 10000) in paragraph at lines 521--522
 []\T1/ptm/m/it/10 Note\T1/ptm/m/n/10 : for ease of pro-to-type test-ing,
  []
 
 
-Underfull \hbox (badness 4686) in paragraph at lines 522--523
+Underfull \hbox (badness 4686) in paragraph at lines 521--522
 \T1/pcr/m/n/10 registerUniversity \T1/ptm/m/n/10 is a per-mis-sion-less call th
 at
  []
 
 
-Underfull \hbox (badness 2401) in paragraph at lines 522--523
+Underfull \hbox (badness 2401) in paragraph at lines 521--522
 \T1/ptm/m/n/10 any ICP prin-ci-pal can in-voke with-out re-stric-tion. This
  []
 
 [7]
 Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
-nput line 577.
+nput line 576.
 
-Underfull \hbox (badness 5161) in paragraph at lines 656--657
+Underfull \hbox (badness 5161) in paragraph at lines 655--656
 \T1/ptm/m/n/10 and ver-i-fi-ca-tion (70%) at con-cur-rency lev-els $\OML/cmm/m/
 it/10 c \OMS/cmsy/m/n/10 2
  []
 
 
-Underfull \hbox (badness 2326) in paragraph at lines 657--658
+Underfull \hbox (badness 2326) in paragraph at lines 656--657
 []\T1/ptm/b/n/10 Throughput\T1/ptm/m/n/10 : Sus-tained 30-second se-quen-tial i
 s-suance,
  []
 
 [8]
-Package pgfplots info on input line 713: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 712: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
-Package pgfplots info on input line 783: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 782: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
  [9]
-Underfull \hbox (badness 1661) in paragraph at lines 875--876
+Underfull \hbox (badness 1661) in paragraph at lines 874--875
 []\T1/ptm/m/n/10 At 100 con-cur-rent queries, the sys-tem achieves \T1/ptm/b/n/
 10 86.6
  []
 
-Package pgfplots info on input line 929: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 928: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
 [10] [11]
-Underfull \hbox (badness 10000) in paragraph at lines 1040--1041
+Underfull \hbox (badness 10000) in paragraph at lines 1039--1040
 []\T1/pcr/b/n/10 createCertificate\T1/ptm/m/n/10 : 6 string con-cate-na-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1040--1041
+Underfull \hbox (badness 10000) in paragraph at lines 1039--1040
 \T1/ptm/m/n/10 tions ($\OMS/cmsy/m/n/10 ^^Y$\T1/ptm/m/n/10 150chars to-tal), \T
 1/pcr/m/n/10 Text.encodeUtf8\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1043--1044
+Underfull \hbox (badness 10000) in paragraph at lines 1042--1043
 []\T1/pcr/b/n/10 CertifiedData.set \T1/ptm/b/n/10 + \T1/pcr/b/n/10 textTo32Byte
 Blob\T1/ptm/m/n/10 :
  []
 
 
-Underfull \hbox (badness 3514) in paragraph at lines 1067--1068
+Underfull \hbox (badness 3514) in paragraph at lines 1066--1067
 \T1/ptm/m/n/10 im-ple-men-ta-tion. Even the up-per bound ($0.000023) is
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1067--1068
+Underfull \hbox (badness 10000) in paragraph at lines 1066--1067
 \OML/cmm/m/it/10 >$\T1/ptm/b/n/10 8,000$\OMS/cmsy/m/n/10 ^^B$ \T1/ptm/b/n/10 ch
 eaper \T1/ptm/m/n/10 than Ethereum's $0.20--$2.00 per
  []
 
 
-Underfull \hbox (badness 2229) in paragraph at lines 1067--1068
+Underfull \hbox (badness 2229) in paragraph at lines 1066--1067
 \T1/ptm/m/n/10 cre-den-tial write. Di-rect cy-cle in-stru-men-ta-tion via ICP's
 
  []
 
 
-Overfull \hbox (24.0pt too wide) in paragraph at lines 1067--1068
+Overfull \hbox (24.0pt too wide) in paragraph at lines 1066--1067
 \T1/pcr/m/n/10 ExperimentalInternetComputer.countInstructions
  []
 
 [12]
-Underfull \hbox (badness 2922) in paragraph at lines 1093--1094
+Underfull \hbox (badness 2922) in paragraph at lines 1092--1093
 \T1/pcr/m/n/10 deploy --network ic\T1/ptm/m/n/10 . Each can-is-ter re-ceived a
  []
 
 [13]
-Underfull \hbox (badness 6220) in paragraph at lines 1259--1263
+Underfull \hbox (badness 6220) in paragraph at lines 1258--1262
 []\T1/ptm/m/n/8 DFINITY Foun-da-tion, ``HTTP Gate-way Pro-to-col Spec-i-fi-ca-t
 ion,''
  []
@@ -1201,39 +1200,40 @@ Package rerunfilecheck Info: File `journal_paper.out' has not changed.
 (rerunfilecheck)             Checksum: 1BEF4A9C9B8487140C0C36D2079AFD25;12780.
  ) 
 Here is how much of TeX's memory you used:
- 36283 strings out of 476106
- 836874 string characters out of 5793933
+ 36297 strings out of 476106
+ 837050 string characters out of 5793933
  2311975 words of memory out of 5000000
- 57489 multiletter control sequences out of 15000+600000
- 685091 words of font info for 184 fonts, out of 8000000 for 9000
+ 57497 multiletter control sequences out of 15000+600000
+ 686947 words of font info for 190 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  84i,19n,93p,1016b,2301s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/shar
-e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texli
-ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texm
-f-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/
-fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/t
-ype1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
-blic/amsfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
-fonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm
-/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pf
-b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share
-/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texliv
-e/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf
--dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/f
-onts/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/fonts/ty
-pe1/public/amsfonts/symbols/msbm5.pfb></usr/share/texlive/texmf-dist/fonts/type
-1/urw/courier/ucrb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier
-/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></u
-sr/share/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texli
-ve/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/f
-onts/type1/urw/times/utmri8a.pfb>
-Output written on journal_paper.pdf (14 pages, 355308 bytes).
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/shar
+e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texl
+ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/tex
+mf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
+ublic/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/
+cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.
+pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/shar
+e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texli
+ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/t
+ype1/public/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
+blic/amsfonts/symbols/msbm5.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/
+courier/ucrb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8
+a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/sha
+re/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texlive/tex
+mf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/t
+ype1/urw/times/utmri8a.pfb>
+Output written on journal_paper.pdf (14 pages, 363479 bytes).
 PDF statistics:
- 797 PDF objects out of 1000 (max. 8388607)
- 725 compressed objects within 8 object streams
+ 802 PDF objects out of 1000 (max. 8388607)
+ 728 compressed objects within 8 object streams
  238 named destinations out of 1000 (max. 500000)
  613 words of extra memory for PDF output out of 10000 (max. 10000000)
 

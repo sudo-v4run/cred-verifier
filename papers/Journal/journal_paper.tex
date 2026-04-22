@@ -350,13 +350,12 @@ Each credential is stored as a Motoko record with the fields shown in Table~\ref
 \end{tabular}
 \end{table}
 
-The \texttt{certificate\_hash} is produced by \texttt{computeCertificateHash()} in \texttt{CertificateManager.mo}. In the current prototype the seven core fields are concatenated, UTF-8 encoded, and hex-encoded:
-\begin{multline}
-  H_{\text{proto}} = \texttt{bytesToHex}\bigl(\text{UTF-8}(\\
-    \texttt{id}\,\|\,\texttt{issuer}\,\|\,\texttt{name}\,\|\,\texttt{student\_id}\,\|\,\texttt{degree}\,\|\,\texttt{major}\,\|\,\texttt{date})\bigr)
+The \texttt{certificate\_hash} is produced by \texttt{computeCertificateHash()} (\texttt{CertificateManager.mo}). In the prototype, seven core fields (\texttt{id}, \texttt{issuer}, \texttt{name}, \texttt{student\_id}, \texttt{degree}, \texttt{major}, \texttt{date}) are concatenated, UTF-8 encoded, and hex-encoded. Denoting their concatenation as $\mathbf{f}_{1..7}$:
+\begin{equation}
+  H_{\text{proto}} = \texttt{bytesToHex}\bigl(\text{UTF-8}(\mathbf{f}_{1..7})\bigr)
   \label{eq:cert-hash}
-\end{multline}
-In production this function should be replaced with a collision-resistant primitive such as SHA-256 (see Section~\ref{sec:discussion}). This hash becomes a leaf in the Merkle tree.
+\end{equation}
+In production this should be replaced with SHA-256 (see Section~\ref{sec:discussion}). This hash becomes a leaf in the Merkle tree.
 
 \subsection{Access Control}
 
