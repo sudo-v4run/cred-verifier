@@ -510,7 +510,7 @@ To bypass this, the attacker would need to either:
 
 Neither is a vulnerability in TrustVault's design — they are operational security requirements that apply to any system.
 
-\textit{Note}: in the current prototype, \texttt{registerUniversity} is a public call that any ICP principal can invoke without restriction. For this security property to hold in production, that function must be gated to the canister controller or an NNS-governed whitelist.
+\textit{Note}: for ease of prototype testing, \texttt{registerUniversity} is a permissionless call that any ICP principal can invoke without restriction. This is an intentional development convenience. A production deployment would restrict this to the canister controller or an NNS-governed whitelist with appropriate identity validation.
 
 \subsection{Man-in-the-Middle Attacks}
 
@@ -969,7 +969,7 @@ Table~\ref{tab:comparison} places TrustVault's measured performance alongside pu
 \midrule
 Block finality        & \textbf{2.40~s} (measured)    & $\approx$24~s~\cite{buterin2020eth2}  & $<$1~s~\cite{androulaki2018fabric} \\
 Throughput            & 7.3 certs/s (measured)        & 15--30 TPS~\cite{dinh2017blockbench}  & $\approx$3{,}500 TPS~\cite{androulaki2018fabric} \\
-Issuance cost         & \textbf{\$0.001} (measured)   & \$0.20--\$2.00~\cite{wood2014ethereum} & Near-zero \\
+Issuance cost         & \textbf{\$0.001} (est.$^\dagger$)   & \$0.20--\$2.00~\cite{wood2014ethereum} & Near-zero \\
 Verification cost     & \textbf{\$0} (query call)     & \$0.05--\$0.50~\cite{wood2014ethereum} & Near-zero \\
 Frontend on-chain     & \textbf{Yes}                  & No                                     & No \\
 Trust model           & \textbf{Zero-trust (BLS)}     & Zero-trust                             & Permissioned (consortium) \\
@@ -1016,6 +1016,9 @@ Our benchmarks were run from India (50--80~ms RTT to ICP boundary nodes). Users 
 \subsubsection{ICP Platform Dependency}
 TrustVault is built on ICP and relies on the ICP subnet infrastructure. If the DFINITY Foundation or the NNS governance system were to make breaking changes to the platform, the canister might need to be updated. However, ICP's governance is decentralized (proposals require community approval via NNS voting), and canisters can be made ``blackholed'' (immutable) if desired — at the cost of giving up upgradeability.
 
+\subsubsection{Issuance Cost Estimation}
+The \$0.001 issuance cost reported throughout this paper is an estimate derived from ICP's public cycle pricing documentation (1\,trillion cycles $\approx$ 1\,XDR $\approx$ \$1.35\,USD); it is not directly instrumented in the benchmark suite, which measures only timing. The full \texttt{issueCertificate} execution consumes more cycles than just the base ingress fee: it includes HashMap allocation and insertion, certificate record creation, Merkle tree path recomputation (O($\log n$) hash calls), CertifiedData.set(), and PerformanceMetrics recording. The total for a representative call is estimated at $\sim$700\,million cycles $\approx$ \$0.001, making it orders of magnitude cheaper than Ethereum gas costs. Direct cycle instrumentation via the ICP management canister's \texttt{canister\_status} API is left to future work.
+
 \subsubsection{Hash Collision Risk}
 The current certificate hash is computed from core identity fields. If two students have identical names, IDs, degree types, majors, and graduation dates (an unlikely but theoretically possible collision), their hashes could collide. In practice, the unique \texttt{certificate\_id} field removes this risk.
 
@@ -1023,7 +1026,7 @@ The current certificate hash is computed from core identity fields. If two stude
 The current implementation uses simplified placeholder hash functions rather than SHA-256. Specifically, \texttt{computeCertificateHash()} in \texttt{CertificateManager.mo} encodes the concatenated certificate fields as their UTF-8 byte sequence in hexadecimal — not a cryptographic hash. \texttt{combineHashes()} in \texttt{Utils.mo} XORs the character bytes of two hex strings into a 32-byte array rather than applying SHA-256. While sufficient to produce unique identifiers for the benchmarking prototype and for demonstrating the system architecture, these functions do \emph{not} provide the collision resistance required for the security guarantees in Section~\ref{sec:security}. Replacing both with SHA-256 (e.g., via the \texttt{mo:sha2} Motoko package) is a prerequisite for production deployment.
 
 \subsubsection{Open University Registration}
-The \texttt{registerUniversity()} function is currently a public, permissionless call: any ICP principal can invoke it and immediately gain the ability to issue credentials. This is acceptable for a research prototype but means the ``Unauthorized Issuance'' security guarantee does not hold against a motivated attacker on the live canister. Production hardening requires restricting this call to the canister controller, an admin principal, or an NNS-governed governance proposal.
+In the current prototype, \texttt{registerUniversity()} is a public, permissionless call: any ICP principal can invoke it and immediately gain the ability to issue credentials. This is an intentional convenience for development and benchmarking — it allows easy testing without an admin setup step. It does not reflect the intended production design; a deployed system would restrict this call to the canister controller, an admin principal, or an NNS-governed governance proposal. No change to the Merkle tree or Certified Variables mechanism is required.
 
 \subsection{Comparison with W3C Verifiable Credentials}
 
