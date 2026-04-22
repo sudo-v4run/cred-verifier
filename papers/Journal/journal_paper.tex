@@ -321,7 +321,7 @@ The backend canister is organized into five Motoko modules:
   \item \textbf{main.mo} — The public actor that exposes the API: \texttt{issueCertificate}, \texttt{revokeCertificate}, \texttt{verifyCertificate}, \texttt{registerUniversity}, and various query functions.
   \item \textbf{CertificateManager.mo} — Handles certificate creation, hash computation, and verification logic.
   \item \textbf{MerkleTree.mo} — Implements the incremental binary Merkle tree with O($\log n$) insertion.
-  \item \textbf{Utils.mo} — Provides SHA-256 hashing and hex encoding utilities.
+  \item \textbf{Utils.mo} — Provides hex encoding and hash-combination utilities (XOR-based in the prototype; SHA-256 in production).
   \item \textbf{PerformanceMetrics.mo} — Records on-chain telemetry (operation latencies, counts, percentiles) for monitoring.
 \end{enumerate}
 
@@ -338,7 +338,7 @@ Each credential is stored as a Motoko record with the fields shown in Table~\ref
 \textbf{Field} & \textbf{Type} & \textbf{Description} \\
 \midrule
 \texttt{certificate\_id}    & Text   & Unique identifier \\
-\texttt{certificate\_hash}  & Text   & SHA-256 of core fields \\
+\texttt{certificate\_hash}  & Text   & Hex-encoded UTF-8 of concatenated fields (prototype; see Section~\ref{sec:discussion}) \\
 \texttt{issuer}             & Record & University name, canister ID, URL \\
 \texttt{recipient}          & Record & Student name, ID, principal \\
 \texttt{credential}         & Record & Degree type, major, GPA, dates \\
@@ -349,7 +349,12 @@ Each credential is stored as a Motoko record with the fields shown in Table~\ref
 \end{tabular}
 \end{table}
 
-The \texttt{certificate\_hash} is computed as $H = \text{SHA-256}(\texttt{id} \| \texttt{issuer} \| \texttt{name} \| \texttt{student\_id} \| \texttt{degree} \| \texttt{major} \| \texttt{date})$. This hash becomes a leaf in the Merkle tree.
+The \texttt{certificate\_hash} is produced by \texttt{computeCertificateHash()} in \texttt{CertificateManager.mo}. In the current prototype the seven core fields are concatenated, UTF-8 encoded, and hex-encoded:
+\begin{equation}
+  H_{\text{proto}} = \texttt{bytesToHex}\bigl(\text{UTF-8}(\texttt{id}\,\|\,\texttt{issuer}\,\|\,\texttt{name}\,\|\,\texttt{student\_id}\,\|\,\texttt{degree}\,\|\,\texttt{major}\,\|\,\texttt{date})\bigr)
+  \label{eq:cert-hash}
+\end{equation}
+In production this function should be replaced with a collision-resistant primitive such as SHA-256 (see Section~\ref{sec:discussion}). This hash becomes a leaf in the Merkle tree.
 
 \subsection{Access Control}
 
@@ -373,7 +378,7 @@ The typical workflow for credential issuance and verification is:
 
 \begin{enumerate}
   \item \textbf{University registers}: A university calls \texttt{registerUniversity(name)} with its Principal. This is a one-time setup step.
-  \item \textbf{University issues credential}: The university fills in the student's information in the University Portal and clicks ``Issue.'' The backend creates the certificate record, computes its SHA-256 hash, inserts the hash into the Merkle tree, and commits the new root via \texttt{CertifiedData.set()}.
+  \item \textbf{University issues credential}: The university fills in the student's information in the University Portal and clicks ``Issue.'' The backend creates the certificate record, computes its certificate hash (\texttt{computeCertificateHash()}), inserts the hash into the Merkle tree, and commits the new root via \texttt{CertifiedData.set()}.
   \item \textbf{Credential becomes verifiable}: Within one consensus round (about 2 seconds), the new Merkle root is BLS-signed by the subnet. The credential is now independently verifiable.
   \item \textbf{Employer verifies}: An employer enters the certificate ID in the Verification Portal. The query returns the certificate data, the Merkle proof, and the certified root. The frontend (or any client) can independently verify the proof chain.
   \item \textbf{Revocation (if needed)}: If a credential needs to be revoked (e.g., academic misconduct discovered), the university calls \texttt{revokeCertificate}. The Merkle tree is rebuilt and the new root invalidates all previous proofs within 2 seconds.
@@ -389,11 +394,12 @@ This section explains how TrustVault achieves trustless verification — a proce
 
 All certificate hashes are stored as leaves of a complete binary Merkle tree~\cite{merkle1989certified}. The tree is implemented as a flat array of size $2C - 1$, where $C$ is the smallest power of two greater than or equal to the number of certificates. Leaf $i$ is at array index $C - 1 + i$, and the root is at index 0.
 
-Each internal node stores the hash of its two children:
+Each internal node stores the combined hash of its two children:
 \begin{equation}
-  \texttt{nodes}[j] = \text{SHA-256}(\texttt{nodes}[2j+1] \;\|\; \texttt{nodes}[2j+2])
+  \texttt{nodes}[j] = \texttt{combineHashes}(\texttt{nodes}[2j+1],\; \texttt{nodes}[2j+2])
   \label{eq:merkle}
 \end{equation}
+In the prototype \texttt{combineHashes()} XORs the character bytes of its two hex-string inputs into a 32-byte array and hex-encodes the result. In production this should be replaced by $\text{SHA-256}(\texttt{nodes}[2j+1] \| \texttt{nodes}[2j+2])$ (see Section~\ref{sec:discussion}).
 
 \textbf{Insertion} (O($\log n$)): When a new certificate is issued, its hash is placed at the next available leaf position. Then, only the nodes along the path from that leaf to the root are recomputed — a sequence of $\lceil\log_2 n\rceil$ hash operations. The updated 32-byte root is committed via \texttt{CertifiedData.set()}.
 
@@ -974,6 +980,8 @@ Verification cost     & \textbf{\$0} (query call)     & \$0.05--\$0.50~\cite{woo
 Frontend on-chain     & \textbf{Yes}                  & No                                     & No \\
 Trust model           & \textbf{Zero-trust (BLS)}     & Zero-trust                             & Permissioned (consortium) \\
 Data storage          & Full record on-chain          & Hash only (data off-chain)             & Full record on-chain \\
+\midrule
+\multicolumn{4}{@{}l}{\scriptsize $^\dagger$\,Estimated from code-complexity analysis against ICP\'s official pricing formula~\cite{dfinity2025gascost}; see Section~\ref{sec:discussion} for full derivation.} \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -1035,23 +1043,23 @@ We trace each call site through the Motoko source:
 
 Total raw Wasm instructions: $\approx$100{,}000. The Motoko runtime adds GC tracing, type-tag checks, and heap bounds-checking overhead. The current code is already GC-optimized (\texttt{bytesToHex} uses \texttt{Array.tabulate} instead of $O(N^2)$ string accumulation; \texttt{combineHashes} avoids intermediate string allocations). Applying a conservative 10--100$\times$ runtime overhead factor yields $\approx$1--10\,M executed Wasm instructions.
 
-\begin{table}[h]
-\caption{Estimated Cycle Cost per \texttt{issueCertificate} Call (13-node subnet)~\cite{dfinity2025gascost}}
+\begin{table*}[t]
+\caption{Estimated Cycle Cost per \texttt{issueCertificate} Call (13-node subnet, 1\,T cycles $\approx$ \$1.355)~\cite{dfinity2025gascost}}
 \label{tab:cost_breakdown}
 \centering\small\renewcommand{\arraystretch}{1.1}
 \begin{tabular}{@{}lrr@{}}
 \toprule
-\textbf{Component} & \textbf{Cycles} & \textbf{USD} \\
+\textbf{Component} & \textbf{Cycles} & \textbf{USD (approx.)} \\
 \midrule
-Ingress base fee            & 1{,}200{,}000                  & \$0.0000016 \\
-Ingress per-byte (400\,B)   & 800{,}000                      & \$0.0000011 \\
-Update execution base       & 5{,}000{,}000                  & \$0.0000068 \\
-Wasm instructions (1--10\,M) & 1{,}000{,}000--10{,}000{,}000  & \$0.0000014--\$0.0000135 \\
+Ingress base fee                      & 1,200,000                & \$0.0000016 \\
+Ingress per-byte ($\approx$400\,B payload) & 800,000             & \$0.0000011 \\
+Update execution base                 & 5,000,000                & \$0.0000068 \\
+Wasm instructions (1--10\,M range)    & 1,000,000 -- 10,000,000  & \$0.0000014 -- \$0.0000135 \\
 \midrule
-\textbf{Total (estimated)}  & \textbf{8--17\,M}              & \textbf{\$0.000011--\$0.000023} \\
+\textbf{Total (estimated)}            & \textbf{8 -- 17\,M}     & \textbf{\$0.000011 -- \$0.000023} \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 The best estimate is $\approx$\textbf{\$0.00002 per certificate} (8--17\,M cycles). The previously stated \$0.001 would require $\approx$738\,M Wasm instructions, implying a 7{,}000$\times$ overhead factor over raw instruction counts -- inconsistent with the GC-optimized implementation. Even the upper bound (\$0.000023) is $>$\textbf{8{,}000$\times$ cheaper} than Ethereum's \$0.20--\$2.00 per credential write. Direct cycle instrumentation via ICP's \texttt{ExperimentalInternetComputer.countInstructions} API~\cite{dfinity2025gascost} is left to future work.
 
