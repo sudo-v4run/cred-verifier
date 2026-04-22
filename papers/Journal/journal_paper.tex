@@ -1064,7 +1064,7 @@ Wasm instructions (1--10\,M range)    & 1,000,000 -- 10,000,000  & \$0.0000014 -
 \end{tabular}
 \end{table*}
 
-The best estimate is $\approx$\textbf{\$0.00002 per certificate} (8--17\,M cycles). The previously stated \$0.001 would require $\approx$738\,M Wasm instructions, implying a 7{,}000$\times$ overhead factor over raw instruction counts -- inconsistent with the GC-optimized implementation. Even the upper bound (\$0.000023) is $>$\textbf{8{,}000$\times$ cheaper} than Ethereum's \$0.20--\$2.00 per credential write. Direct cycle instrumentation via ICP's \texttt{ExperimentalInternetComputer.countInstructions} API~\cite{dfinity2025gascost} is left to future work.
+The best estimate is $\approx$\textbf{\$0.00002 per certificate} (8--17\,M cycles), which is $>$\textbf{8{,}000$\times$ cheaper} than Ethereum's \$0.20--\$2.00 per credential write.
 
 \subsubsection{Hash Collision Risk}
 The current certificate hash is computed from core identity fields. If two students have identical names, IDs, degree types, majors, and graduation dates (an unlikely but theoretically possible collision), their hashes could collide. In practice, the unique \texttt{certificate\_id} field removes this risk.
@@ -1141,6 +1141,7 @@ Several directions for future work are planned:
   \item \textbf{Mobile SDK}: A lightweight library for verifying credentials directly from a mobile app, using the ICP agent protocol to communicate with boundary nodes.
   \item \textbf{Batch revocation optimization}: Replacing the full O($n$) tree rebuild with accumulator-based revocation or incremental tree surgery to reduce revocation latency.
   \item \textbf{Cross-subnet scalability testing}: Deploying canisters across multiple ICP subnets and measuring inter-canister call overhead for a sharded architecture.
+  \item \textbf{Direct cycle instrumentation}: Measuring actual cycle consumption via ICP's \texttt{ExperimentalInternetComputer.countInstructions} API to validate and refine the cost estimate in Section~\ref{sec:discussion}.
 \end{enumerate}
 
 % =========================================================
