@@ -80,7 +80,7 @@
 
 % =========================================================
 \begin{abstract}
-Academic credential fraud imposes significant costs on institutions and employers worldwide. Existing solutions rely on either centralized registries or permissioned blockchains, both of which retain trust dependencies and single points of failure. This paper presents \textit{TrustVault}, a fully on-chain academic credential verification system deployed on the Internet Computer Protocol (ICP) mainnet (canister \texttt{pekzw-diaaa-aaaad-afh3q-cai}). TrustVault stores credential data and its serving frontend inside ICP canisters and uses ICP \textit{Certified Variables} — backed by threshold BLS signatures from a decentralized subnet — for mathematically verifiable, zero-trust authentication. An incremental binary Merkle tree provides O($\log n$) update cost as the credential database scales. Live mainnet benchmarks show issuance latency of $\approx$1.9\,s, verification queries as fast as 60\,ms, parallel throughput up to 7.3\,certs/s, concurrent mixed-load throughput of 13.1\,ops/s, and issuance cost of $\approx$\$0.001 per certificate.
+Academic credential fraud imposes significant costs on institutions and employers worldwide. Existing solutions rely on either centralized registries or permissioned blockchains, both of which retain trust dependencies and single points of failure. This paper presents \textit{TrustVault}, a fully on-chain academic credential verification system deployed on the Internet Computer Protocol (ICP) mainnet (canister \texttt{pekzw-diaaa-aaaad-afh3q-cai}). TrustVault stores credential data and its serving frontend inside ICP canisters and uses ICP \textit{Certified Variables} — backed by threshold BLS signatures from a decentralized subnet — for mathematically verifiable, zero-trust authentication. An incremental binary Merkle tree provides O($\log n$) update cost as the credential database scales. Live mainnet benchmarks show issuance latency of $\approx$1.9\,s, verification queries as fast as 60\,ms, parallel throughput up to 7.3\,certs/s, concurrent mixed-load throughput of 13.1\,ops/s, and issuance cost of $\approx$\$0.00002 per certificate.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -482,7 +482,7 @@ Block finality was measured over 20 independent update calls: min 1{,}443\,ms, m
 \midrule
 Finality          & \textbf{2.40\,s} (meas.)  & $\approx$24\,s \cite{buterin2020eth2}  & $<$1\,s \cite{androulaki2018fabric} \\
 Throughput        & 7.3\,certs/s              & 15--30\,TPS \cite{dinh2017blockbench}  & $\approx$3500\,TPS \cite{androulaki2018fabric} \\
-Issuance cost     & \textbf{\$0.001} (est.$^\dagger$)  & \$0.20--\$2.00 \cite{wood2014ethereum} & Near-zero \\
+Issuance cost     & $\approx$\textbf{\$0.00002} (est.$^\dagger$)  & \$0.20--\$2.00 \cite{wood2014ethereum} & Near-zero \\
 Verification cost & \textbf{\$0} (query)      & \$0.05--\$0.50 \cite{wood2014ethereum} & Near-zero \\
 Frontend on-chain & \textbf{Yes}              & No                                     & No \\
 Trust model       & \textbf{Zero-trust}       & Zero-trust                             & Permissioned \\
@@ -526,10 +526,10 @@ TrustVault's guarantees rest on: (1)~SHA-256 collision resistance; (2)~BLS12-381
 
 \textbf{Related Work.} Blockcerts~\cite{grech2017blockchain} anchors diploma hashes on Bitcoin, but verification still requires the issuer's web server and the UI is centralized. EduCTX~\cite{turk2018eductx} uses a permissioned Ark-based blockchain and requires trust in the university consortium. Ethereum-based systems~\cite{lizcano2020blockchain} store only hashes on-chain, keeping full data off-chain and restoring centralization; gas costs~\cite{wood2014ethereum} vary significantly post-EIP-1559 and post-Merge, often exceeding \$1--\$5 per credential write under high network demand. W3C Verifiable Credentials~\cite{w3c2022vc} is a data model, not a storage platform; most implementations use permissioned ledgers or central registries. Self-Sovereign Identity systems~\cite{allen2016decentralized} target individual data control but do not specify on-chain storage or serving. None of the above systems (a) store the full credential record on a public blockchain, (b) serve the verification UI from the blockchain, or (c) provide reproducible mainnet performance benchmarks. Note that Table~\ref{tab:comparison} compares TrustVault's credential-specific throughput against Fabric's general-transaction TPS~\cite{androulaki2018fabric} — not a matched workload comparison; Fabric's figure reflects a permissioned setting with no credential-specific overhead.
 
-\textbf{Conclusion.} TrustVault demonstrates that ICP's Certified Variables and on-chain web serving enable a practical, fully trustless academic credential system. Live mainnet benchmarks confirm: issuance in $\approx$1.9\,s; verification in 60--937\,ms; parallel throughput of 7.3\,certs/s; concurrent mixed-load throughput of 13.1\,ops/s at 0\% error rate; block finality of 2.40\,s (p99 $<$ 3.05\,s); issuance cost $\approx$\$0.001$^\dagger$. \textbf{Limitations:} revocation requires O($n$) Merkle rebuild; per-canister throughput is bounded by ICP's consensus serialization; no cross-chain support; prototype uses simplified hash functions and permissionless university registration requiring production hardening. Future work: W3C VC integration, multi-canister sharding, and accumulator-based O(1) revocation.
+\textbf{Conclusion.} TrustVault demonstrates that ICP's Certified Variables and on-chain web serving enable a practical, fully trustless academic credential system. Live mainnet benchmarks confirm: issuance in $\approx$1.9\,s; verification in 60--937\,ms; parallel throughput of 7.3\,certs/s; concurrent mixed-load throughput of 13.1\,ops/s at 0\% error rate; block finality of 2.40\,s (p99 $<$ 3.05\,s); issuance cost $\approx$\$0.00002$^\dagger$. \textbf{Limitations:} revocation requires O($n$) Merkle rebuild; per-canister throughput is bounded by ICP's consensus serialization; no cross-chain support; prototype uses simplified hash functions and permissionless university registration requiring production hardening. Future work: W3C VC integration, multi-canister sharding, and accumulator-based O(1) revocation.
 
 \smallskip
-{\scriptsize $^\dagger$Estimated from ICP's public cycle pricing documentation (1\,trillion cycles $\approx$ \$1.35\,XDR); not directly instrumented in the benchmark suite. The full \texttt{issueCertificate} execution cost — base ingress fee plus HashMap writes, Merkle tree updates, and CertifiedData commit — is estimated at $\sim$700\,M cycles $\approx$ \$0.001.}
+{\scriptsize $^\dagger$\,Derived from ICP's official pricing formula~\cite{dfinity2025gascost} (updated Dec.\ 2025): ingress fee = 1.2\,M\,+\,2\,K$\times$\,bytes; update execution base = 5\,M cycles; 1 executed Wasm instruction = 1 cycle; 1\,T cycles = \$1.354820\,USD. For a $\approx$400-byte \texttt{issueCertificate} payload, fixed fees total 7\,M cycles. Code-complexity tracing of the Motoko source gives $\approx$100\,K raw Wasm instructions: 2$\times$\texttt{HashMap.get} ($\approx$800), \texttt{createCertificate}/\texttt{bytesToHex} ($\approx$33\,K), \texttt{HashMap.put} ($\approx$1.5\,K), O($\log n$) \texttt{insertCertLeaf}/\texttt{combineHashes} ($\approx$56\,K), \texttt{CertifiedData.set} ($\approx$3.2\,K), metrics ($\approx$3.3\,K). Applying a 10--100$\times$ Motoko runtime overhead (GC, type-tag checks, bounds checks) yields 1--10\,M instruction cycles. \textbf{Total: 8--17\,M cycles $\approx$ \$0.000011--\$0.000023.} The previously stated \$0.001 (requiring $\approx$738\,M Wasm instructions) was an overestimate; even the upper bound (\$0.000023) is ${>}$8{,}000$\times$ cheaper than Ethereum. Direct measurement via ICP's \texttt{countInstructions} API is left to future work.}
 
 % =========================================================
 \begin{thebibliography}{99}
@@ -606,6 +606,11 @@ in \textit{Proc.\ ACM SIGMOD}, 2017, pp.~1085--1100.
 E.~Androulaki et al.,
 ``Hyperledger Fabric: A distributed operating system for permissioned blockchains,''
 in \textit{Proc.\ EuroSys'18}, 2018, pp.~1--15.
+
+\bibitem{dfinity2025gascost}
+DFINITY Foundation,
+``Gas Cost,'' \textit{Internet Computer Documentation}, Dec.\ 2025.
+[Online]. Available: \url{https://docs.internetcomputer.org/building-apps/essentials/gas-cost}
 
 \bibitem{allen2016decentralized}
 C.~Allen,

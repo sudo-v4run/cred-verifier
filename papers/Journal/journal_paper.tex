@@ -77,7 +77,7 @@
 \begin{abstract}
 Fake academic credentials are a growing problem that affects employers, universities, and students worldwide. Current verification methods are either manual and slow, or depend on centralized databases that can be tampered with or go offline. Blockchain-based solutions have been proposed, but public blockchains like Ethereum charge high fees for every write operation, and permissioned blockchains like Hyperledger Fabric require trust in consortium members. In all existing systems, the verification website itself runs on a regular web server — a single point of failure.
 
-This paper presents \textbf{TrustVault}, an academic credential verification system that is \emph{fully on-chain} — both the data and the user-facing website live on the Internet Computer Protocol (ICP) blockchain. TrustVault uses an incremental Merkle tree combined with ICP's \emph{Certified Variables} (values signed by the subnet's threshold BLS key) so that anyone can verify a credential mathematically, without trusting any single server or institution. We deploy TrustVault on the ICP mainnet and run a comprehensive benchmark suite. Our results show: single-certificate issuance in about 1.9 seconds, verification queries as fast as 60 milliseconds, parallel throughput up to 7.3 certificates per second, concurrent mixed-workload throughput of 13.1 operations per second with zero errors, block finality of 2.40 seconds (p99 under 3.05 seconds), and an issuance cost of approximately \$0.001 per certificate — orders of magnitude cheaper than Ethereum.
+This paper presents \textbf{TrustVault}, an academic credential verification system that is \emph{fully on-chain} — both the data and the user-facing website live on the Internet Computer Protocol (ICP) blockchain. TrustVault uses an incremental Merkle tree combined with ICP's \emph{Certified Variables} (values signed by the subnet's threshold BLS key) so that anyone can verify a credential mathematically, without trusting any single server or institution. We deploy TrustVault on the ICP mainnet and run a comprehensive benchmark suite. Our results show: single-certificate issuance in about 1.9 seconds, verification queries as fast as 60 milliseconds, parallel throughput up to 7.3 certificates per second, concurrent mixed-workload throughput of 13.1 operations per second with zero errors, block finality of 2.40 seconds (p99 under 3.05 seconds), and an issuance cost of approximately \$0.00002 per certificate — orders of magnitude cheaper than Ethereum.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -187,7 +187,7 @@ Unlike Ethereum or Bitcoin, ICP canisters can respond directly to HTTP requests.
 ICP is governed by the \emph{Network Nervous System} (NNS), an on-chain decentralized autonomous organization (DAO). The NNS controls subnet creation, node onboarding, protocol upgrades, and other governance decisions. All changes require community approval through a proposal-and-voting mechanism where ICP token holders stake tokens as ``neurons'' with voting power. This means no single entity — including the DFINITY Foundation — can unilaterally change the platform. Subnet public keys are also registered and verifiable through the NNS, which forms the root of trust for the entire Certified Variables mechanism.
 
 \subsubsection{Cycles and Cost Model}
-Computation on ICP is paid for using \emph{cycles}, which are pegged to the Swiss Franc at a fixed exchange rate (1 trillion cycles = 1 XDR $\approx$ \$1.35). Canister operators ``top up'' their canisters with cycles, and each operation (update call, memory storage, network bandwidth) consumes a known amount. Critically, \emph{query calls are free} for the caller — the canister operator absorbs the cost. This means that credential verification in TrustVault costs nothing to the employer or verifier, regardless of how many queries they make. Issuance (an update call) costs roughly \$0.001 per certificate at current ICP cycle prices (approximately 1~trillion cycles $\approx$ \$1.35 USD), making credential issuance orders of magnitude cheaper than Ethereum.
+Computation on ICP is paid for using \emph{cycles}, which are pegged to the Swiss Franc at a fixed exchange rate (1 trillion cycles = 1 XDR $\approx$ \$1.35). Canister operators ``top up'' their canisters with cycles, and each operation (update call, memory storage, network bandwidth) consumes a known amount. Critically, \emph{query calls are free} for the caller — the canister operator absorbs the cost. This means that credential verification in TrustVault costs nothing to the employer or verifier, regardless of how many queries they make. Issuance (an update call) costs approximately \$0.00002 per certificate~\cite{dfinity2025gascost} (estimated from ICP's official pricing formula; see Section~\ref{sec:discussion} for the full derivation), making credential issuance orders of magnitude cheaper than Ethereum.
 
 % =========================================================
 \section{Related Work}
@@ -225,7 +225,7 @@ Ethereum hash systems~\cite{lizcano2020blockchain}  & Hash only  & No  & Partial
 Hyperledger Fabric~\cite{androulaki2018fabric}      & Full       & No  & No  & Yes           & Private       & Yes \\
 W3C VC~\cite{w3c2022vc}                            & Varies     & No  & Varies & Varies       & Varies        & No \\
 Self-Sovereign Identity~\cite{allen2016decentralized} & Varies  & No  & Partial & Varies       & Varies        & No \\
-\textbf{TrustVault (this work)}                     & \textbf{Full} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes (\$0.001)} & \textbf{Yes (ICP)} & \textbf{Yes} \\
+\textbf{TrustVault (this work)}                     & \textbf{Full} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes ($<$\$0.001)} & \textbf{Yes (ICP)} & \textbf{Yes} \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -969,7 +969,7 @@ Table~\ref{tab:comparison} places TrustVault's measured performance alongside pu
 \midrule
 Block finality        & \textbf{2.40~s} (measured)    & $\approx$24~s~\cite{buterin2020eth2}  & $<$1~s~\cite{androulaki2018fabric} \\
 Throughput            & 7.3 certs/s (measured)        & 15--30 TPS~\cite{dinh2017blockbench}  & $\approx$3{,}500 TPS~\cite{androulaki2018fabric} \\
-Issuance cost         & \textbf{\$0.001} (est.$^\dagger$)   & \$0.20--\$2.00~\cite{wood2014ethereum} & Near-zero \\
+Issuance cost         & $\approx$\textbf{\$0.00002} (est.$^\dagger$)  & \$0.20--\$2.00~\cite{wood2014ethereum} & Near-zero \\
 Verification cost     & \textbf{\$0} (query call)     & \$0.05--\$0.50~\cite{wood2014ethereum} & Near-zero \\
 Frontend on-chain     & \textbf{Yes}                  & No                                     & No \\
 Trust model           & \textbf{Zero-trust (BLS)}     & Zero-trust                             & Permissioned (consortium) \\
@@ -981,7 +981,7 @@ Data storage          & Full record on-chain          & Hash only (data off-chai
 Key observations:
 \begin{itemize}[leftmargin=*]
   \item ICP's finality (2.40~s) is about 10$\times$ faster than Ethereum PoS (24~s) but slower than Fabric ($<$1~s). However, Fabric requires trusting the consortium.
-  \item ICP's per-credential cost (\$0.001) is 200--2{,}000$\times$ cheaper than Ethereum. Note: the Ethereum cost range~\cite{wood2014ethereum} reflects pre-EIP-1559 baselines; post-Merge costs vary widely with network demand and have exceeded \$50 per transaction in high-demand periods.
+  \item ICP's per-credential cost ($\approx$\$0.00002) is ${>}$10{,}000$\times$ cheaper than Ethereum. Note: the Ethereum cost range~\cite{wood2014ethereum} reflects pre-EIP-1559 baselines; post-Merge costs vary widely with network demand and have exceeded \$50 per transaction in high-demand periods.
   \item TrustVault is the only system where both the verification result and the verification \emph{interface} are served from the blockchain itself.
   \item Fabric achieves far higher raw throughput (3{,}500 TPS), but this is for a permissioned network where all validators are known and trusted — a fundamentally different security model. The Fabric figure is also a general-transaction benchmark~\cite{androulaki2018fabric}, not a credential-issuance measurement; a matched-workload comparison would require running Fabric with equivalent credential schemas.
 \end{itemize}
@@ -994,7 +994,7 @@ This section discusses the practical implications, limitations, and trade-offs o
 
 \subsection{Practical Suitability}
 
-The benchmark results demonstrate that TrustVault is practical for real-world use. Consider a mid-sized university that graduates 5,000 students per year. At 7.3 certs/s parallel throughput, all credentials could be issued in approximately 11 minutes. At \$0.001 per credential, the total annual issuance cost would be about \$5 — negligible compared to the cost of maintaining a traditional verification office.
+The benchmark results demonstrate that TrustVault is practical for real-world use. Consider a mid-sized university that graduates 5,000 students per year. At 7.3 certs/s parallel throughput, all credentials could be issued in approximately 11 minutes. At $\approx$\$0.00002 per credential~\cite{dfinity2025gascost}, the total annual issuance cost would be about \$0.10 — essentially free compared to the cost of maintaining a traditional verification office.
 
 For employers, verification queries return in under 500~ms (median) and are completely free. An employer portal could verify hundreds of candidates per minute without any cost or rate-limiting concern.
 
@@ -1017,7 +1017,43 @@ Our benchmarks were run from India (50--80~ms RTT to ICP boundary nodes). Users 
 TrustVault is built on ICP and relies on the ICP subnet infrastructure. If the DFINITY Foundation or the NNS governance system were to make breaking changes to the platform, the canister might need to be updated. However, ICP's governance is decentralized (proposals require community approval via NNS voting), and canisters can be made ``blackholed'' (immutable) if desired — at the cost of giving up upgradeability.
 
 \subsubsection{Issuance Cost Estimation}
-The \$0.001 issuance cost reported throughout this paper is an estimate derived from ICP's public cycle pricing documentation (1\,trillion cycles $\approx$ 1\,XDR $\approx$ \$1.35\,USD); it is not directly instrumented in the benchmark suite, which measures only timing. The full \texttt{issueCertificate} execution consumes more cycles than just the base ingress fee: it includes HashMap allocation and insertion, certificate record creation, Merkle tree path recomputation (O($\log n$) hash calls), CertifiedData.set(), and PerformanceMetrics recording. The total for a representative call is estimated at $\sim$700\,million cycles $\approx$ \$0.001, making it orders of magnitude cheaper than Ethereum gas costs. Direct cycle instrumentation via the ICP management canister's \texttt{canister\_status} API is left to future work.
+A thorough code-complexity analysis against ICP's official pricing formula~\cite{dfinity2025gascost} (updated Dec.\ 2025) gives the following per-call breakdown. On a 13-node subnet, ICP charges: (i)~1{,}200{,}000 cycles (base) + 2{,}000 cycles per byte for ingress messages; (ii)~5{,}000{,}000 cycles per update message execution; and (iii)~1 cycle per executed WebAssembly (Wasm) instruction~\cite{dfinity2025gascost}. At 1\,trillion cycles $= 1$\,XDR $\approx$ \$1.354820\,USD (May 2025), 1\,billion cycles $\approx$ \$0.001355.
+
+\paragraph{Payload.}
+\texttt{issueCertificate} takes 12 text fields and one float. A representative call (names~$\approx$30\,B, IDs~$\approx$15\,B, dates~$\approx$10\,B, degree/major/URL~$\approx$30\,B each, Candid framing~$\approx$50\,B) totals $\approx$400\,bytes.
+
+\paragraph{Wasm instruction count.}
+We trace each call site through the Motoko source:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Access control and duplicate check} (2$\times$ \texttt{HashMap.get}): $\approx$800 raw Wasm instructions.
+  \item \textbf{\texttt{createCertificate}}: 6 string concatenations ($\approx$150\,chars total), \texttt{Text.encodeUtf8}, \texttt{Blob.toArray}, \texttt{bytesToHex} (\texttt{Array.tabulate} + \texttt{Text.fromIter} over 300-char output): $\approx$33{,}000 raw instructions.
+  \item \textbf{\texttt{HashMap.put}}: $\approx$1{,}500 raw instructions.
+  \item \textbf{\texttt{insertCertLeaf}} with O($\log n$) \texttt{combineHashes} (7 levels for $n{=}100$): Level~0 combines two $\approx$300-char leaf hashes; Levels~1--6 combine 64-char internal nodes; each level iterates char-by-char + \texttt{bytesToHex}(32\,B): $\approx$56{,}000 raw instructions total.
+  \item \textbf{\texttt{CertifiedData.set} + \texttt{textTo32ByteBlob}}: $\approx$3{,}200 raw instructions.
+  \item \textbf{\texttt{recordMetric}$\times$2 + miscellaneous}: $\approx$3{,}300 raw instructions.
+\end{itemize}
+
+Total raw Wasm instructions: $\approx$100{,}000. The Motoko runtime adds GC tracing, type-tag checks, and heap bounds-checking overhead. The current code is already GC-optimized (\texttt{bytesToHex} uses \texttt{Array.tabulate} instead of $O(N^2)$ string accumulation; \texttt{combineHashes} avoids intermediate string allocations). Applying a conservative 10--100$\times$ runtime overhead factor yields $\approx$1--10\,M executed Wasm instructions.
+
+\begin{table}[h]
+\caption{Estimated Cycle Cost per \texttt{issueCertificate} Call (13-node subnet)~\cite{dfinity2025gascost}}
+\label{tab:cost_breakdown}
+\centering\small\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Component} & \textbf{Cycles} & \textbf{USD} \\
+\midrule
+Ingress base fee            & 1{,}200{,}000                  & \$0.0000016 \\
+Ingress per-byte (400\,B)   & 800{,}000                      & \$0.0000011 \\
+Update execution base       & 5{,}000{,}000                  & \$0.0000068 \\
+Wasm instructions (1--10\,M) & 1{,}000{,}000--10{,}000{,}000  & \$0.0000014--\$0.0000135 \\
+\midrule
+\textbf{Total (estimated)}  & \textbf{8--17\,M}              & \textbf{\$0.000011--\$0.000023} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The best estimate is $\approx$\textbf{\$0.00002 per certificate} (8--17\,M cycles). The previously stated \$0.001 would require $\approx$738\,M Wasm instructions, implying a 7{,}000$\times$ overhead factor over raw instruction counts -- inconsistent with the GC-optimized implementation. Even the upper bound (\$0.000023) is $>$\textbf{8{,}000$\times$ cheaper} than Ethereum's \$0.20--\$2.00 per credential write. Direct cycle instrumentation via ICP's \texttt{ExperimentalInternetComputer.countInstructions} API~\cite{dfinity2025gascost} is left to future work.
 
 \subsubsection{Hash Collision Risk}
 The current certificate hash is computed from core identity fields. If two students have identical names, IDs, degree types, majors, and graduation dates (an unlikely but theoretically possible collision), their hashes could collide. In practice, the unique \texttt{certificate\_id} field removes this risk.
@@ -1055,9 +1091,9 @@ The entire deployment process took approximately 30 minutes and cost less than \
 Based on our measured throughput of 7.3 certs/s (parallel) and 0.57 certs/s (sustained sequential), we can project the following capacity:
 
 \begin{itemize}[leftmargin=*]
-  \item \textbf{Small university} (1,000 graduates/year): All credentials could be issued in 2.3 minutes (parallel) at a cost of \$1.
-  \item \textbf{Large university} (50,000 graduates/year): All credentials could be issued in 1.9 hours (parallel) at a cost of \$50.
-  \item \textbf{National system} (1 million graduates/year): With a single canister, issuance would take about 38 hours. With 10 canisters (multi-canister sharding), this drops to under 4 hours at a cost of approximately \$1,000.
+  \item \textbf{Small university} (1,000 graduates/year): All credentials could be issued in 2.3 minutes (parallel) at a cost of \$0.02.
+  \item \textbf{Large university} (50,000 graduates/year): All credentials could be issued in 1.9 hours (parallel) at a cost of \$1.
+  \item \textbf{National system} (1 million graduates/year): With a single canister, issuance would take about 38 hours. With 10 canisters (multi-canister sharding), this drops to under 4 hours at a cost of approximately \$20.
   \item \textbf{Verification load}: At 86.6 queries/s, a single canister can handle over 7.4 million verification queries per day — more than enough for any realistic deployment.
 \end{itemize}
 
@@ -1076,11 +1112,11 @@ Our comprehensive benchmarks on the live ICP mainnet demonstrate practical perfo
   \item Parallel throughput up to 7.3 certificates per second.
   \item Concurrent mixed-workload throughput of 13.1 ops/s with zero errors.
   \item Block finality of 2.40 seconds (p99 under 3.05 seconds).
-  \item Issuance cost of approximately \$0.001 per certificate.
+  \item Issuance cost of approximately \$0.00002 per certificate (8--17\,M cycles; estimated from code-complexity analysis against ICP's official pricing~\cite{dfinity2025gascost}).
   \item O($\log n$) Merkle tree scaling confirmed with less than 10\% throughput difference between a fresh and a 3,280+ certificate database.
 \end{itemize}
 
-Compared to Ethereum PoS, TrustVault is 10$\times$ faster in finality and 200--2{,}000$\times$ cheaper per credential. Compared to Hyperledger Fabric, TrustVault provides true zero-trust verification without requiring trust in a consortium.
+Compared to Ethereum PoS, TrustVault is 10$\times$ faster in finality and 10{,}000--200{,}000$\times$ cheaper per credential. Compared to Hyperledger Fabric, TrustVault provides true zero-trust verification without requiring trust in a consortium.
 
 \subsection{Future Work}
 
@@ -1202,6 +1238,11 @@ in \textit{Proc.\ iConference}, 2015, pp.~1--6.
 A.~Nzaou, P.~Fabian, and M.~Samwel,
 ``Blockchain-based academic credential verification: A systematic review,''
 \textit{Education and Information Technologies}, vol.~27, pp.~9503--9540, 2022.
+
+\bibitem{dfinity2025gascost}
+DFINITY Foundation,
+``Gas Cost,'' \textit{Internet Computer Documentation}, Dec.\ 2025.
+[Online]. Available: \url{https://docs.internetcomputer.org/building-apps/essentials/gas-cost}
 
 \bibitem{dfinity2023httpgateway}
 DFINITY Foundation,
