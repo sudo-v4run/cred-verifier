@@ -70,6 +70,7 @@
 │   └── Journal/journal_paper.tex
 ├── dfx.json                      # DFX project config
 ├── mops.toml                     # Motoko package manager config
+├── mops.lock                     # Mops lockfile (commit this)
 ├── package.json                  # Root npm workspace
 ├── canister_ids.json             # Mainnet canister ID mapping
 └── .github/workflows/mops-test.yml
@@ -81,7 +82,7 @@
 
 - **DFX** (DFINITY SDK) manages canister build and deployment
 - **Mops** is the Motoko package manager (`mops sources` used as packtool in `dfx.json`)
-- Motoko dependencies: `core@2.1.0`, `base@0.16.0`
+- Motoko dependencies: `base@0.16.0`
 - Frontend build: Vite 4 + `@vitejs/plugin-react`
 - Frontend package manager: npm workspaces (`src/frontend` is the workspace)
 - TypeScript target: ES2020, strict mode
